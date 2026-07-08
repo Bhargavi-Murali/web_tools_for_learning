@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Wave Phase Shift Explorer</title>
+  <title>Wave Phase, Wavelength and Frequency Explorer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
@@ -90,13 +90,13 @@
 
     h1 {
       margin: 0;
-      font-size: clamp(2rem, 5vw, 4.3rem);
+      font-size: clamp(2rem, 5vw, 4.1rem);
       line-height: 0.98;
       letter-spacing: -0.055em;
     }
 
     .subtitle {
-      max-width: 900px;
+      max-width: 930px;
       margin: 16px 0 0;
       color: #cbd5e1;
       line-height: 1.65;
@@ -134,7 +134,7 @@
       display: block;
       width: 100%;
       height: min(68vh, 650px);
-      min-height: 480px;
+      min-height: 500px;
       border-radius: 18px;
       background:
         radial-gradient(circle at 28% 68%, rgba(14, 165, 233, 0.10), transparent 18rem),
@@ -203,7 +203,7 @@
     }
 
     label span {
-      min-width: 78px;
+      min-width: 92px;
       text-align: right;
       color: #bae6fd;
       font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -345,15 +345,14 @@
 
 <body>
   <header class="site-header">
-    <a class="back-link" href="../index.html">← Back to Interactive Learning Lab</a>
+    <a class="back-link" href="../../index.html">← Back to Interactive Learning Lab</a>
 
     <section class="hero">
       <p class="eyebrow">Physics Simulation • Waves • Phase Difference</p>
-      <h1>Wave Phase Shift Explorer</h1>
+      <h1>Wave Phase, Wavelength and Frequency Explorer</h1>
       <p class="subtitle">
-        Compare two rotating vectors and their projections. The horizontal projection produces
-        cosine-like motion and the vertical projection produces sine-like motion. Adjust the phase
-        difference to see how one wave leads or lags the other.
+        Compare two rotating vectors and their sine/cosine projections. Amplitude is fixed so
+        this applet focuses only on phase, wavelength, and frequency.
       </p>
     </section>
   </header>
@@ -376,13 +375,13 @@
         </div>
 
         <div class="status-item">
-          <strong id="leadLagStatus">B leads A</strong>
-          <span>Positive Δθ means the amber wave is ahead.</span>
+          <strong id="wavelengthStatus">λ = 180 px</strong>
+          <span>Distance between two successive crests.</span>
         </div>
 
         <div class="status-item">
-          <strong id="speedStatus">Speed: 1.00×</strong>
-          <span>Animation speed, not physical wave speed.</span>
+          <strong id="frequencyStatus">f = 1.00 Hz</strong>
+          <span>Oscillations per second in this model.</span>
         </div>
       </div>
     </section>
@@ -408,32 +407,24 @@
         </div>
 
         <div class="control-group">
-          <label for="amplitudeSlider">
-            Amplitude
-            <span id="amplitudeValue">90 px</span>
+          <label for="wavelengthSlider">
+            Wavelength λ
+            <span id="wavelengthValue">180 px</span>
           </label>
-          <input type="range" id="amplitudeSlider" min="45" max="125" step="1" value="90">
+          <input type="range" id="wavelengthSlider" min="80" max="320" step="5" value="180">
         </div>
 
         <div class="control-group">
-          <label for="speedSlider">
-            Speed
-            <span id="speedValue">1.00×</span>
+          <label for="frequencySlider">
+            Frequency f
+            <span id="frequencyValue">1.00 Hz</span>
           </label>
-          <input type="range" id="speedSlider" min="0.2" max="2.5" step="0.05" value="1">
-        </div>
-
-        <div class="control-group">
-          <label for="trailSlider">
-            Trail length
-            <span id="trailValue">580</span>
-          </label>
-          <input type="range" id="trailSlider" min="160" max="720" step="10" value="580">
+          <input type="range" id="frequencySlider" min="0.20" max="2.50" step="0.05" value="1.00">
         </div>
 
         <div class="button-row">
           <button id="pauseBtn">Pause</button>
-          <button id="resetBtn" class="secondary">Reset trails</button>
+          <button id="resetBtn" class="secondary">Reset phase</button>
         </div>
       </section>
 
@@ -447,21 +438,22 @@
         </div>
 
         <div class="formula-box">
-          A: y = R sin(ωt + φ)<br>
-          B: y = R sin(ωt + φ + Δθ)<br>
-          X projection: x = R cos(ωt + φ)
+          A: y = R sin(2πft + φ − 2πx/λ)<br>
+          B: y = R sin(2πft + φ + Δθ − 2πx/λ)<br>
+          Fixed amplitude: R = constant
         </div>
 
         <p>
-          In this representation, uniform circular motion is projected onto straight axes.
-          The projection becomes sinusoidal motion. Changing Δθ shifts the amber wave relative
-          to the cyan wave.
+          The rotating vectors show the instantaneous phase. The drawn wave to the right uses
+          the wavelength slider, so increasing λ spreads the crests farther apart. Increasing
+          frequency makes the phase advance faster in time.
         </p>
 
         <ul>
-          <li>Δθ &gt; 0: wave B leads wave A.</li>
-          <li>Δθ &lt; 0: wave B lags wave A.</li>
-          <li>Δθ ≈ π means the two waves are nearly opposite in phase.</li>
+          <li>Amplitude is intentionally fixed in this applet.</li>
+          <li>λ controls spatial spacing of the wave pattern.</li>
+          <li>f controls how fast the oscillation evolves.</li>
+          <li>For a traveling wave, wave speed would be v = fλ.</li>
         </ul>
       </section>
     </aside>
@@ -473,20 +465,18 @@
 
     const basePhaseSlider = document.getElementById("basePhaseSlider");
     const phaseDiffSlider = document.getElementById("phaseDiffSlider");
-    const amplitudeSlider = document.getElementById("amplitudeSlider");
-    const speedSlider = document.getElementById("speedSlider");
-    const trailSlider = document.getElementById("trailSlider");
+    const wavelengthSlider = document.getElementById("wavelengthSlider");
+    const frequencySlider = document.getElementById("frequencySlider");
 
     const basePhaseValue = document.getElementById("basePhaseValue");
     const phaseDiffValue = document.getElementById("phaseDiffValue");
-    const amplitudeValue = document.getElementById("amplitudeValue");
-    const speedValue = document.getElementById("speedValue");
-    const trailValue = document.getElementById("trailValue");
+    const wavelengthValue = document.getElementById("wavelengthValue");
+    const frequencyValue = document.getElementById("frequencyValue");
 
     const phaseStatus = document.getElementById("phaseStatus");
     const degreeStatus = document.getElementById("degreeStatus");
-    const leadLagStatus = document.getElementById("leadLagStatus");
-    const speedStatus = document.getElementById("speedStatus");
+    const wavelengthStatus = document.getElementById("wavelengthStatus");
+    const frequencyStatus = document.getElementById("frequencyStatus");
 
     const pauseBtn = document.getElementById("pauseBtn");
     const resetBtn = document.getElementById("resetBtn");
@@ -499,10 +489,7 @@
     let lastTimestamp = 0;
     let paused = false;
 
-    let historyYA = [];
-    let historyYB = [];
-    let historyXA = [];
-    let historyXB = [];
+    const FIXED_AMPLITUDE = 76;
 
     function clamp(value, min, max) {
       return Math.max(min, Math.min(max, value));
@@ -513,7 +500,7 @@
 
       const rect = canvas.getBoundingClientRect();
       width = Math.max(520, rect.width);
-      height = Math.max(480, rect.height);
+      height = Math.max(500, rect.height);
 
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
@@ -522,21 +509,22 @@
     }
 
     function getLayout() {
-      const R = Number(amplitudeSlider.value);
+      /*
+        Amplitude is fixed for the pedagogical aim of this applet.
+        It is also clamped slightly on small screens to avoid overshooting.
+      */
+      const R = Math.min(FIXED_AMPLITUDE, Math.max(58, Math.min(width, height) * 0.12));
       const margin = Math.max(28, width * 0.035);
 
-      const centerX = clamp(width * 0.20, 145, 230);
+      const centerX = clamp(width * 0.20, 145, 220);
       const centerY = height * 0.67;
 
       const graphXStart = centerX + R + 90;
-      const maxHorizontal = Math.max(150, width - graphXStart - margin);
-      const requestedTrail = Number(trailSlider.value);
-      const trail = Math.floor(Math.min(requestedTrail, maxHorizontal));
+      const graphWidth = Math.max(170, width - graphXStart - margin);
 
-      const verticalGraphTop = margin + 44;
+      const verticalGraphTop = margin + 48;
       const graphYStart = centerY - R - 70;
-      const maxVertical = Math.max(100, graphYStart - verticalGraphTop);
-      const verticalTrail = Math.floor(Math.min(trail, maxVertical));
+      const graphHeight = Math.max(120, graphYStart - verticalGraphTop);
 
       return {
         R,
@@ -544,47 +532,29 @@
         centerY,
         graphXStart,
         graphYStart,
-        trail,
-        verticalTrail,
+        graphWidth,
+        graphHeight,
         margin
       };
-    }
-
-    function resetTrails() {
-      historyYA = [];
-      historyYB = [];
-      historyXA = [];
-      historyXB = [];
     }
 
     function updateLabels() {
       const basePhase = Number(basePhaseSlider.value);
       const phaseDiff = Number(phaseDiffSlider.value);
-      const amplitude = Number(amplitudeSlider.value);
-      const speed = Number(speedSlider.value);
-      const trail = Number(trailSlider.value);
+      const wavelength = Number(wavelengthSlider.value);
+      const frequency = Number(frequencySlider.value);
 
       basePhaseValue.textContent = `${basePhase.toFixed(2)} rad`;
       phaseDiffValue.textContent = `${phaseDiff.toFixed(2)} rad`;
-      amplitudeValue.textContent = `${amplitude} px`;
-      speedValue.textContent = `${speed.toFixed(2)}×`;
-      trailValue.textContent = `${trail}`;
+      wavelengthValue.textContent = `${wavelength} px`;
+      frequencyValue.textContent = `${frequency.toFixed(2)} Hz`;
 
       const deg = phaseDiff * 180 / Math.PI;
 
       phaseStatus.textContent = `Δθ = ${phaseDiff.toFixed(2)} rad`;
       degreeStatus.textContent = `≈ ${deg.toFixed(1)}°`;
-      speedStatus.textContent = `Speed: ${speed.toFixed(2)}×`;
-
-      if (Math.abs(phaseDiff) < 0.08) {
-        leadLagStatus.textContent = "Nearly in phase";
-      } else if (Math.abs(Math.abs(phaseDiff) - Math.PI) < 0.08) {
-        leadLagStatus.textContent = "Nearly opposite phase";
-      } else if (phaseDiff > 0) {
-        leadLagStatus.textContent = "B leads A";
-      } else {
-        leadLagStatus.textContent = "B lags A";
-      }
+      wavelengthStatus.textContent = `λ = ${wavelength} px`;
+      frequencyStatus.textContent = `f = ${frequency.toFixed(2)} Hz`;
     }
 
     function drawBackground() {
@@ -596,7 +566,6 @@
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, width, height);
 
-      // Subtle star-like background dots.
       ctx.save();
       ctx.fillStyle = "rgba(226, 232, 240, 0.28)";
       for (let i = 0; i < 90; i++) {
@@ -610,75 +579,6 @@
       ctx.restore();
     }
 
-    function drawGrid(layout) {
-      const { R, centerX, centerY, graphXStart, graphYStart, trail, verticalTrail } = layout;
-
-      ctx.save();
-
-      // Soft graph panels.
-      ctx.fillStyle = "rgba(15, 23, 42, 0.42)";
-      roundRect(graphXStart - 18, centerY - R - 32, trail + 40, 2 * R + 64, 18);
-      ctx.fill();
-
-      ctx.fillStyle = "rgba(15, 23, 42, 0.35)";
-      roundRect(centerX - R - 34, graphYStart - verticalTrail - 20, 2 * R + 68, verticalTrail + 42, 18);
-      ctx.fill();
-
-      // Reference circle panel.
-      ctx.fillStyle = "rgba(15, 23, 42, 0.42)";
-      roundRect(centerX - R - 42, centerY - R - 42, 2 * R + 84, 2 * R + 84, 22);
-      ctx.fill();
-
-      ctx.strokeStyle = "rgba(148, 163, 184, 0.16)";
-      ctx.lineWidth = 1;
-
-      // Circle axes.
-      ctx.beginPath();
-      ctx.moveTo(centerX - R - 28, centerY);
-      ctx.lineTo(centerX + R + 28, centerY);
-      ctx.moveTo(centerX, centerY - R - 28);
-      ctx.lineTo(centerX, centerY + R + 28);
-      ctx.stroke();
-
-      // Y graph axis.
-      ctx.strokeStyle = "rgba(148, 163, 184, 0.24)";
-      ctx.beginPath();
-      ctx.moveTo(graphXStart, centerY);
-      ctx.lineTo(graphXStart + trail, centerY);
-      ctx.moveTo(graphXStart, centerY - R - 22);
-      ctx.lineTo(graphXStart, centerY + R + 22);
-      ctx.stroke();
-
-      // X graph axis.
-      ctx.beginPath();
-      ctx.moveTo(centerX, graphYStart);
-      ctx.lineTo(centerX, graphYStart - verticalTrail);
-      ctx.moveTo(centerX - R - 22, graphYStart);
-      ctx.lineTo(centerX + R + 22, graphYStart);
-      ctx.stroke();
-
-      // Reference circle.
-      ctx.strokeStyle = "rgba(186, 230, 253, 0.45)";
-      ctx.lineWidth = 1.6;
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, R, 0, Math.PI * 2);
-      ctx.stroke();
-
-      // Labels.
-      ctx.fillStyle = "rgba(226, 232, 240, 0.88)";
-      ctx.font = "800 14px system-ui, Arial";
-      ctx.fillText("Rotating vectors", centerX - 57, centerY + R + 62);
-      ctx.fillText("Y projection vs time", graphXStart, centerY - R - 45);
-      ctx.fillText("X projection vs time", centerX - R - 30, graphYStart - verticalTrail - 34);
-
-      ctx.fillStyle = "rgba(148, 163, 184, 0.85)";
-      ctx.font = "12px system-ui, Arial";
-      ctx.fillText("sin component", graphXStart, centerY + R + 44);
-      ctx.fillText("cos component", centerX + R + 34, graphYStart);
-
-      ctx.restore();
-    }
-
     function roundRect(x, y, w, h, r) {
       ctx.beginPath();
       ctx.moveTo(x + r, y);
@@ -689,29 +589,103 @@
       ctx.closePath();
     }
 
-    function drawWave(history, startX, centerY, color, trail) {
+    function drawGrid(layout) {
+      const { R, centerX, centerY, graphXStart, graphYStart, graphWidth, graphHeight } = layout;
+
       ctx.save();
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 2.6;
-      ctx.shadowBlur = 12;
-      ctx.shadowColor = color;
+
+      ctx.fillStyle = "rgba(15, 23, 42, 0.42)";
+      roundRect(graphXStart - 18, centerY - R - 32, graphWidth + 40, 2 * R + 64, 18);
+      ctx.fill();
+
+      ctx.fillStyle = "rgba(15, 23, 42, 0.35)";
+      roundRect(centerX - R - 34, graphYStart - graphHeight - 20, 2 * R + 68, graphHeight + 42, 18);
+      ctx.fill();
+
+      ctx.fillStyle = "rgba(15, 23, 42, 0.42)";
+      roundRect(centerX - R - 42, centerY - R - 42, 2 * R + 84, 2 * R + 84, 22);
+      ctx.fill();
+
+      ctx.strokeStyle = "rgba(148, 163, 184, 0.16)";
+      ctx.lineWidth = 1;
+
       ctx.beginPath();
-
-      const n = Math.min(history.length, trail);
-
-      for (let i = 0; i < n; i++) {
-        const alphaX = startX + i;
-        const y = history[i];
-
-        if (i === 0) ctx.moveTo(alphaX, y);
-        else ctx.lineTo(alphaX, y);
-      }
-
+      ctx.moveTo(centerX - R - 28, centerY);
+      ctx.lineTo(centerX + R + 28, centerY);
+      ctx.moveTo(centerX, centerY - R - 28);
+      ctx.lineTo(centerX, centerY + R + 28);
       ctx.stroke();
+
+      ctx.strokeStyle = "rgba(148, 163, 184, 0.24)";
+      ctx.beginPath();
+      ctx.moveTo(graphXStart, centerY);
+      ctx.lineTo(graphXStart + graphWidth, centerY);
+      ctx.moveTo(graphXStart, centerY - R - 22);
+      ctx.lineTo(graphXStart, centerY + R + 22);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(centerX, graphYStart);
+      ctx.lineTo(centerX, graphYStart - graphHeight);
+      ctx.moveTo(centerX - R - 22, graphYStart);
+      ctx.lineTo(centerX + R + 22, graphYStart);
+      ctx.stroke();
+
+      ctx.strokeStyle = "rgba(186, 230, 253, 0.45)";
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, R, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.fillStyle = "rgba(226, 232, 240, 0.88)";
+      ctx.font = "800 14px system-ui, Arial";
+      ctx.fillText("Rotating vectors", centerX - 57, centerY + R + 62);
+      ctx.fillText("Y projection: sine wave", graphXStart, centerY - R - 45);
+      ctx.fillText("X projection: cosine wave", centerX - R - 30, graphYStart - graphHeight - 34);
+
+      ctx.fillStyle = "rgba(148, 163, 184, 0.85)";
+      ctx.font = "12px system-ui, Arial";
+      ctx.fillText("spatial coordinate →", graphXStart + 6, centerY + R + 44);
+      ctx.fillText("spatial coordinate ↑", centerX + R + 34, graphYStart);
+
       ctx.restore();
     }
 
-    function drawVerticalWave(history, centerX, startY, color, verticalTrail) {
+    function drawWavelengthMarkers(layout, wavelength) {
+      const { graphXStart, centerY, graphWidth, graphYStart, graphHeight } = layout;
+
+      ctx.save();
+      ctx.strokeStyle = "rgba(186, 230, 253, 0.17)";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([5, 7]);
+
+      for (let x = graphXStart; x <= graphXStart + graphWidth; x += wavelength) {
+        ctx.beginPath();
+        ctx.moveTo(x, centerY - layout.R - 22);
+        ctx.lineTo(x, centerY + layout.R + 22);
+        ctx.stroke();
+      }
+
+      for (let y = graphYStart; y >= graphYStart - graphHeight; y -= wavelength) {
+        ctx.beginPath();
+        ctx.moveTo(layout.centerX - layout.R - 22, y);
+        ctx.lineTo(layout.centerX + layout.R + 22, y);
+        ctx.stroke();
+      }
+
+      ctx.setLineDash([]);
+      ctx.fillStyle = "rgba(186, 230, 253, 0.78)";
+      ctx.font = "700 12px system-ui, Arial";
+      ctx.fillText("λ", graphXStart + wavelength - 10, centerY - layout.R - 28);
+
+      ctx.restore();
+    }
+
+    function drawWave(layout, phase, color, kind) {
+      const { R, graphXStart, centerY, graphWidth, centerX, graphYStart, graphHeight } = layout;
+      const wavelength = Number(wavelengthSlider.value);
+      const k = 2 * Math.PI / wavelength;
+
       ctx.save();
       ctx.strokeStyle = color;
       ctx.lineWidth = 2.6;
@@ -719,14 +693,20 @@
       ctx.shadowColor = color;
       ctx.beginPath();
 
-      const n = Math.min(history.length, verticalTrail);
-
-      for (let i = 0; i < n; i++) {
-        const x = history[i];
-        const y = startY - i;
-
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
+      if (kind === "y") {
+        for (let px = 0; px <= graphWidth; px++) {
+          const y = centerY - R * Math.sin(phase - k * px);
+          const x = graphXStart + px;
+          if (px === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+      } else {
+        for (let py = 0; py <= graphHeight; py++) {
+          const x = centerX + R * Math.cos(phase - k * py);
+          const y = graphYStart - py;
+          if (py === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
       }
 
       ctx.stroke();
@@ -787,19 +767,6 @@
       ctx.restore();
     }
 
-    function drawCurrentDots(ptXA, ptYA, ptXB, ptYB, layout) {
-      const { centerX, centerY } = layout;
-
-      ctx.save();
-
-      drawDot(ptXA, centerY, "#38bdf8");
-      drawDot(ptXB, centerY, "#f59e0b");
-      drawDot(centerX, ptYA, "#38bdf8");
-      drawDot(centerX, ptYB, "#f59e0b");
-
-      ctx.restore();
-    }
-
     function drawDot(x, y, color) {
       ctx.save();
       ctx.fillStyle = color;
@@ -811,71 +778,53 @@
       ctx.restore();
     }
 
+    function drawCurrentDots(ptXA, ptYA, ptXB, ptYB, layout) {
+      const { centerX, centerY } = layout;
+
+      drawDot(ptXA, centerY, "#38bdf8");
+      drawDot(ptXB, centerY, "#f59e0b");
+      drawDot(centerX, ptYA, "#38bdf8");
+      drawDot(centerX, ptYB, "#f59e0b");
+    }
+
     function animate(timestamp) {
       if (!lastTimestamp) lastTimestamp = timestamp;
       const dt = Math.min((timestamp - lastTimestamp) / 1000, 0.05);
       lastTimestamp = timestamp;
 
       const layout = getLayout();
-      const {
-        R,
-        centerX,
-        centerY,
-        graphXStart,
-        graphYStart,
-        trail,
-        verticalTrail
-      } = layout;
+      const { R, centerX, centerY } = layout;
 
       const basePhase = Number(basePhaseSlider.value);
       const phaseDiff = Number(phaseDiffSlider.value);
-      const speed = Number(speedSlider.value);
+      const frequency = Number(frequencySlider.value);
+      const wavelength = Number(wavelengthSlider.value);
 
       if (!paused) {
-        time += dt * speed;
+        time += dt;
       }
 
-      const omega = 2.05;
-      const angleA = omega * time + basePhase;
-      const angleB = omega * time + basePhase + phaseDiff;
+      const phaseA = 2 * Math.PI * frequency * time + basePhase;
+      const phaseB = phaseA + phaseDiff;
 
-      const relXA = R * Math.cos(angleA);
-      const relYA = R * Math.sin(angleA);
-      const relXB = R * Math.cos(angleB);
-      const relYB = R * Math.sin(angleB);
-
-      const ptXA = centerX + relXA;
-      const ptYA = centerY - relYA;
-      const ptXB = centerX + relXB;
-      const ptYB = centerY - relYB;
-
-      if (!paused) {
-        historyYA.unshift(ptYA);
-        historyYB.unshift(ptYB);
-        historyXA.unshift(ptXA);
-        historyXB.unshift(ptXB);
-
-        const maxNeeded = Math.max(trail, verticalTrail) + 4;
-        while (historyYA.length > maxNeeded) {
-          historyYA.pop();
-          historyYB.pop();
-          historyXA.pop();
-          historyXB.pop();
-        }
-      }
+      const ptXA = centerX + R * Math.cos(phaseA);
+      const ptYA = centerY - R * Math.sin(phaseA);
+      const ptXB = centerX + R * Math.cos(phaseB);
+      const ptYB = centerY - R * Math.sin(phaseB);
 
       updateLabels();
 
       drawBackground();
       drawGrid(layout);
+      drawWavelengthMarkers(layout, wavelength);
 
       drawProjectionGuides(ptXA, ptYA, ptXB, ptYB, layout);
 
-      drawWave(historyYA, graphXStart, centerY, "rgba(56, 189, 248, 0.92)", trail);
-      drawWave(historyYB, graphXStart, centerY, "rgba(245, 158, 11, 0.92)", trail);
+      drawWave(layout, phaseA, "rgba(56, 189, 248, 0.92)", "y");
+      drawWave(layout, phaseB, "rgba(245, 158, 11, 0.92)", "y");
 
-      drawVerticalWave(historyXA, centerX, graphYStart, "rgba(56, 189, 248, 0.90)", verticalTrail);
-      drawVerticalWave(historyXB, centerX, graphYStart, "rgba(245, 158, 11, 0.90)", verticalTrail);
+      drawWave(layout, phaseA, "rgba(56, 189, 248, 0.90)", "x");
+      drawWave(layout, phaseB, "rgba(245, 158, 11, 0.90)", "x");
 
       drawVector(centerX, centerY, ptXA, ptYA, "#38bdf8", "A");
       drawVector(centerX, centerY, ptXB, ptYB, "#f59e0b", "B");
@@ -892,18 +841,9 @@
 
     resetBtn.addEventListener("click", () => {
       time = 0;
-      resetTrails();
     });
 
-    basePhaseSlider.addEventListener("input", resetTrails);
-    phaseDiffSlider.addEventListener("input", resetTrails);
-    amplitudeSlider.addEventListener("input", resetTrails);
-    trailSlider.addEventListener("input", resetTrails);
-
-    window.addEventListener("resize", () => {
-      resizeCanvas();
-      resetTrails();
-    });
+    window.addEventListener("resize", resizeCanvas);
 
     resizeCanvas();
     updateLabels();

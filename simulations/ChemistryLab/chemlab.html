@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Virtual Acid–Base Titration Lab</title>
+<style>
+  :root {
+    --bg1: #07111f;
+    --bg2: #10213b;
+    --panel: rgba(15, 23, 42, 0.94);
+    --panel2: rgba(30, 41, 59, 0.88);
+    --ink: #e5eefc;
+    --muted: #9fb3d9;
+    --line: rgba(148, 163, 184, 0.20);
+    --accent: #60a5fa;
+    --accent-dark: #3b82f6;
+    --good: #34d399;
+    --warn: #fbbf24;
+    --bad: #fb7185;
+    --glass: rgba(15, 23, 42, 0.70);
+    --shadow: 0 14px 34px rgba(0, 0, 0, 0.32);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background:
+      radial-gradient(circle at 18% 12%, rgba(96, 165, 250, 0.16), transparent 28rem),
+      radial-gradient(circle at 86% 82%, rgba(52, 211, 153, 0.10), transparent 28rem),
+      linear-gradient(135deg, var(--bg1), var(--bg2));
+    color: var(--ink);
+  }
+
+  header {
+    padding: 28px 18px 16px;
+    text-align: center;
+  }
+
+  header h1 {
+    margin: 0;
+    font-size: clamp(1.85rem, 3.6vw, 3.05rem);
+    letter-spacing: -0.04em;
+    color: #dbeafe;
+  }
+
+  header p {
+    max-width: 900px;
+    margin: 10px auto 0;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .wrap {
+    width: min(1220px, calc(100% - 28px));
+    margin: 0 auto 40px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1.05fr 1.25fr;
+    gap: 18px;
+    align-items: start;
+  }
+
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    padding: 18px;
+  }
+
+  .card h2, .card h3 {
+    margin: 0 0 12px;
+    color: #bfdbfe;
+    letter-spacing: -0.025em;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  @media (max-width: 640px) {
+    .row { grid-template-columns: 1fr; }
+  }
+
+  label {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 750;
+    color: #dce8ff;
+    margin-bottom: 6px;
+  }
+
+  select, input[type="number"] {
+    width: 100%;
+    border: 1px solid rgba(148, 163, 184, 0.38);
+    background: #0f172a;
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-size: 1rem;
+    color: var(--ink);
+    outline: none;
+  }
+
+  select:focus, input[type="number"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.20);
+  }
+
+  .radio-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    background: rgba(30, 41, 59, 0.82);
+    color: #d7e7ff;
+    padding: 10px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .pill input { accent-color: var(--accent); }
+
+  button {
+    border: 0;
+    border-radius: 12px;
+    background: var(--accent);
+    color: #06111f;
+    padding: 10px 14px;
+    font-weight: 850;
+    font-size: 0.95rem;
+    cursor: pointer;
+    box-shadow: 0 7px 18px rgba(96, 165, 250, 0.20);
+  }
+
+  button:hover { background: var(--accent-dark); color: #eff6ff; }
+  button:disabled { background: #64748b; color: #cbd5e1; cursor: not-allowed; box-shadow: none; }
+
+  .ghost-btn {
+    background: #334155;
+    color: #e2e8f0;
+    box-shadow: none;
+  }
+
+  .ghost-btn:hover { background: #475569; color: #f8fafc; }
+
+  .danger-btn {
+    background: #fb7185;
+    color: #3f0712;
+  }
+
+  .danger-btn:hover {
+    background: #f43f5e;
+    color: white;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .stat {
+    background: rgba(30, 41, 59, 0.82);
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 16px;
+    padding: 12px;
+  }
+
+  .stat .k {
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .stat .v {
+    margin-top: 4px;
+    font-size: 1.12rem;
+    font-weight: 900;
+    color: #f8fafc;
+  }
+
+  .lab {
+    min-height: 800px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .bench {
+    position: relative;
+    min-height: 520px;
+    border-radius: 20px;
+    background:
+      radial-gradient(circle at 45% 34%, rgba(96, 165, 250, 0.13), transparent 17rem),
+      linear-gradient(180deg, rgba(15,23,42,0.88), rgba(2,6,23,0.96)),
+      repeating-linear-gradient(90deg, rgba(148,163,184,0.06) 0 14px, rgba(148,163,184,0.10) 14px 28px);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    padding: 18px;
+  }
+
+  .stand {
+    position: absolute;
+    left: 78px;
+    top: 42px;
+    width: 12px;
+    height: 315px;
+    background: #64748b;
+    border-radius: 999px;
+    box-shadow: 0 0 12px rgba(148,163,184,0.14);
+  }
+
+  .stand::before {
+    content: "";
+    position: absolute;
+    left: -42px;
+    bottom: -10px;
+    width: 98px;
+    height: 18px;
+    border-radius: 999px;
+    background: #64748b;
+  }
+
+  .clamp {
+    position: absolute;
+    left: 86px;
+    top: 92px;
+    width: 80px;
+    height: 12px;
+    border-radius: 999px;
+    background: #94a3b8;
+  }
+
+  .burette {
+    position: absolute;
+    left: 150px;
+    top: 38px;
+    width: 50px;
+    height: 285px;
+    border: 3px solid rgba(226, 232, 240, 0.70);
+    background: rgba(255,255,255,0.16);
+    border-radius: 17px 17px 8px 8px;
+    overflow: hidden;
+    box-shadow: inset 0 0 18px rgba(255,255,255,0.08);
+  }
+
+  .burette-liquid {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 92%;
+    background: linear-gradient(180deg, rgba(125, 211, 252, 0.45), rgba(59, 130, 246, 0.70));
+    transition: height 0.35s ease;
+  }
+
+  .ticks {
+    position: absolute;
+    inset: 8px 0 8px auto;
+    width: 18px;
+    background: repeating-linear-gradient(180deg, rgba(241,245,249,.65) 0 2px, transparent 2px 22px);
+    opacity: 0.72;
+  }
+
+  .stopcock {
+    position: absolute;
+    left: 140px;
+    top: 317px;
+    width: 70px;
+    height: 12px;
+    border-radius: 999px;
+    background: #cbd5e1;
+  }
+
+  .drop {
+    position: absolute;
+    left: 172px;
+    top: 334px;
+    width: 10px;
+    height: 18px;
+    background: rgba(96, 165, 250, 0.78);
+    border-radius: 50% 50% 65% 65%;
+    opacity: 0;
+  }
+
+  .drop.animate {
+    animation: fall 0.45s ease-out;
+  }
+
+  @keyframes fall {
+    0% { transform: translateY(0); opacity: 0.95; }
+    100% { transform: translateY(68px); opacity: 0; }
+  }
+
+  .flask {
+    position: absolute;
+    left: 105px;
+    top: 354px;
+    width: 154px;
+    height: 122px;
+    transform: translateX(-8px);
+  }
+
+  .flask-neck {
+    position: absolute;
+    left: 62px;
+    top: -52px;
+    width: 32px;
+    height: 75px;
+    border: 3px solid rgba(226, 232, 240, 0.55);
+    border-bottom: 0;
+    border-radius: 12px 12px 0 0;
+    background: rgba(255,255,255,0.18);
+  }
+
+  .flask-body {
+    position: absolute;
+    inset: 0;
+    clip-path: polygon(39% 0, 61% 0, 96% 90%, 88% 100%, 12% 100%, 4% 90%);
+    border-radius: 26px;
+    background: rgba(255,255,255,0.20);
+    border: 3px solid rgba(226, 232, 240, 0.55);
+    overflow: hidden;
+    box-shadow: inset 0 0 18px rgba(255,255,255,0.10);
+  }
+
+  .flask-liquid {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 8px;
+    height: 50px;
+    border-radius: 0 0 28px 28px;
+    background: rgba(255,255,255,0.75);
+    border-top: 2px solid rgba(255,255,255,0.78);
+    transition: background 0.3s ease, height 0.25s ease;
+  }
+
+  .swirl {
+    position: absolute;
+    left: 55px;
+    top: 70px;
+    width: 50px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.55);
+    opacity: 0.0;
+  }
+
+  .flask.swirling .swirl {
+    animation: swirl 0.7s ease-out;
+  }
+
+  @keyframes swirl {
+    0% { transform: rotate(0deg) scale(0.75); opacity: 0.8; }
+    100% { transform: rotate(420deg) scale(1.4); opacity: 0; }
+  }
+
+  .side-readout {
+    position: absolute;
+    right: 18px;
+    top: 18px;
+    width: min(330px, calc(100% - 300px));
+    min-width: 230px;
+    display: grid;
+    gap: 10px;
+  }
+
+  @media (max-width: 680px) {
+    .bench { min-height: 610px; }
+    .side-readout {
+      top: 470px;
+      left: 18px;
+      right: 18px;
+      width: auto;
+    }
+  }
+
+  .readout-box {
+    background: rgba(15, 23, 42, 0.82);
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 16px;
+    padding: 12px;
+  }
+
+  .readout-box strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #f8fafc;
+  }
+
+  .readout-box span {
+    color: var(--muted);
+    line-height: 1.45;
+  }
+
+  .controls {
+    margin-top: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .message {
+    margin-top: 12px;
+    border-radius: 16px;
+    padding: 12px 14px;
+    background: rgba(30, 64, 175, 0.22);
+    border: 1px solid rgba(96, 165, 250, 0.26);
+    color: #dbeafe;
+    line-height: 1.45;
+  }
+
+  .message.good {
+    background: rgba(20, 83, 45, 0.24);
+    border-color: rgba(52, 211, 153, 0.34);
+    color: #bbf7d0;
+  }
+
+  .message.warn {
+    background: rgba(120, 53, 15, 0.25);
+    border-color: rgba(251, 191, 36, 0.36);
+    color: #fde68a;
+  }
+
+  .message.bad {
+    background: rgba(127, 29, 29, 0.28);
+    border-color: rgba(251, 113, 133, 0.38);
+    color: #fecdd3;
+  }
+
+  .challenge {
+    margin-top: 18px;
+  }
+
+  .challenge-grid {
+    display: grid;
+    grid-template-columns: 1fr 170px 120px;
+    gap: 10px;
+    align-items: end;
+  }
+
+  @media (max-width: 720px) {
+    .challenge-grid { grid-template-columns: 1fr; }
+  }
+
+  details {
+    margin-top: 12px;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  summary {
+    cursor: pointer;
+    font-weight: 850;
+    color: #bfdbfe;
+  }
+
+  .reward {
+    min-height: 44px;
+    margin-top: 12px;
+    font-weight: 900;
+    font-size: 1.12rem;
+    color: var(--good);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, rgba(251,191,36,0.95), rgba(52,211,153,0.88));
+    border: 1px solid #facc15;
+    color: #1f2933;
+    padding: 9px 14px;
+    border-radius: 999px;
+    box-shadow: 0 8px 18px rgba(234, 179, 8, 0.22);
+  }
+
+  .confetti-piece {
+    position: fixed;
+    top: -20px;
+    width: 10px;
+    height: 16px;
+    border-radius: 3px;
+    z-index: 9999;
+    animation: confettiFall 1.8s linear forwards;
+  }
+
+  @keyframes confettiFall {
+    to {
+      transform: translateY(110vh) rotate(760deg);
+      opacity: 0.2;
+    }
+  }
+
+  .mini-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 0.92rem;
+    overflow: hidden;
+    border-radius: 14px;
+  }
+
+  .mini-table th, .mini-table td {
+    border: 1px solid rgba(148, 163, 184, 0.20);
+    padding: 8px;
+    text-align: left;
+  }
+
+  .mini-table th {
+    background: rgba(30, 41, 59, 0.95);
+    color: #dbeafe;
+  }
+
+  .mini-table td {
+    background: rgba(15, 23, 42, 0.62);
+    color: #cbd5e1;
+  }
+
+  .small {
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.5;
+	
+	
+	
+  }
+</style>
+</head>
+<body>
+
+<header>
+
+
+  <a class="back-link" href="../../index.html" style="display:inline-block;margin-bottom:14px;color:#bfdbfe;text-decoration:none;font-weight:700">&larr; Back to Interactive Learning Lab</a>
+  <h1>Virtual Acid–Base Titration Lab</h1>
+  <p>
+    Choose an unknown acid or base, select a suitable standard titrant and indicator, perform a virtual titration, record the endpoint, and calculate the concentration of the unknown solution.
+  </p>
+</header>
+
+<main class="wrap">
+  <section class="grid">
+    <aside class="card">
+      <h2>1. Set up the experiment</h2>
+
+      <div>
+        <label>Unknown solution</label>
+        <div class="radio-row">
+          <label class="pill"><input type="radio" name="unknownType" value="acid" checked> Unknown acid</label>
+          <label class="pill"><input type="radio" name="unknownType" value="base"> Unknown base</label>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:14px;">
+        <div>
+          <label for="titrantSelect">Standard titrant</label>
+          <select id="titrantSelect"></select>
+        </div>
+        <div>
+          <label for="molaritySelect">Titrant molarity</label>
+          <select id="molaritySelect">
+            <option value="0.050">0.050 M</option>
+            <option value="0.100" selected>0.100 M</option>
+            <option value="0.200">0.200 M</option>
+            <option value="0.500">0.500 M</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:14px;">
+        <div>
+          <label for="indicatorSelect">Indicator</label>
+          <select id="indicatorSelect">
+            <option value="phenolphthalein">Phenolphthalein</option>
+            <option value="methylOrange">Methyl orange</option>
+            <option value="bromothymolBlue" selected>Bromothymol blue</option>
+            <option value="litmus">Litmus</option>
+            <option value="universal">Universal indicator</option>
+          </select>
+        </div>
+        <div>
+          <label>Fresh trial</label>
+          <button id="newUnknownBtn" class="ghost-btn" style="width:100%;">Generate new unknown</button>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="k">Sample volume</div>
+          <div class="v" id="sampleVol">25.00 mL</div>
+        </div>
+        <div class="stat">
+          <div class="k">Unknown type</div>
+          <div class="v" id="unknownLabel">Monoprotic acid</div>
+        </div>
+        <div class="stat">
+          <div class="k">Titrant n-factor</div>
+          <div class="v" id="nfactorLabel">1</div>
+        </div>
+        <div class="stat">
+          <div class="k">Expected endpoint</div>
+          <div class="v" id="endpointHint">Find experimentally</div>
+        </div>
+      </div>
+
+      <div id="setupMessage" class="message">Use a base to titrate an unknown acid, or an acid to titrate an unknown base.</div>
+
+      <table class="mini-table" aria-label="Indicators and useful ranges">
+        <thead><tr><th>Indicator</th><th>Useful colour change region</th></tr></thead>
+        <tbody>
+          <tr><td>Phenolphthalein</td><td>Colourless → pink, pH 8.2–10.0</td></tr>
+          <tr><td>Methyl orange</td><td>Red → yellow, pH 3.1–4.4</td></tr>
+          <tr><td>Bromothymol blue</td><td>Yellow → blue, pH 6.0–7.6</td></tr>
+          <tr><td>Litmus</td><td>Red → blue, broad range</td></tr>
+        </tbody>
+      </table>
+    </aside>
+
+    <section class="card lab">
+      <h2>2. Perform the titration</h2>
+      <div class="bench" aria-label="Virtual titration bench">
+        <div class="stand"></div>
+        <div class="clamp"></div>
+        <div class="burette">
+          <div id="buretteLiquid" class="burette-liquid"></div>
+          <div class="ticks"></div>
+        </div>
+        <div class="stopcock"></div>
+        <div id="drop" class="drop"></div>
+
+        <div id="flask" class="flask">
+          <div class="flask-neck"></div>
+          <div class="flask-body">
+            <div id="flaskLiquid" class="flask-liquid"></div>
+            <div class="swirl"></div>
+          </div>
+        </div>
+
+        <div class="side-readout">
+          <div class="readout-box">
+            <strong>Burette reading</strong>
+            <span id="volumeReadout">0.00 mL added</span>
+          </div>
+          <div class="readout-box">
+            <strong>Solution appearance</strong>
+            <span id="colourReadout">Colourless</span>
+          </div>
+          <div class="readout-box">
+            <strong>Estimated pH</strong>
+            <span id="phReadout">pH = —</span>
+          </div>
+          <div class="readout-box">
+            <strong>Endpoint observation</strong>
+            <span id="endpointReadout">Add titrant slowly near the endpoint.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button data-add="1.00">Add 1.00 mL</button>
+        <button data-add="0.50">Add 0.50 mL</button>
+        <button data-add="0.10">Add 0.10 mL</button>
+        <button id="recordEndpointBtn" class="ghost-btn">Record endpoint</button>
+        <button id="resetTrialBtn" class="danger-btn">Reset burette</button>
+      </div>
+
+      <div id="trialMessage" class="message">Begin with larger additions, then use 0.10 mL drops near the colour change.</div>
+    </section>
+  </section>
+
+  <section class="card challenge">
+    <h2>3. Challenge question</h2>
+    <p id="questionText" class="small"></p>
+
+    <div class="challenge-grid">
+      <div>
+        <label for="answerInput">Enter concentration of the unknown solution, in mol L<sup>−1</sup></label>
+        <input id="answerInput" type="number" min="0" step="0.001" placeholder="Example: 0.125" />
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button id="checkAnswerBtn" style="width:100%;">Check answer</button>
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button id="showHintBtn" class="ghost-btn" style="width:100%;">Small hint</button>
+      </div>
+    </div>
+
+    <div id="answerMessage" class="message">Record the endpoint, then use the titration relation to calculate the unknown concentration.</div>
+    <div id="reward" class="reward"></div>
+
+    <details>
+      <summary>Formula reminder</summary>
+      <p>
+        At equivalence point: equivalents of acid = equivalents of base.
+        For this simulation, the unknown is monoprotic, so its n-factor is 1.
+      </p>
+      <p>
+        Use: <strong>C<sub>unknown</sub> × V<sub>unknown</sub> × n<sub>unknown</sub> = C<sub>titrant</sub> × V<sub>titrant</sub> × n<sub>titrant</sub></strong>.
+        Volumes may be used in mL on both sides because the same volume unit cancels.
+      </p>
+    </details>
+  </section>
+</main>
+
+<script>
+(function () {
+  const titrants = [
+    { id: "naoh", formula: "NaOH", name: "Sodium hydroxide", type: "base", n: 1, strength: "strong" },
+    { id: "koh", formula: "KOH", name: "Potassium hydroxide", type: "base", n: 1, strength: "strong" },
+    { id: "caoh2", formula: "Ca(OH)₂", name: "Calcium hydroxide", type: "base", n: 2, strength: "strong" },
+    { id: "hcl", formula: "HCl", name: "Hydrochloric acid", type: "acid", n: 1, strength: "strong" },
+    { id: "hno3", formula: "HNO₃", name: "Nitric acid", type: "acid", n: 1, strength: "strong" },
+    { id: "h2so4", formula: "H₂SO₄", name: "Sulfuric acid", type: "acid", n: 2, strength: "strong" }
+  ];
+
+  const sampleVolumeMl = 25.00;
+  const unknownN = 1;
+  let state = {
+    unknownType: "acid",
+    unknownM: randomUnknownM(),
+    addedMl: 0,
+    recordedEndpointMl: null,
+    rewardGiven: false
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const titrantSelect = $("titrantSelect");
+  const molaritySelect = $("molaritySelect");
+  const indicatorSelect = $("indicatorSelect");
+  const answerInput = $("answerInput");
+
+  function randomUnknownM() {
+    // 0.060 M to 0.180 M in 0.005 M steps
+    const steps = Math.floor(Math.random() * 25); // 0..24
+    return (60 + steps * 5) / 1000;
+  }
+
+  function populateTitrants() {
+    titrantSelect.innerHTML = titrants.map(t =>
+      `<option value="${t.id}">${t.formula} — ${t.name} (${t.type}, n=${t.n})</option>`
+    ).join("");
+    chooseDefaultTitrant();
+  }
+
+  function chooseDefaultTitrant() {
+    if (state.unknownType === "acid") titrantSelect.value = "naoh";
+    if (state.unknownType === "base") titrantSelect.value = "hcl";
+  }
+
+  function getTitrant() {
+    return titrants.find(t => t.id === titrantSelect.value);
+  }
+
+  function getTitrantM() {
+    return parseFloat(molaritySelect.value);
+  }
+
+  function isSuitableTitrant() {
+    return getTitrant().type !== state.unknownType;
+  }
+
+  function endpointVolumeMl() {
+    if (!isSuitableTitrant()) return null;
+    const t = getTitrant();
+    const titrantNormality = getTitrantM() * t.n;
+    return (state.unknownM * unknownN * sampleVolumeMl) / titrantNormality;
+  }
+
+  function estimatePH() {
+    const t = getTitrant();
+    const titrantM = getTitrantM();
+    const totalL = (sampleVolumeMl + state.addedMl) / 1000;
+    const unknownEq = state.unknownM * unknownN * sampleVolumeMl / 1000;
+    const titrantEq = titrantM * t.n * state.addedMl / 1000;
+    let acidEq = 0, baseEq = 0;
+
+    if (state.unknownType === "acid") acidEq += unknownEq;
+    else baseEq += unknownEq;
+
+    if (t.type === "acid") acidEq += titrantEq;
+    else baseEq += titrantEq;
+
+    const netAcid = acidEq - baseEq;
+    const tiny = 1e-12;
+    if (Math.abs(netAcid) < 2e-7) return 7.00;
+
+    if (netAcid > 0) {
+      const h = Math.max(netAcid / totalL, tiny);
+      return clamp(-Math.log10(h), 0, 14);
+    } else {
+      const oh = Math.max((-netAcid) / totalL, tiny);
+      return clamp(14 + Math.log10(oh), 0, 14);
+    }
+  }
+
+  function clamp(x, min, max) {
+    return Math.min(max, Math.max(min, x));
+  }
+
+  function indicatorAppearance(pH) {
+    const id = indicatorSelect.value;
+    if (id === "phenolphthalein") {
+      if (pH < 8.2) return { label: "Colourless", color: "rgba(255,255,255,0.72)" };
+      if (pH < 10.0) return { label: "Very pale pink", color: "rgba(251, 207, 232, 0.90)" };
+      return { label: "Pink", color: "rgba(244, 114, 182, 0.92)" };
+    }
+    if (id === "methylOrange") {
+      if (pH < 3.1) return { label: "Red", color: "rgba(248, 113, 113, 0.90)" };
+      if (pH < 4.4) return { label: "Orange", color: "rgba(251, 146, 60, 0.90)" };
+      return { label: "Yellow", color: "rgba(253, 224, 71, 0.92)" };
+    }
+    if (id === "bromothymolBlue") {
+      if (pH < 6.0) return { label: "Yellow", color: "rgba(250, 204, 21, 0.85)" };
+      if (pH < 7.6) return { label: "Green", color: "rgba(74, 222, 128, 0.78)" };
+      return { label: "Blue", color: "rgba(96, 165, 250, 0.88)" };
+    }
+    if (id === "litmus") {
+      if (pH < 5.0) return { label: "Red", color: "rgba(248, 113, 113, 0.88)" };
+      if (pH < 8.0) return { label: "Purple", color: "rgba(196, 181, 253, 0.88)" };
+      return { label: "Blue", color: "rgba(96, 165, 250, 0.88)" };
+    }
+    // Universal indicator
+    if (pH < 3) return { label: "Red", color: "rgba(248, 113, 113, 0.88)" };
+    if (pH < 5) return { label: "Orange", color: "rgba(251, 146, 60, 0.88)" };
+    if (pH < 6.5) return { label: "Yellow", color: "rgba(253, 224, 71, 0.88)" };
+    if (pH < 8) return { label: "Green", color: "rgba(74, 222, 128, 0.80)" };
+    if (pH < 11) return { label: "Blue", color: "rgba(96, 165, 250, 0.88)" };
+    return { label: "Violet", color: "rgba(167, 139, 250, 0.90)" };
+  }
+
+  function endpointStatus() {
+    const ep = endpointVolumeMl();
+    if (ep === null) return {
+      text: "This titrant is not suitable because acid is being added to acid, or base to base.",
+      css: "bad"
+    };
+    const diff = state.addedMl - ep;
+    if (ep > 50) return {
+      text: "Endpoint is beyond a 50 mL burette. Use a stronger titrant or refill the burette.",
+      css: "warn"
+    };
+    if (Math.abs(diff) <= 0.15) return {
+      text: "Endpoint reached: the colour change should just persist.",
+      css: "good"
+    };
+    if (diff < -1.0) return {
+      text: "Before endpoint: continue adding titrant. Slow down near the colour change.",
+      css: ""
+    };
+    if (diff < 0) return {
+      text: "Very close to endpoint: add dropwise using 0.10 mL.",
+      css: "warn"
+    };
+    return {
+      text: "Past endpoint: the flask has been over-titrated. Reset and try again if needed.",
+      css: "bad"
+    };
+  }
+
+  function updateUI() {
+    const t = getTitrant();
+    const pH = estimatePH();
+    const app = indicatorAppearance(pH);
+    const ep = endpointVolumeMl();
+    const status = endpointStatus();
+
+    $("unknownLabel").textContent = state.unknownType === "acid" ? "Monoprotic acid" : "Monoprotic base";
+    $("nfactorLabel").textContent = `${t.n}`;
+    $("endpointHint").textContent = ep === null ? "No neutralization" : "Find experimentally";
+    $("volumeReadout").textContent = `${state.addedMl.toFixed(2)} mL added`;
+    $("phReadout").textContent = `pH ≈ ${pH.toFixed(2)}`;
+    $("colourReadout").textContent = `${app.label} with ${indicatorSelect.options[indicatorSelect.selectedIndex].text}`;
+    $("endpointReadout").textContent = status.text;
+
+    const fillPercent = clamp(92 - (state.addedMl / 50) * 92, 0, 92);
+    $("buretteLiquid").style.height = `${fillPercent}%`;
+    $("flaskLiquid").style.background = app.color;
+    $("flaskLiquid").style.height = `${clamp(48 + state.addedMl * 0.75, 48, 82)}px`;
+
+    const setupMsg = $("setupMessage");
+    setupMsg.className = "message";
+    if (isSuitableTitrant()) {
+      setupMsg.classList.add("good");
+      setupMsg.innerHTML = `Good choice: <strong>${t.formula}</strong> is a suitable ${t.type} titrant for an unknown ${state.unknownType}. Equivalent strength = ${(getTitrantM() * t.n).toFixed(3)} N.`;
+    } else {
+      setupMsg.classList.add("bad");
+      setupMsg.innerHTML = `Unsuitable choice: choose a ${state.unknownType === "acid" ? "base" : "acid"} titrant for an unknown ${state.unknownType}.`;
+    }
+
+    const trialMsg = $("trialMessage");
+    trialMsg.className = "message";
+    if (status.css) trialMsg.classList.add(status.css);
+    trialMsg.textContent = status.text;
+
+    $("questionText").innerHTML = `A <strong>${sampleVolumeMl.toFixed(2)} mL</strong> sample of an <strong>unknown monoprotic ${state.unknownType}</strong> is placed in the conical flask. Choose a suitable titrant, perform the titration, record the endpoint volume, and calculate the unknown concentration.`;
+
+    if (state.recordedEndpointMl !== null) {
+      $("answerMessage").className = "message good";
+      $("answerMessage").innerHTML = `Recorded endpoint: <strong>${state.recordedEndpointMl.toFixed(2)} mL</strong>. Now calculate the concentration of the unknown ${state.unknownType}.`;
+    }
+  }
+
+  function addTitrant(ml) {
+    if (state.addedMl >= 50) return;
+    state.addedMl = clamp(state.addedMl + ml, 0, 50);
+    animateDropAndSwirl();
+    updateUI();
+  }
+
+  function animateDropAndSwirl() {
+    const drop = $("drop");
+    const flask = $("flask");
+    drop.classList.remove("animate");
+    flask.classList.remove("swirling");
+    void drop.offsetWidth;
+    drop.classList.add("animate");
+    flask.classList.add("swirling");
+    setTimeout(() => {
+      drop.classList.remove("animate");
+      flask.classList.remove("swirling");
+    }, 720);
+  }
+
+  function resetBurette() {
+    state.addedMl = 0;
+    state.recordedEndpointMl = null;
+    state.rewardGiven = false;
+    answerInput.value = "";
+    $("reward").innerHTML = "";
+    $("answerMessage").className = "message";
+    $("answerMessage").textContent = "Record the endpoint, then use the titration relation to calculate the unknown concentration.";
+    updateUI();
+  }
+
+  function generateNewUnknown() {
+    state.unknownM = randomUnknownM();
+    resetBurette();
+  }
+
+  function recordEndpoint() {
+    if (!isSuitableTitrant()) {
+      $("answerMessage").className = "message bad";
+      $("answerMessage").textContent = "First choose a suitable titrant: acid for an unknown base, or base for an unknown acid.";
+      return;
+    }
+    state.recordedEndpointMl = state.addedMl;
+    const ep = endpointVolumeMl();
+    const diff = Math.abs(state.addedMl - ep);
+    const msg = $("answerMessage");
+    if (diff <= 0.25) {
+      msg.className = "message good";
+      msg.innerHTML = `Excellent endpoint! Recorded volume = <strong>${state.recordedEndpointMl.toFixed(2)} mL</strong>. Now calculate the unknown concentration.`;
+    } else if (state.addedMl < ep) {
+      msg.className = "message warn";
+      msg.innerHTML = `You recorded <strong>${state.recordedEndpointMl.toFixed(2)} mL</strong>, but the endpoint may not have persisted yet. You may continue or calculate with this reading.`;
+    } else {
+      msg.className = "message bad";
+      msg.innerHTML = `You recorded <strong>${state.recordedEndpointMl.toFixed(2)} mL</strong>, but the solution appears over-titrated. Resetting may give a better result.`;
+    }
+    updateUI();
+  }
+
+  function checkAnswer() {
+    const val = parseFloat(answerInput.value);
+    const msg = $("answerMessage");
+    if (!isFinite(val) || val <= 0) {
+      msg.className = "message bad";
+      msg.textContent = "Enter a positive concentration in mol L⁻¹.";
+      return;
+    }
+    if (!isSuitableTitrant()) {
+      msg.className = "message bad";
+      msg.textContent = "The chosen titrant is unsuitable. Select an acid titrant for an unknown base or a base titrant for an unknown acid.";
+      return;
+    }
+    if (state.recordedEndpointMl === null) {
+      msg.className = "message warn";
+      msg.textContent = "Record the endpoint before submitting the concentration.";
+      return;
+    }
+
+    const actual = state.unknownM;
+    const relErr = Math.abs(val - actual) / actual;
+    const roundedActual = actual.toFixed(3);
+
+    if (relErr <= 0.02) {
+      msg.className = "message good";
+      msg.innerHTML = `Correct. The unknown concentration is approximately <strong>${roundedActual} M</strong>.`;
+      giveReward();
+    } else {
+      const t = getTitrant();
+      const calcFromRecorded = (getTitrantM() * t.n * state.recordedEndpointMl) / (sampleVolumeMl * unknownN);
+      msg.className = relErr <= 0.06 ? "message warn" : "message bad";
+      msg.innerHTML = `Not quite. From your recorded endpoint, the calculation gives about <strong>${calcFromRecorded.toFixed(3)} M</strong>. Check your endpoint reading, n-factor, and decimal places.`;
+      $("reward").innerHTML = "";
+    }
+  }
+
+  function giveReward() {
+    if (!state.rewardGiven) {
+      state.rewardGiven = true;
+      launchConfetti();
+    }
+    $("reward").innerHTML = `<span class="badge">🏅 Titration Master unlocked!</span>`;
+  }
+
+  function launchConfetti() {
+    const colours = ["#ef4444", "#f59e0b", "#22c55e", "#3b82f6", "#a855f7", "#ec4899"];
+    for (let i = 0; i < 90; i++) {
+      const p = document.createElement("div");
+      p.className = "confetti-piece";
+      p.style.left = `${Math.random() * 100}vw`;
+      p.style.background = colours[Math.floor(Math.random() * colours.length)];
+      p.style.animationDelay = `${Math.random() * 0.55}s`;
+      p.style.transform = `rotate(${Math.random() * 180}deg)`;
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 2300);
+    }
+  }
+
+  function showHint() {
+    const t = getTitrant();
+    const msg = $("answerMessage");
+    msg.className = "message";
+    if (state.recordedEndpointMl === null) {
+      msg.innerHTML = `First record the endpoint. Then use <strong>C<sub>unknown</sub> = C<sub>titrant</sub> × V<sub>titrant</sub> × n<sub>titrant</sub> / V<sub>unknown</sub></strong>.`;
+    } else {
+      msg.innerHTML = `Use: <strong>C<sub>unknown</sub> = ${getTitrantM().toFixed(3)} × ${state.recordedEndpointMl.toFixed(2)} × ${t.n} / ${sampleVolumeMl.toFixed(2)}</strong>.`;
+    }
+  }
+
+  document.querySelectorAll('input[name="unknownType"]').forEach(radio => {
+    radio.addEventListener("change", () => {
+      state.unknownType = radio.value;
+      chooseDefaultTitrant();
+      generateNewUnknown();
+    });
+  });
+
+  document.querySelectorAll("button[data-add]").forEach(btn => {
+    btn.addEventListener("click", () => addTitrant(parseFloat(btn.dataset.add)));
+  });
+
+  titrantSelect.addEventListener("change", resetBurette);
+  molaritySelect.addEventListener("change", resetBurette);
+  indicatorSelect.addEventListener("change", updateUI);
+  $("newUnknownBtn").addEventListener("click", generateNewUnknown);
+  $("resetTrialBtn").addEventListener("click", resetBurette);
+  $("recordEndpointBtn").addEventListener("click", recordEndpoint);
+  $("checkAnswerBtn").addEventListener("click", checkAnswer);
+  $("showHintBtn").addEventListener("click", showHint);
+
+  populateTitrants();
+  updateUI();
+})();
+</script>
+</body>
+</html>

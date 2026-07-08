@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Molecular Orbital Simulator</title>
+<style>
+  :root{
+    --bg:#080b12;
+    --panel:#111827;
+    --panel2:#0d1422;
+    --ink:#e9f0ff;
+    --muted:#9fb0d0;
+    --accent:#65d6ff;
+    --accent2:#ffb86b;
+    --good:#69f0ae;
+    --bad:#ff6b9d;
+    --line:#25324a;
+    --card:#151f33;
+    --shadow: 0 18px 50px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(circle at 18% 12%, rgba(101,214,255,.22), transparent 28%),
+      radial-gradient(circle at 90% 8%, rgba(255,184,107,.16), transparent 26%),
+      linear-gradient(135deg, #06070b 0%, #0b1020 45%, #090b12 100%);
+    min-height:100vh;
+  }
+  header{
+    padding:26px 28px 10px;
+    max-width:1380px;
+    margin:auto;
+  }
+  h1{
+    margin:0 0 8px;
+    letter-spacing:.2px;
+    font-size: clamp(28px, 4vw, 46px);
+    line-height:1.05;
+  }
+  .subtitle{
+    color:var(--muted);
+    max-width:930px;
+    line-height:1.55;
+    font-size:15px;
+  }
+  .app{
+    display:grid;
+    grid-template-columns: 320px minmax(560px, 1fr) 340px;
+    gap:18px;
+    padding:18px 28px 28px;
+    max-width:1380px;
+    margin:auto;
+  }
+  .panel{
+    background:linear-gradient(180deg, rgba(21,31,51,.92), rgba(12,18,30,.92));
+    border:1px solid rgba(159,176,208,.14);
+    border-radius:20px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+  .panel h2{
+    margin:0;
+    padding:16px 18px 10px;
+    font-size:16px;
+    letter-spacing:.4px;
+    color:#f4f8ff;
+  }
+  .controls{padding:0 18px 18px}
+  label.small{
+    display:block;
+    color:var(--muted);
+    font-size:12px;
+    margin:15px 0 7px;
+    text-transform:uppercase;
+    letter-spacing:.8px;
+  }
+  select, button, input[type="range"]{
+    width:100%;
+  }
+  select, button{
+    background:#0a1020;
+    color:var(--ink);
+    border:1px solid rgba(159,176,208,.22);
+    border-radius:12px;
+    padding:10px 12px;
+    font-size:14px;
+    outline:none;
+  }
+  button{
+    cursor:pointer;
+    font-weight:700;
+    transition:.16s ease;
+  }
+  button:hover{ transform:translateY(-1px); border-color:rgba(101,214,255,.75); box-shadow:0 0 0 3px rgba(101,214,255,.08) }
+  .buttonRow{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px}
+  .primary{background:linear-gradient(135deg, rgba(101,214,255,.26), rgba(105,240,174,.14));}
+  .danger{background:linear-gradient(135deg, rgba(255,107,157,.20), rgba(255,184,107,.10));}
+  input[type="range"]{ accent-color: var(--accent); }
+  .readout{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    color:var(--muted);
+    font-size:13px;
+    margin-top:6px;
+  }
+  .readout b{color:#fff; font-weight:700}
+  .check{
+    display:flex; align-items:center; gap:10px;
+    color:var(--muted); font-size:14px;
+    margin-top:12px;
+  }
+  .check input{ accent-color: var(--accent); width:18px; height:18px; }
+  .mainCanvasWrap{
+    position:relative;
+    padding:16px;
+  }
+  canvas{
+    display:block;
+    width:100%;
+    border-radius:16px;
+    background:#050810;
+    border:1px solid rgba(159,176,208,.12);
+  }
+  #moCanvas{height:520px;}
+  #sliceCanvas{height:190px; margin-top:12px;}
+  #energyCanvas{height:310px;}
+  #formulaCanvas{height:190px; margin-top:12px;}
+  .badgeRow{
+    position:absolute;
+    left:28px; top:28px;
+    display:flex; gap:8px; flex-wrap:wrap;
+    pointer-events:none;
+  }
+  .badge{
+    padding:7px 10px;
+    border-radius:999px;
+    font-size:12px;
+    color:#dfeaff;
+    background:rgba(8,11,18,.62);
+    border:1px solid rgba(159,176,208,.22);
+    backdrop-filter: blur(8px);
+  }
+  .stats{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    padding:0 18px 18px;
+  }
+  .stat{
+    background:rgba(8,11,18,.45);
+    border:1px solid rgba(159,176,208,.12);
+    border-radius:14px;
+    padding:12px;
+  }
+  .stat .k{color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.7px}
+  .stat .v{font-size:22px; font-weight:800; margin-top:5px}
+  .explain{
+    color:var(--muted);
+    font-size:14px;
+    line-height:1.54;
+    padding:0 18px 18px;
+  }
+  .equation{
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color:#f2f7ff;
+    background:#080d18;
+    border:1px solid rgba(159,176,208,.13);
+    border-radius:12px;
+    padding:11px 12px;
+    margin:10px 0;
+    overflow:auto;
+    white-space:nowrap;
+  }
+  .legend{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    color:var(--muted);
+    font-size:12px;
+    padding:0 18px 14px;
+  }
+  .dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:-1px}
+  .blue{background:#65d6ff}.orange{background:#ffb86b}.white{background:#fff}.green{background:#69f0ae}.pink{background:#ff6b9d}
+  .quiz{
+    margin:0 18px 18px;
+    background:rgba(101,214,255,.06);
+    border:1px solid rgba(101,214,255,.16);
+    border-radius:16px;
+    padding:13px;
+  }
+  .quiz b{color:#fff}
+  .quiz p{margin:7px 0 11px; color:var(--muted); font-size:13px; line-height:1.4}
+  .quiz .answer{display:none; color:#d9fff0; font-size:13px; margin-top:10px; line-height:1.4}
+  .quiz.show .answer{display:block}
+  .footerNote{
+    color:#6f7f9d; font-size:12px; padding:0 18px 18px; line-height:1.45;
+  }
+  @media(max-width:1160px){
+    .app{grid-template-columns:1fr;}
+    #moCanvas{height:500px;}
+  }
+</style>
+</head>
+<body>
+<header>
+  <a class="back-link" href="../../index.html" style="display:inline-block;margin-bottom:14px;color:#bfdbfe;text-decoration:none;font-weight:700">&larr; Back to Interactive Learning Lab</a>
+  <h1>Molecular Orbital Simulator</h1>
+  <div class="subtitle">
+    Build molecular orbitals by adding or subtracting atomic orbitals. Watch how phase controls constructive/destructive interference, how density appears or disappears between the nuclei, and how this connects to bonding and antibonding energy levels.
+  </div>
+</header>
+
+<main class="app">
+  <section class="panel">
+    <h2>Controls</h2>
+    <div class="controls">
+      <label class="small" for="orbitalType">Atomic orbitals</label>
+      <select id="orbitalType">
+        <option value="s">1s + 1s → σ molecular orbital</option>
+        <option value="px">2p along bond → σ molecular orbital</option>
+        <option value="py">2p side-on → π molecular orbital</option>
+      </select>
+
+      <label class="small" for="moType">Combination</label>
+      <select id="moType">
+        <option value="bonding">Bonding: constructive overlap</option>
+        <option value="antibonding">Antibonding: destructive overlap</option>
+      </select>
+
+      <label class="small" for="plotMode">Display</label>
+      <select id="plotMode">
+        <option value="phase">Wave function phase, ψ</option>
+        <option value="density">Electron density, |ψ|²</option>
+        <option value="diff">Density change, Δρ</option>
+      </select>
+
+      <label class="small" for="R">Internuclear distance, R</label>
+      <input type="range" id="R" min="0.8" max="5.0" step="0.02" value="2.0" />
+      <div class="readout"><span>close nuclei ⟷ separated nuclei</span><b id="Rval">2.00 a₀</b></div>
+
+      <label class="small" for="size">Orbital size</label>
+      <input type="range" id="size" min="0.45" max="1.65" step="0.02" value="0.95" />
+      <div class="readout"><span>compact ⟷ diffuse</span><b id="sizeVal">0.95</b></div>
+
+      <label class="small" for="polarity">Unequal mixing / polarity</label>
+      <input type="range" id="polarity" min="-0.65" max="0.65" step="0.01" value="0" />
+      <div class="readout"><span>more on left ⟷ more on right</span><b id="polVal">0.00</b></div>
+
+      <label class="small" for="zoom">View scale</label>
+      <input type="range" id="zoom" min="4.0" max="8.5" step="0.1" value="6.3" />
+      <div class="readout"><span>zoomed in ⟷ zoomed out</span><b id="zoomVal">6.3</b></div>
+
+      <label class="check"><input type="checkbox" id="aoShadows" checked /> Show separate atomic-orbital shadows</label>
+      <label class="check"><input type="checkbox" id="nodes" checked /> Show nodal lines</label>
+      <label class="check"><input type="checkbox" id="electronDots" checked /> Animate electron cloud samples</label>
+
+      <div class="buttonRow">
+        <button class="primary" id="resetBtn">Reset H₂</button>
+        <button class="danger" id="challengeBtn">Random challenge</button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="k">Overlap S</div><div class="v" id="Sstat">0.00</div></div>
+      <div class="stat"><div class="k">Bond order idea</div><div class="v" id="BOstat">+1</div></div>
+      <div class="stat"><div class="k">Node between nuclei</div><div class="v" id="Nstat">No</div></div>
+      <div class="stat"><div class="k">Stability</div><div class="v" id="Estat">Lower</div></div>
+    </div>
+  </section>
+
+  <section class="panel mainCanvasWrap">
+    <canvas id="moCanvas" width="920" height="560"></canvas>
+    <div class="badgeRow">
+      <div class="badge"><span class="dot blue"></span>positive phase</div>
+      <div class="badge"><span class="dot orange"></span>negative phase</div>
+      <div class="badge"><span class="dot white"></span>high density</div>
+    </div>
+    <canvas id="sliceCanvas" width="920" height="210"></canvas>
+  </section>
+
+  <section class="panel">
+    <h2>Energy and interpretation</h2>
+    <canvas id="energyCanvas" width="340" height="310"></canvas>
+    <div class="legend">
+      <span><span class="dot green"></span>bonding MO</span>
+      <span><span class="dot pink"></span>antibonding MO</span>
+    </div>
+    <div class="explain" id="explainBox"></div>
+    <div class="equation" id="equationBox"></div>
+    <div class="quiz" id="quizBox">
+      <b>Think like a chemist</b>
+      <p id="quizQuestion">Where should electron density be concentrated for a stable σ bonding orbital?</p>
+      <button id="showAnswer">Show answer</button>
+      <div class="answer" id="quizAnswer">Between the nuclei. Density in the internuclear region attracts both nuclei and lowers the energy.</div>
+    </div>
+    <div class="footerNote">
+      This is a qualitative LCAO teaching model using 2D slices of simple hydrogen-like orbitals. It shows phase, overlap, nodes, and density redistribution; it is not a full Hartree–Fock or DFT calculation.
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const moCanvas = $('moCanvas'), moCtx = moCanvas.getContext('2d');
+  const sliceCanvas = $('sliceCanvas'), sliceCtx = sliceCanvas.getContext('2d');
+  const energyCanvas = $('energyCanvas'), energyCtx = energyCanvas.getContext('2d');
+
+  const controls = {
+    orbitalType: $('orbitalType'), moType: $('moType'), plotMode: $('plotMode'),
+    R: $('R'), size: $('size'), polarity: $('polarity'), zoom: $('zoom'),
+    aoShadows: $('aoShadows'), nodes: $('nodes'), electronDots: $('electronDots')
+  };
+
+  const off = document.createElement('canvas');
+  const offCtx = off.getContext('2d');
+  off.width = 360; off.height = 220;
+
+  let dirty = true;
+  let last = null;
+  let t = 0;
+
+  function state(){
+    return {
+      kind: controls.orbitalType.value,
+      mo: controls.moType.value,
+      mode: controls.plotMode.value,
+      R: +controls.R.value,
+      a: +controls.size.value,
+      pol: +controls.polarity.value,
+      spanX: +controls.zoom.value
+    };
+  }
+
+  function signForB(kind, mo){
+    // For px orbitals aligned along the bond, constructive overlap requires opposite algebraic signs,
+    // because the facing p lobes have opposite signs in a common coordinate system.
+    const bondSign = (kind === 'px') ? -1 : +1;
+    return mo === 'bonding' ? bondSign : -bondSign;
+  }
+
+  function ao(kind, x, y, cx, a){
+    const dx = x - cx;
+    const r = Math.sqrt(dx*dx + y*y + 0.018);
+    const envelope = Math.exp(-r / a);
+    if(kind === 's') return envelope;
+    if(kind === 'px') return (dx / a) * envelope;
+    if(kind === 'py') return (y / a) * envelope;
+    return envelope;
+  }
+
+  function clamp(v,a,b){ return Math.max(a, Math.min(b,v)); }
+  function lerp(a,b,t){ return a + (b-a)*t; }
+  function rgb(r,g,b,a=255){ return [r|0,g|0,b|0,a|0]; }
+
+  function colorPhase(v){
+    const m = Math.min(1, Math.sqrt(Math.abs(v)) * 1.15);
+    if(v >= 0){
+      return rgb(lerp(7, 225, m), lerp(14, 255, m), lerp(32, 255, m));
+    } else {
+      return rgb(lerp(7, 255, m), lerp(14, 187, m), lerp(32, 92, m));
+    }
+  }
+
+  function colorDensity(v){
+    v = clamp(v,0,1);
+    const x = Math.pow(v, 0.55);
+    let r,g,b;
+    if(x < .33){ const q=x/.33; r=lerp(4,38,q); g=lerp(8,36,q); b=lerp(18,110,q); }
+    else if(x < .72){ const q=(x-.33)/.39; r=lerp(38,50,q); g=lerp(36,210,q); b=lerp(110,255,q); }
+    else { const q=(x-.72)/.28; r=lerp(50,255,q); g=lerp(210,255,q); b=lerp(255,255,q); }
+    return rgb(r,g,b);
+  }
+
+  function colorDiff(v){
+    v = clamp(v,-1,1);
+    const m = Math.sqrt(Math.abs(v));
+    if(v >= 0) return rgb(lerp(8, 86, m), lerp(12, 245, m), lerp(24, 255, m));
+    return rgb(lerp(8, 255, m), lerp(12, 82, m), lerp(24, 128, m));
+  }
+
+  function recompute(){
+    const s = state();
+    const gw = off.width, gh = off.height;
+    const spanX = s.spanX;
+    const spanY = spanX * gh / gw;
+    const dx = spanX / (gw-1);
+    const dy = spanY / (gh-1);
+    const n = gw*gh;
+    const psi = new Float32Array(n);
+    const Aarr = new Float32Array(n);
+    const Barr = new Float32Array(n);
+    const rho = new Float32Array(n);
+    const rhoAO = new Float32Array(n);
+    const diff = new Float32Array(n);
+    let normPsi = 0, normA = 0, normB = 0, maxAbsPsi = 0, maxRho = 0, maxAbsDiff = 0;
+    let overlapRaw = 0;
+    const cxA = -s.R/2, cxB = s.R/2;
+    const cA = 1 + s.pol;
+    const cB = signForB(s.kind, s.mo) * (1 - s.pol);
+    const bConstructive = signForB(s.kind, 'bonding');
+
+    for(let j=0;j<gh;j++){
+      const y = (0.5 - j/(gh-1)) * spanY;
+      for(let i=0;i<gw;i++){
+        const x = (i/(gw-1) - 0.5) * spanX;
+        const idx = j*gw+i;
+        const A = ao(s.kind,x,y,cxA,s.a);
+        const B = ao(s.kind,x,y,cxB,s.a);
+        const P = cA*A + cB*B;
+        Aarr[idx]=A; Barr[idx]=B; psi[idx]=P;
+        normPsi += P*P*dx*dy;
+        normA += A*A*dx*dy;
+        normB += B*B*dx*dy;
+        overlapRaw += A*(bConstructive*B)*dx*dy;
+      }
+    }
+    normPsi = Math.max(normPsi, 1e-12);
+    normA = Math.max(normA, 1e-12);
+    normB = Math.max(normB, 1e-12);
+
+    for(let idx=0; idx<n; idx++){
+      const pn = psi[idx] / Math.sqrt(normPsi);
+      const rn = pn*pn;
+      const ar = 0.5*(Aarr[idx]*Aarr[idx]/normA + Barr[idx]*Barr[idx]/normB);
+      const df = rn - ar;
+      psi[idx] = pn;
+      rho[idx] = rn;
+      rhoAO[idx] = ar;
+      diff[idx] = df;
+      if(Math.abs(pn) > maxAbsPsi) maxAbsPsi = Math.abs(pn);
+      if(rn > maxRho) maxRho = rn;
+      if(Math.abs(df) > maxAbsDiff) maxAbsDiff = Math.abs(df);
+    }
+
+    const S = overlapRaw / Math.sqrt(normA*normB);
+    const img = offCtx.createImageData(gw, gh);
+    const pix = img.data;
+    for(let idx=0; idx<n; idx++){
+      let col;
+      if(s.mode === 'phase') col = colorPhase(psi[idx] / (maxAbsPsi || 1));
+      else if(s.mode === 'density') col = colorDensity(rho[idx] / (maxRho || 1));
+      else col = colorDiff(diff[idx] / (maxAbsDiff || 1));
+      const p = idx*4;
+      pix[p]=col[0]; pix[p+1]=col[1]; pix[p+2]=col[2]; pix[p+3]=255;
+    }
+    offCtx.putImageData(img,0,0);
+
+    const cdf = new Float32Array(n);
+    let accum = 0;
+    for(let idx=0; idx<n; idx++){ accum += rho[idx]; cdf[idx] = accum; }
+    for(let idx=0; idx<n; idx++) cdf[idx] /= accum || 1;
+
+    last = {s, psi, Aarr, Barr, rho, diff, gw, gh, spanX, spanY, maxAbsPsi, maxRho, maxAbsDiff, S, cdf, normA, normB};
+    dirty = false;
+    updateReadouts();
+    updateText();
+  }
+
+  function worldToCanvas(x,y, canvas){
+    const {spanX, spanY} = last;
+    return {
+      x: (x/spanX + 0.5) * canvas.width,
+      y: (0.5 - y/spanY) * canvas.height
+    };
+  }
+
+  function drawAOShadows(ctx){
+    const s = last.s;
+    const nuclei = [-s.R/2, s.R/2];
+    ctx.save();
+    ctx.globalAlpha = 0.55;
+    ctx.lineWidth = 1.2;
+    ctx.setLineDash([6,6]);
+    nuclei.forEach((cx, ni) => {
+      const C = worldToCanvas(cx,0,moCanvas);
+      const scale = moCanvas.width / last.spanX;
+      ctx.strokeStyle = ni===0 ? 'rgba(101,214,255,.55)' : 'rgba(255,184,107,.55)';
+      if(s.kind === 's'){
+        ctx.beginPath(); ctx.arc(C.x,C.y,s.a*scale*.9,0,Math.PI*2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(C.x,C.y,s.a*scale*1.55,0,Math.PI*2); ctx.stroke();
+      } else if(s.kind === 'px'){
+        ctx.beginPath(); ctx.ellipse(C.x-scale*s.a*.52,C.y,scale*s.a*.48,scale*s.a*.72,0,0,Math.PI*2); ctx.stroke();
+        ctx.beginPath(); ctx.ellipse(C.x+scale*s.a*.52,C.y,scale*s.a*.48,scale*s.a*.72,0,0,Math.PI*2); ctx.stroke();
+      } else {
+        ctx.beginPath(); ctx.ellipse(C.x,C.y-scale*s.a*.52,scale*s.a*.72,scale*s.a*.48,0,0,Math.PI*2); ctx.stroke();
+        ctx.beginPath(); ctx.ellipse(C.x,C.y+scale*s.a*.52,scale*s.a*.72,scale*s.a*.48,0,0,Math.PI*2); ctx.stroke();
+      }
+    });
+    ctx.restore();
+  }
+
+  function drawNuclei(ctx){
+    const s = last.s;
+    ctx.save();
+    [-s.R/2, s.R/2].forEach((cx, i)=>{
+      const C = worldToCanvas(cx,0,moCanvas);
+      const grad = ctx.createRadialGradient(C.x-4,C.y-5,2,C.x,C.y,18);
+      grad.addColorStop(0,'#fff7da');
+      grad.addColorStop(.45,'#ffd166');
+      grad.addColorStop(1,'#ff8b4a');
+      ctx.fillStyle = grad;
+      ctx.beginPath(); ctx.arc(C.x,C.y,15,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,.72)'; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.fillStyle = '#15110a'; ctx.font='bold 16px ui-sans-serif, system-ui'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('+',C.x,C.y+0.5);
+      ctx.fillStyle='rgba(255,255,255,.9)'; ctx.font='12px ui-sans-serif, system-ui';
+      ctx.fillText(i===0?'A':'B', C.x, C.y+32);
+    });
+    ctx.restore();
+  }
+
+  function drawNodeLines(ctx){
+    const {gw, gh, psi, spanX, spanY} = last;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,255,255,.78)';
+    ctx.lineWidth = 1.2;
+    ctx.globalAlpha = .85;
+    for(let j=0; j<gh-1; j++){
+      for(let i=0; i<gw-1; i++){
+        const idx = j*gw+i;
+        const p = psi[idx];
+        const pr = psi[idx+1];
+        const pd = psi[idx+gw];
+        if((p>=0 && pr<0) || (p<0 && pr>=0) || (p>=0 && pd<0) || (p<0 && pd>=0)){
+          const x = (i/(gw-1)-0.5)*spanX;
+          const y = (0.5-j/(gh-1))*spanY;
+          const C = worldToCanvas(x,y,moCanvas);
+          ctx.fillStyle = 'rgba(255,255,255,.66)';
+          ctx.fillRect(C.x, C.y, 1.35, 1.35);
+        }
+      }
+    }
+    ctx.restore();
+  }
+
+  function drawElectronDots(ctx){
+    if(!controls.electronDots.checked || !last) return;
+    const nDots = 240;
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    for(let k=0;k<nDots;k++){
+      const r = Math.random();
+      let lo=0, hi=last.cdf.length-1;
+      while(lo<hi){ const mid=(lo+hi)>>1; if(last.cdf[mid]<r) lo=mid+1; else hi=mid; }
+      const i = lo % last.gw, j = (lo/last.gw)|0;
+      const x = (i/(last.gw-1)-0.5)*last.spanX;
+      const y = (0.5-j/(last.gh-1))*last.spanY;
+      const C = worldToCanvas(x,y,moCanvas);
+      const a = .05 + .22*Math.random();
+      ctx.fillStyle = `rgba(255,255,255,${a})`;
+      ctx.beginPath(); ctx.arc(C.x + (Math.random()-.5)*2, C.y + (Math.random()-.5)*2, 1.1 + Math.random()*1.8, 0, Math.PI*2); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawMain(){
+    if(dirty) recompute();
+    moCtx.clearRect(0,0,moCanvas.width,moCanvas.height);
+    moCtx.imageSmoothingEnabled = true;
+    moCtx.drawImage(off, 0, 0, moCanvas.width, moCanvas.height);
+
+    // subtle grid / bond axis
+    moCtx.save();
+    moCtx.strokeStyle='rgba(255,255,255,.10)'; moCtx.lineWidth=1;
+    const y0 = worldToCanvas(0,0,moCanvas).y;
+    const x0 = worldToCanvas(0,0,moCanvas).x;
+    moCtx.beginPath(); moCtx.moveTo(0,y0); moCtx.lineTo(moCanvas.width,y0); moCtx.stroke();
+    moCtx.beginPath(); moCtx.moveTo(x0,0); moCtx.lineTo(x0,moCanvas.height); moCtx.stroke();
+    moCtx.restore();
+
+    if(controls.aoShadows.checked) drawAOShadows(moCtx);
+    if(controls.nodes.checked) drawNodeLines(moCtx);
+    drawElectronDots(moCtx);
+    drawNuclei(moCtx);
+
+    // titles inside canvas
+    moCtx.save();
+    moCtx.fillStyle='rgba(8,11,18,.62)';
+    moCtx.fillRect(16, moCanvas.height-58, moCanvas.width-32, 42);
+    moCtx.fillStyle='#e9f0ff';
+    moCtx.font='bold 16px ui-sans-serif, system-ui';
+    moCtx.fillText(titleForState(), 28, moCanvas.height-33);
+    moCtx.fillStyle='rgba(233,240,255,.72)';
+    moCtx.font='12px ui-sans-serif, system-ui';
+    moCtx.fillText(captionForMode(), 28, moCanvas.height-17);
+    moCtx.restore();
+  }
+
+  function titleForState(){
+    const s = last.s;
+    const orbital = s.kind==='s'?'1s σ':(s.kind==='px'?'2pσ':'2pπ');
+    return `${s.mo === 'bonding' ? 'Bonding' : 'Antibonding'} ${orbital} molecular orbital`;
+  }
+  function captionForMode(){
+    const m = last.s.mode;
+    if(m==='phase') return 'Color shows sign/phase of ψ. White nodal curves mark ψ = 0.';
+    if(m==='density') return 'Brightness shows electron probability density |ψ|².';
+    return 'Cyan/blue means density gained; pink/orange means density depleted compared with separated atoms.';
+  }
+
+  function drawSlice(){
+    if(dirty) recompute();
+    const ctx = sliceCtx;
+    ctx.clearRect(0,0,sliceCanvas.width,sliceCanvas.height);
+    const W=sliceCanvas.width, H=sliceCanvas.height;
+    const padL=46, padR=18, padT=18, padB=34;
+    ctx.fillStyle='#050810'; ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle='rgba(159,176,208,.18)'; ctx.lineWidth=1;
+    for(let k=0;k<5;k++){
+      const y = padT + k*(H-padT-padB)/4;
+      ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke();
+    }
+    ctx.strokeStyle='rgba(255,255,255,.13)';
+    const zeroY = padT + (H-padT-padB)/2;
+    ctx.beginPath(); ctx.moveTo(padL,zeroY); ctx.lineTo(W-padR,zeroY); ctx.stroke();
+
+    const samples = 420;
+    const psiVals=[], rhoVals=[];
+    let maxPsi=0, maxR=0;
+    const ySlice = last.s.kind === 'py' ? 0.62*last.s.a : 0;
+    const s = last.s;
+    const cA = 1 + s.pol;
+    const cB = signForB(s.kind, s.mo) * (1 - s.pol);
+    let normApprox = 0;
+    // approximate normalization from existing map max; this is only for shape in the line plot
+    for(let k=0;k<samples;k++){
+      const x = (k/(samples-1)-.5)*last.spanX;
+      const P = cA*ao(s.kind,x,ySlice,-s.R/2,s.a) + cB*ao(s.kind,x,ySlice,s.R/2,s.a);
+      psiVals.push(P); if(Math.abs(P)>maxPsi) maxPsi=Math.abs(P);
+      rhoVals.push(P*P); if(P*P>maxR) maxR=P*P;
+      normApprox += P*P;
+    }
+    maxPsi = maxPsi || 1; maxR = maxR || 1;
+
+    function px(k){ return padL + k/(samples-1)*(W-padL-padR); }
+    function pyPsi(v){ return zeroY - (v/maxPsi)*(H-padT-padB)*.38; }
+    function pyRho(v){ return H-padB - (v/maxR)*(H-padT-padB)*.78; }
+
+    // density area
+    const grad = ctx.createLinearGradient(0,padT,0,H-padB);
+    grad.addColorStop(0,'rgba(101,214,255,.35)'); grad.addColorStop(1,'rgba(101,214,255,.02)');
+    ctx.beginPath(); ctx.moveTo(px(0), H-padB);
+    rhoVals.forEach((v,k)=>ctx.lineTo(px(k), pyRho(v)));
+    ctx.lineTo(px(samples-1), H-padB); ctx.closePath(); ctx.fillStyle=grad; ctx.fill();
+    ctx.strokeStyle='rgba(101,214,255,.9)'; ctx.lineWidth=2;
+    ctx.beginPath(); rhoVals.forEach((v,k)=>{ const X=px(k), Y=pyRho(v); k?ctx.lineTo(X,Y):ctx.moveTo(X,Y); }); ctx.stroke();
+
+    // psi line
+    ctx.strokeStyle='rgba(255,184,107,.95)'; ctx.lineWidth=2;
+    ctx.beginPath(); psiVals.forEach((v,k)=>{ const X=px(k), Y=pyPsi(v); k?ctx.lineTo(X,Y):ctx.moveTo(X,Y); }); ctx.stroke();
+
+    // nuclei markers
+    [-s.R/2, s.R/2].forEach(cx=>{
+      const X = padL + ((cx/last.spanX)+.5)*(W-padL-padR);
+      ctx.strokeStyle='rgba(255,209,102,.8)'; ctx.beginPath(); ctx.moveTo(X,padT); ctx.lineTo(X,H-padB); ctx.stroke();
+      ctx.fillStyle='#ffd166'; ctx.beginPath(); ctx.arc(X,H-padB+10,5,0,Math.PI*2); ctx.fill();
+    });
+
+    ctx.fillStyle='#dfeaff'; ctx.font='bold 13px ui-sans-serif, system-ui';
+    const sliceLabel = last.s.kind === 'py' ? 'off-axis slice for π orbital' : 'bond-axis slice';
+    ctx.fillText(`ψ and |ψ|² along ${sliceLabel}`, 16, 18);
+    ctx.fillStyle='rgba(233,240,255,.72)'; ctx.font='12px ui-sans-serif, system-ui';
+    ctx.fillText('orange: ψ', W-150, 20);
+    ctx.fillStyle='rgba(101,214,255,.9)'; ctx.fillText('cyan: |ψ|²', W-86, 20);
+    ctx.fillStyle='rgba(233,240,255,.55)'; ctx.fillText('x along bond', W/2-30, H-10);
+  }
+
+  function drawEnergy(){
+    if(dirty) recompute();
+    const ctx = energyCtx, W=energyCanvas.width, H=energyCanvas.height;
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#050810'; ctx.fillRect(0,0,W,H);
+    const pad=34;
+    ctx.strokeStyle='rgba(159,176,208,.16)'; ctx.lineWidth=1;
+    for(let k=0;k<5;k++){
+      const y=pad+k*(H-2*pad)/4;
+      ctx.beginPath(); ctx.moveTo(20,y); ctx.lineTo(W-20,y); ctx.stroke();
+    }
+    const S = Math.abs(last.S);
+    const split = 38 + 76*S;
+    const midY = H/2 + 12;
+    const yBond = midY + split/2;
+    const yAnti = midY - split/2;
+    const yAO = midY;
+
+    function line(x1,x2,y,color,w=4){
+      ctx.strokeStyle=color; ctx.lineWidth=w; ctx.beginPath(); ctx.moveTo(x1,y); ctx.lineTo(x2,y); ctx.stroke();
+    }
+    // AO lines
+    line(28,94,yAO,'rgba(101,214,255,.75)',3); line(W-94,W-28,yAO,'rgba(255,184,107,.75)',3);
+    // MO lines
+    line(126,W-126,yBond,'rgba(105,240,174,.95)',5);
+    line(126,W-126,yAnti,'rgba(255,107,157,.95)',5);
+
+    // connecting guides
+    ctx.strokeStyle='rgba(255,255,255,.18)'; ctx.lineWidth=1; ctx.setLineDash([4,5]);
+    ctx.beginPath(); ctx.moveTo(94,yAO); ctx.lineTo(126,yBond); ctx.moveTo(94,yAO); ctx.lineTo(126,yAnti); ctx.moveTo(W-94,yAO); ctx.lineTo(W-126,yBond); ctx.moveTo(W-94,yAO); ctx.lineTo(W-126,yAnti); ctx.stroke(); ctx.setLineDash([]);
+
+    // current selection marker
+    const selectedY = last.s.mo === 'bonding' ? yBond : yAnti;
+    ctx.fillStyle='rgba(255,255,255,.92)';
+    ctx.beginPath(); ctx.arc(W/2, selectedY, 7, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,.6)'; ctx.lineWidth=2; ctx.stroke();
+
+    ctx.fillStyle='#e9f0ff'; ctx.font='bold 14px ui-sans-serif, system-ui'; ctx.textAlign='center';
+    ctx.fillText('Atomic', 62, 26); ctx.fillText('Molecular orbitals', W/2, 26); ctx.fillText('Atomic', W-62, 26);
+    ctx.font='12px ui-sans-serif, system-ui'; ctx.fillStyle='rgba(233,240,255,.70)';
+    const aoLabel = last.s.kind==='s'?'1s':(last.s.kind==='px'?'2pσ':'2pπ');
+    ctx.fillText(aoLabel, 62, yAO-9); ctx.fillText(aoLabel, W-62, yAO-9);
+    ctx.fillStyle='rgba(105,240,174,.95)'; ctx.fillText('bonding', W/2, yBond+22);
+    ctx.fillStyle='rgba(255,107,157,.95)'; ctx.fillText('antibonding', W/2, yAnti-12);
+
+    ctx.save(); ctx.translate(16,H/2); ctx.rotate(-Math.PI/2); ctx.fillStyle='rgba(233,240,255,.55)'; ctx.font='12px ui-sans-serif, system-ui'; ctx.textAlign='center'; ctx.fillText('energy increases upward',0,0); ctx.restore();
+    ctx.fillStyle='rgba(233,240,255,.75)'; ctx.textAlign='left';
+    ctx.fillText(`splitting ∝ overlap |S| = ${Math.abs(last.S).toFixed(2)}`, 26, H-18);
+  }
+
+  function updateText(){
+    const s = last.s;
+    const Sabs = Math.abs(last.S);
+    $('Sstat').textContent = Sabs.toFixed(2);
+    $('BOstat').textContent = s.mo === 'bonding' ? '+1' : '0 or −';
+    const nodeBetween = hasInternuclearNode();
+    $('Nstat').textContent = nodeBetween ? 'Yes' : 'No';
+    $('Estat').textContent = s.mo === 'bonding' ? 'Lower' : 'Higher';
+
+    const typeText = s.kind === 's' ? 'two 1s orbitals' : (s.kind === 'px' ? 'two p orbitals pointing along the bond axis' : 'two p orbitals overlapping side-on');
+    const moName = s.kind === 'py' ? 'π' : 'σ';
+    const bondText = s.mo === 'bonding'
+      ? `The selected ${moName} bonding orbital is formed by constructive overlap of ${typeText}. Electron density increases between the nuclei, which helps hold the atoms together.`
+      : `The selected ${moName} antibonding orbital has destructive overlap. A node appears in an important bonding region, density between the nuclei is reduced, and the orbital is raised in energy.`;
+    const Rtext = s.R < 1.15 ? 'At very small R, nuclear repulsion would become important in a real molecule.' : (s.R > 3.8 ? 'At large R, overlap becomes small, so bonding and antibonding levels become nearly degenerate.' : 'At this separation, overlap is visible, so the energy splitting is appreciable.');
+    $('explainBox').innerHTML = `${bondText}<br><br>${Rtext}`;
+
+    let sign = signForB(s.kind, s.mo) > 0 ? '+' : '−';
+    const aoSym = s.kind==='s'?'1s':(s.kind==='px'?'2p<sub>σ</sub>':'2p<sub>π</sub>');
+    $('equationBox').innerHTML = `ψ<sub>MO</sub> = c<sub>A</sub> φ<sub>A</sub> ${sign} c<sub>B</sub> φ<sub>B</sub><br><span style="color:#9fb0d0">current basis: ${aoSym}; normalized after mixing</span>`;
+  }
+
+  function hasInternuclearNode(){
+    const s = last.s;
+    if(s.kind === 'py') return true; // π orbitals have the bond axis as a node
+    if(s.kind === 's' && s.mo === 'antibonding') return true;
+    if(s.kind === 'px' && s.mo === 'antibonding') return true;
+    return false;
+  }
+
+  function updateReadouts(){
+    $('Rval').textContent = (+controls.R.value).toFixed(2) + ' a₀';
+    $('sizeVal').textContent = (+controls.size.value).toFixed(2);
+    $('polVal').textContent = (+controls.polarity.value).toFixed(2);
+    $('zoomVal').textContent = (+controls.zoom.value).toFixed(1);
+  }
+
+  function redrawAll(){
+    if(dirty) recompute();
+    drawMain(); drawSlice(); drawEnergy();
+  }
+
+  function animate(){
+    t += 1;
+    if(dirty) recompute();
+    drawMain();
+    if(t % 7 === 0) { drawSlice(); drawEnergy(); }
+    requestAnimationFrame(animate);
+  }
+
+  Object.values(controls).forEach(el => {
+    const evt = el.type === 'checkbox' ? 'change' : 'input';
+    el.addEventListener(evt, () => { dirty = true; redrawAll(); });
+  });
+
+  $('resetBtn').addEventListener('click', () => {
+    controls.orbitalType.value = 's';
+    controls.moType.value = 'bonding';
+    controls.plotMode.value = 'phase';
+    controls.R.value = 2.0;
+    controls.size.value = .95;
+    controls.polarity.value = 0;
+    controls.zoom.value = 6.3;
+    controls.aoShadows.checked = true;
+    controls.nodes.checked = true;
+    controls.electronDots.checked = true;
+    dirty = true; redrawAll();
+  });
+
+  $('challengeBtn').addEventListener('click', () => {
+    const kinds = ['s','px','py'];
+    const mos = ['bonding','antibonding'];
+    const modes = ['phase','density','diff'];
+    controls.orbitalType.value = kinds[(Math.random()*kinds.length)|0];
+    controls.moType.value = mos[(Math.random()*mos.length)|0];
+    controls.plotMode.value = modes[(Math.random()*modes.length)|0];
+    controls.R.value = (0.95 + Math.random()*3.7).toFixed(2);
+    controls.size.value = (0.65 + Math.random()*0.75).toFixed(2);
+    controls.polarity.value = ((Math.random()-.5)*0.75).toFixed(2);
+    dirty = true; redrawAll();
+  });
+
+  $('showAnswer').addEventListener('click', () => {
+    $('quizBox').classList.toggle('show');
+    $('showAnswer').textContent = $('quizBox').classList.contains('show') ? 'Hide answer' : 'Show answer';
+  });
+
+  // Resize backing store crisply while preserving CSS layout.
+  function fitCanvas(canvas, cssHeight){
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const rect = canvas.getBoundingClientRect();
+    const w = Math.max(320, Math.floor(rect.width*dpr));
+    const h = Math.max(180, Math.floor(rect.height*dpr));
+    if(canvas.width !== w || canvas.height !== h){ canvas.width = w; canvas.height = h; dirty = true; }
+  }
+  function fitAll(){
+    fitCanvas(moCanvas); fitCanvas(sliceCanvas); fitCanvas(energyCanvas); redrawAll();
+  }
+  window.addEventListener('resize', fitAll);
+
+  // First paint
+  setTimeout(() => { fitAll(); animate(); }, 40);
+})();
+</script>
+</body>
+</html>

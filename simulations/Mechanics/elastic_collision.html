@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elastic Collision</title>
+  <style>
+    :root{
+      --bg1:#07111f; --bg2:#10213b; --panel:rgba(15,23,42,.95);
+      --line:rgba(148,163,184,.22); --text:#e5eefc; --muted:#9fb3d9;
+      --blue:#60a5fa; --green:#34d399; --amber:#fbbf24; --rose:#fb7185;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; min-height:100vh; font-family:"Segoe UI",Arial,sans-serif; color:var(--text);
+      background:radial-gradient(circle at 18% 12%, rgba(96,165,250,.16), transparent 28rem),
+                 radial-gradient(circle at 86% 82%, rgba(52,211,153,.10), transparent 28rem),
+                 linear-gradient(135deg,var(--bg1),var(--bg2));
+    }
+    .wrap{max-width:1220px;margin:22px auto;padding:0 16px 30px}
+    .hero,.card{background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:0 14px 34px rgba(0,0,0,.28)}
+    .hero{padding:22px 24px;margin-bottom:18px}
+    h1{margin:0 0 10px;color:#dbeafe;font-size:clamp(1.8rem,3vw,2.5rem);letter-spacing:-.03em}
+    .subtitle,.note{margin:0;color:var(--muted);line-height:1.65}
+    .grid{display:grid;grid-template-columns:350px minmax(0,1fr);gap:18px;align-items:start}
+    .card{padding:18px}
+    h2{margin:0 0 12px;color:#bfdbfe;font-size:1.18rem}
+    h3{margin:18px 0 8px;color:#dbeafe;font-size:1rem}
+    .control{margin:14px 0 17px}
+    label{display:flex;justify-content:space-between;gap:12px;font-weight:650;margin-bottom:7px;color:#dce8ff;line-height:1.35}
+    .value{color:#86efac;font-variant-numeric:tabular-nums;white-space:nowrap}
+    input[type=range],select{width:100%;accent-color:var(--blue)}
+    select{padding:9px 10px;border-radius:10px;border:1px solid rgba(148,163,184,.30);background:#0f172a;color:#e2e8f0}
+    .row{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 4px}
+    button{padding:10px 14px;border:none;border-radius:10px;cursor:pointer;font-weight:750;background:var(--blue);color:#06111f}
+    button.secondary{background:#334155;color:#e2e8f0}
+    button.preset{background:#1e293b;color:#e2e8f0;border:1px solid rgba(148,163,184,.24);padding:8px 10px;font-size:.88rem}
+    #canvasWrap{width:100%;height:440px;border-radius:16px;overflow:hidden;border:1px solid rgba(148,163,184,.18);
+      background:radial-gradient(circle at center, rgba(30,41,59,.55), rgba(2,6,23,.92)),#020617;position:relative}
+    canvas{width:100%;height:100%;display:block}
+    .status{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}
+    .pill{background:rgba(30,41,59,.88);border:1px solid rgba(148,163,184,.16);border-radius:13px;padding:10px;text-align:center}
+    .pill b{display:block;color:#f8fafc;margin-bottom:4px;font-size:.96rem;font-variant-numeric:tabular-nums}
+    .pill span{color:var(--muted);font-size:.82rem;line-height:1.25}
+    .formula{color:#fef3c7;font-weight:700;line-height:1.65;margin:0}
+    .small{font-size:.88rem;color:var(--muted);line-height:1.55}
+    .legend{display:grid;gap:8px;margin-top:15px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:.92rem}
+    .sw{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:8px;vertical-align:middle}
+    table{width:100%;border-collapse:collapse;margin-top:12px;color:#dbeafe;font-size:.92rem}
+    th,td{padding:8px;border-bottom:1px solid rgba(148,163,184,.16);text-align:right;font-variant-numeric:tabular-nums}
+    th:first-child,td:first-child{text-align:left}
+    th{color:#93c5fd;font-weight:750}
+    .warn{padding:10px 12px;border-radius:12px;background:rgba(251,191,36,.10);border-left:5px solid var(--amber);color:#fde68a;line-height:1.5;margin-top:14px;font-size:.92rem}
+    @media(max-width:900px){.grid{grid-template-columns:1fr}#canvasWrap{height:370px}.status{grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back-link" href="../../index.html" style="display:inline-block;margin-bottom:14px;color:#bfdbfe;text-decoration:none;font-weight:700">&larr; Back to Interactive Learning Lab</a>
+  <section class="hero">
+    <h1> Elastic Collision </h1>
+    <p class="subtitle">
+      Learning objectives: <p>1. Conservation of Momentum </p>
+	  <p>2. Inertia: increase the mass of the ball to see how it resists motion. </p>
+    </p>
+  </section>
+
+  <div class="grid">
+    <aside class="card">
+      <h2>Controls</h2>
+
+      <div class="control">
+        <label><span>Mass of A, m<sub>A</sub></span><span class="value" id="mAVal">1.00 kg</span></label>
+        <input id="mA" type="range" min="10" max="500" step="5" value="100">
+      </div>
+
+      <div class="control">
+        <label><span>Mass of B, m<sub>B</sub></span><span class="value" id="mBVal">1.00 kg</span></label>
+        <input id="mB" type="range" min="10" max="500" step="5" value="100">
+      </div>
+
+      <div class="control">
+        <label><span>Initial velocity of A, u<sub>A</sub></span><span class="value" id="uAVal">1.00 m/s</span></label>
+        <input id="uA" type="range" min="-1000" max="1000" step="10" value="100">
+      </div>
+
+      <div class="control">
+        <label><span>Initial velocity of B, u<sub>B</sub></span><span class="value" id="uBVal">-1.00 m/s</span></label>
+        <input id="uB" type="range" min="-1000" max="1000" step="10" value="-100">
+      </div>
+
+      <div class="control">
+        <label><span>Animation speed</span><span class="value" id="speedVal">1.00×</span></label>
+        <input id="speed" type="range" min="20" max="220" step="5" value="100">
+      </div>
+
+      <div class="control">
+        <label><span>Trail length</span><span class="value" id="trailVal">45</span></label>
+        <input id="trail" type="range" min="0" max="140" step="5" value="45">
+      </div>
+
+      <div class="row">
+        <button id="playPause">Pause</button>
+        <button class="secondary" id="resetBtn">Reset motion</button>
+      </div>
+
+      <h3>Presets</h3>
+      <div class="row">
+        <button class="preset" id="presetOriginal">Original</button>
+        <button class="preset" id="presetEqualOpposite">Equal opposite</button>
+        <button class="preset" id="presetHeavyA">Heavy A</button>
+        <button class="preset" id="presetChase">A catches B</button>
+      </div>
+
+      <div class="legend">
+        <div><span class="sw" style="background:#60a5fa"></span>Ball A</div>
+        <div><span class="sw" style="background:#fb7185"></span>Ball B</div>
+        <div><span class="sw" style="background:#34d399"></span>velocity arrows</div>
+      </div>
+
+      <div class="warn">
+        The starting positions are symmetric about the center. The balls collide only when their chosen velocities make them approach each other, or when the rear ball catches the front ball. For large velocities, reduce animation speed if the collision happens too quickly.
+      </div>
+    </aside>
+
+    <main>
+      <section class="card">
+        <h2>Collision animation</h2>
+        <div id="canvasWrap">
+          <canvas id="canvas" width="840" height="440"></canvas>
+        </div>
+
+        <div class="status">
+          <div class="pill"><b id="timeLabel">t = 0.00 s</b><span>time</span></div>
+          <div class="pill"><b id="stageLabel">before collision</b><span>stage</span></div>
+          <div class="pill"><b id="vALabel">vA = 1.00 m/s</b><span>velocity of A</span></div>
+          <div class="pill"><b id="vBLabel">vB = -1.00 m/s</b><span>velocity of B</span></div>
+        </div>
+      </section>
+
+      <section class="card" style="margin-top:18px;">
+        <h2>Elastic-collision calculation</h2>
+        <p class="formula">
+          v'_A = [(m_A-m_B)u_A + 2m_Bu_B]/(m_A+m_B), &nbsp;
+          v'_B = [2m_Au_A + (m_B-m_A)u_B]/(m_A+m_B)
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Quantity</th>
+              <th>Before</th>
+              <th>After</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Velocity of A</td><td id="tableUA">1.000 m/s</td><td id="tableVA">-1.000 m/s</td></tr>
+            <tr><td>Velocity of B</td><td id="tableUB">-1.000 m/s</td><td id="tableVB">1.000 m/s</td></tr>
+            <tr><td>Total momentum</td><td id="tablePBefore">0.000 kg m/s</td><td id="tablePAfter">0.000 kg m/s</td></tr>
+            <tr><td>Total kinetic energy</td><td id="tableKBefore">1.000 J</td><td id="tableKAfter">1.000 J</td></tr>
+          </tbody>
+        </table>
+
+        <p class="small">
+          Momentum and kinetic energy are conserved because the collision is perfectly elastic.
+        </p>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const canvas = $("canvas");
+const ctx = canvas.getContext("2d");
+const W = canvas.width, H = canvas.height;
+
+const ui = {
+  mA:$("mA"), mB:$("mB"), uA:$("uA"), uB:$("uB"), speed:$("speed"), trail:$("trail"),
+  playPause:$("playPause"), resetBtn:$("resetBtn"),
+  presetOriginal:$("presetOriginal"), presetEqualOpposite:$("presetEqualOpposite"),
+  presetHeavyA:$("presetHeavyA"), presetChase:$("presetChase")
+};
+
+let running = true, t = 0, last = null, collisionTime = Infinity;
+let xA0 = 3.0, xB0 = 7.0;
+let trailA = [], trailB = [];
+
+const xMin = 0, xMax = 10, groundY = 270;
+
+function mA(){ return Number(ui.mA.value)/100; }
+function mB(){ return Number(ui.mB.value)/100; }
+function uA(){ return Number(ui.uA.value)/100; }
+function uB(){ return Number(ui.uB.value)/100; }
+
+function radiusFromMass(m){ return 0.20 + 0.125*Math.sqrt(m); }
+function radiusA(){ return radiusFromMass(mA()); }
+function radiusB(){ return radiusFromMass(mB()); }
+
+function pxPerM(){ return (W - 110)/(xMax - xMin); }
+function xToPx(x){ return 55 + (x-xMin)*pxPerM(); }
+
+function afterVelocities(){
+  const ma=mA(), mb=mB(), ua=uA(), ub=uB();
+  return {
+    va: ((ma-mb)*ua + 2*mb*ub)/(ma+mb),
+    vb: (2*ma*ua + (mb-ma)*ub)/(ma+mb)
+  };
+}
+
+function computeCollisionTime(){
+  const rsum = radiusA()+radiusB();
+  const distanceGap = Math.abs(xB0-xA0) - rsum;
+  const relativeClosingSpeed = (uA()-uB()); // A is initially left of B.
+  if(relativeClosingSpeed <= 0 || distanceGap <= 0) return Infinity;
+  return distanceGap / relativeClosingSpeed;
+}
+
+function resetMotion(){
+  t=0; last=null; trailA=[]; trailB=[];
+  xA0 = 3.0; xB0 = 7.0; // symmetric about center x = 5
+  collisionTime = computeCollisionTime();
+  updateTable();
+}
+
+function state(){
+  const av = afterVelocities();
+  if(t < collisionTime){
+    return {xA:xA0+uA()*t, xB:xB0+uB()*t, vA:uA(), vB:uB(), stage:isFinite(collisionTime)?"before collision":"no collision"};
+  }
+  const xAc = xA0 + uA()*collisionTime;
+  const xBc = xB0 + uB()*collisionTime;
+  const dt = t - collisionTime;
+  return {xA:xAc+av.va*dt, xB:xBc+av.vb*dt, vA:av.va, vB:av.vb, stage:"after collision"};
+}
+
+function updateLabels(){
+  $("mAVal").textContent = mA().toFixed(2)+" kg";
+  $("mBVal").textContent = mB().toFixed(2)+" kg";
+  $("uAVal").textContent = uA().toFixed(2)+" m/s";
+  $("uBVal").textContent = uB().toFixed(2)+" m/s";
+  $("speedVal").textContent = (Number(ui.speed.value)/100).toFixed(2)+"×";
+  $("trailVal").textContent = ui.trail.value;
+}
+
+function updateTable(){
+  const ma=mA(), mb=mB(), ua=uA(), ub=uB(), av=afterVelocities();
+  const pBefore = ma*ua + mb*ub;
+  const pAfter = ma*av.va + mb*av.vb;
+  const kBefore = 0.5*ma*ua*ua + 0.5*mb*ub*ub;
+  const kAfter = 0.5*ma*av.va*av.va + 0.5*mb*av.vb*av.vb;
+
+  $("tableUA").textContent = ua.toFixed(3)+" m/s";
+  $("tableUB").textContent = ub.toFixed(3)+" m/s";
+  $("tableVA").textContent = av.va.toFixed(3)+" m/s";
+  $("tableVB").textContent = av.vb.toFixed(3)+" m/s";
+  $("tablePBefore").textContent = pBefore.toFixed(3)+" kg m/s";
+  $("tablePAfter").textContent = pAfter.toFixed(3)+" kg m/s";
+  $("tableKBefore").textContent = kBefore.toFixed(3)+" J";
+  $("tableKAfter").textContent = kAfter.toFixed(3)+" J";
+}
+
+function drawBackground(){
+  const bg=ctx.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,"#020617"); bg.addColorStop(.6,"#0f172a"); bg.addColorStop(1,"#020617");
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+  ctx.save();
+  ctx.strokeStyle="rgba(148,163,184,.16)"; ctx.lineWidth=1;
+  for(let x=0;x<=10;x++){
+    const px=xToPx(x);
+    ctx.beginPath(); ctx.moveTo(px,70); ctx.lineTo(px,groundY+60); ctx.stroke();
+    ctx.fillStyle="rgba(203,213,225,.55)"; ctx.font="12px Segoe UI";
+    ctx.fillText(x+" m",px-10,groundY+82);
+  }
+
+  ctx.strokeStyle="rgba(226,232,240,.42)"; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(xToPx(0),groundY); ctx.lineTo(xToPx(10),groundY); ctx.stroke();
+
+  ctx.strokeStyle="rgba(251,191,36,.45)"; ctx.setLineDash([6,6]); ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(xToPx(5),70); ctx.lineTo(xToPx(5),groundY+55); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle="rgba(251,191,36,.86)"; ctx.font="12px Segoe UI"; ctx.fillText("center",xToPx(5)+8,86);
+
+  ctx.restore();
+}
+
+function drawArrow(x,y,v,color){
+  if(Math.abs(v)<0.02) return;
+  const len=60*Math.min(1.6,Math.abs(v));
+  const dir=Math.sign(v), x2=x+dir*len;
+  ctx.save(); ctx.strokeStyle=color; ctx.fillStyle=color; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x2,y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x2,y); ctx.lineTo(x2-dir*10,y-6); ctx.lineTo(x2-dir*10,y+6); ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+
+function drawTrail(trail,color){
+  ctx.save();
+  for(let i=0;i<trail.length;i++){
+    const a=(i+1)/trail.length;
+    ctx.fillStyle=color.replace("ALPHA",(0.05+0.20*a).toFixed(3));
+    ctx.beginPath(); ctx.arc(xToPx(trail[i].x), groundY-trail[i].r*pxPerM(), 3+3*a, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawBall(x,r,color,label,mass,vel){
+  const px=xToPx(x), rp=r*pxPerM(), py=groundY-rp;
+  ctx.save();
+  const grad=ctx.createRadialGradient(px-rp*.35,py-rp*.35,rp*.1,px,py,rp);
+  grad.addColorStop(0,"rgba(255,255,255,.95)"); grad.addColorStop(.2,color.light); grad.addColorStop(1,color.dark);
+  ctx.fillStyle=grad; ctx.beginPath(); ctx.arc(px,py,rp,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle="rgba(255,255,255,.55)"; ctx.lineWidth=2; ctx.stroke();
+  ctx.fillStyle="#020617"; ctx.font="bold 20px Segoe UI"; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(label,px,py);
+  ctx.fillStyle="rgba(226,232,240,.92)"; ctx.font="13px Segoe UI";
+  ctx.fillText(mass.toFixed(2)+" kg",px,py+rp+18);
+  ctx.fillText("v = "+vel.toFixed(2)+" m/s",px,py-rp-16);
+  drawArrow(px,py-rp-37,vel,"rgba(52,211,153,.95)");
+  ctx.restore();
+}
+
+function drawFlash(s){
+  if(!isFinite(collisionTime) || Math.abs(t-collisionTime)>0.14) return;
+  const px=xToPx(0.5*(s.xA+s.xB));
+  const alpha=1-Math.abs(t-collisionTime)/0.14;
+  ctx.save(); ctx.strokeStyle="rgba(251,191,36,"+(0.8*alpha).toFixed(3)+")"; ctx.lineWidth=3;
+  for(let i=0;i<10;i++){
+    const ang=i*Math.PI*2/10, r1=12, r2=38*alpha;
+    ctx.beginPath();
+    ctx.moveTo(px+r1*Math.cos(ang), groundY-50+r1*Math.sin(ang));
+    ctx.lineTo(px+r2*Math.cos(ang), groundY-50+r2*Math.sin(ang));
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function roundRect(x,y,w,h,r){
+  ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+}
+
+function drawInfo(){
+  const av=afterVelocities();
+  ctx.save();
+  ctx.fillStyle="rgba(15,23,42,.84)"; roundRect(24,22,455,105,14); ctx.fill();
+  ctx.fillStyle="rgba(226,232,240,.95)"; ctx.font="bold 15px Segoe UI";
+  ctx.fillText("Perfectly elastic 1D collision",44,50);
+  ctx.font="13px Segoe UI"; ctx.fillStyle="rgba(203,213,225,.88)";
+  ctx.fillText("Initial positions: A at 3 m, B at 7 m, symmetric about center x = 5 m",44,74);
+  ctx.fillText("After: vA' = "+av.va.toFixed(3)+" m/s,  vB' = "+av.vb.toFixed(3)+" m/s",44,98);
+  if(!isFinite(collisionTime)) ctx.fillText("Chosen velocities do not make the balls collide.",44,120);
+  ctx.restore();
+}
+
+function draw(){
+  updateLabels(); updateTable();
+  const s=state();
+  $("timeLabel").textContent="t = "+t.toFixed(2)+" s";
+  $("stageLabel").textContent=s.stage;
+  $("vALabel").textContent="vA = "+s.vA.toFixed(2)+" m/s";
+  $("vBLabel").textContent="vB = "+s.vB.toFixed(2)+" m/s";
+
+  const maxTrail=Number(ui.trail.value);
+  if(running && maxTrail>0){
+    trailA.push({x:s.xA,r:radiusA()}); trailB.push({x:s.xB,r:radiusB()});
+    while(trailA.length>maxTrail) trailA.shift();
+    while(trailB.length>maxTrail) trailB.shift();
+  }
+
+  drawBackground();
+  drawTrail(trailA,"rgba(96,165,250,ALPHA)");
+  drawTrail(trailB,"rgba(251,113,133,ALPHA)");
+  drawFlash(s);
+  drawBall(s.xA,radiusA(),{light:"#93c5fd",dark:"#2563eb"},"A",mA(),s.vA);
+  drawBall(s.xB,radiusB(),{light:"#fda4af",dark:"#be123c"},"B",mB(),s.vB);
+  drawInfo();
+}
+
+function animate(now){
+  if(last===null) last=now;
+  const dt=Math.min(0.035,(now-last)/1000); last=now;
+  if(running){
+    t += dt*Number(ui.speed.value)/100;
+    const s=state();
+    if(s.xA<-1 || s.xA>11 || s.xB<-1 || s.xB>11 || t>20) resetMotion();
+  }
+  draw();
+  requestAnimationFrame(animate);
+}
+
+function setPreset(ma,mb,ua,ub){
+  ui.mA.value=Math.round(ma*100);
+  ui.mB.value=Math.round(mb*100);
+  ui.uA.value=Math.round(ua*100);
+  ui.uB.value=Math.round(ub*100);
+  resetMotion();
+}
+
+[ui.mA,ui.mB,ui.uA,ui.uB].forEach(el => el.addEventListener("input", resetMotion));
+[ui.speed,ui.trail].forEach(el => el.addEventListener("input", updateLabels));
+
+ui.playPause.addEventListener("click",()=>{running=!running; ui.playPause.textContent=running?"Pause":"Play";});
+ui.resetBtn.addEventListener("click", resetMotion);
+ui.presetOriginal.addEventListener("click",()=>setPreset(1,1,1,0));
+ui.presetEqualOpposite.addEventListener("click",()=>setPreset(1,1,1,-1));
+ui.presetHeavyA.addEventListener("click",()=>setPreset(3,1,1,-0.5));
+ui.presetChase.addEventListener("click",()=>setPreset(1,2,1.5,0.3));
+
+resetMotion();
+console.log("Adjustable two-ball collision simulation loaded successfully.");
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>

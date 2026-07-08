@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Hydrogen Spectral Lines: Random Photon Excitation</title>
+<style>
+:root{--panel:rgba(8,12,24,.96);--panel2:rgba(18,25,42,.92);--line:rgba(148,163,184,.22);--text:#e5eefc;--muted:#9fb3d9;--blue:#60a5fa;--green:#34d399;--amber:#fbbf24;--red:#ef4444}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:"Segoe UI",Arial,sans-serif;color:var(--text);background:#000}
+.wrap{max-width:1460px;margin:20px auto;padding:0 16px 30px}
+.hero,.card{background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:0 14px 34px rgba(0,0,0,.34)}
+.hero{padding:22px 24px;margin-bottom:18px}
+h1{margin:0 0 10px;color:#dbeafe;font-size:clamp(1.9rem,3vw,2.7rem);letter-spacing:-.03em}
+.subtitle,.small{margin:0;color:var(--muted);line-height:1.65}
+.grid{display:grid;grid-template-columns:1fr;gap:18px}.card{padding:18px}
+h2{margin:0 0 12px;color:#bfdbfe;font-size:1.18rem}
+.status{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.pill{background:var(--panel2);border:1px solid rgba(148,163,184,.16);border-radius:13px;padding:10px;text-align:center}
+.pill b{display:block;color:#f8fafc;margin-bottom:4px;font-size:.98rem;font-variant-numeric:tabular-nums}
+.pill span{color:var(--muted);font-size:.84rem;line-height:1.25}
+.mainButtons{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 14px}
+button{padding:11px 15px;border:none;border-radius:10px;cursor:pointer;font-weight:800;background:var(--blue);color:#06111f}
+button.good{background:var(--green);color:#052e1a}button.secondary{background:#334155;color:#e2e8f0}button.warn{background:var(--amber);color:#3a2500}button:disabled{opacity:.52;cursor:not-allowed}
+#canvasWrap{width:100%;height:720px;border-radius:18px;overflow:hidden;border:1px solid rgba(148,163,184,.18);background:#000;position:relative}
+canvas{width:100%;height:100%;display:block}
+.bottomPanel{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:start}.bottomPanel h2{grid-column:1/-1;margin-bottom:0}.bottomCol{display:flex;flex-direction:column;gap:12px;min-width:0}
+.box,.message{background:rgba(2,6,23,.62);border:1px solid rgba(148,163,184,.16);border-radius:14px;padding:12px}
+.message{line-height:1.55;color:#dbeafe;background:rgba(30,41,59,.82);border-left:5px solid var(--blue)}.message.good{border-left-color:var(--green)}.message.warn{border-left-color:var(--amber)}.message.bad{border-left-color:var(--red)}
+.hint{color:#fde68a;font-weight:800}.lineList{display:grid;gap:8px;margin-top:10px;max-height:245px;overflow:auto}.lineItem{background:rgba(2,6,23,.44);border:1px solid rgba(148,163,184,.12);border-radius:12px;padding:8px 10px;color:#dbeafe;font-size:.92rem}
+.legend{display:grid;gap:8px;padding-top:12px;border-top:1px solid var(--line);color:var(--muted);font-size:.92rem}.sw{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:8px;vertical-align:middle}
+@media(max-width:980px){.status{grid-template-columns:1fr 1fr}.bottomPanel{grid-template-columns:1fr}#canvasWrap{height:580px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<a class="back-link" href="../../index.html" style="display:inline-block;margin-bottom:14px;color:#bfdbfe;text-decoration:none;font-weight:700">&larr; Back to Interactive Learning Lab</a>
+<section class="hero">
+<h1>Hydrogen Spectral Lines: Random Photon Excitation</h1>
+<p class="subtitle">Photons arrive from random directions. One random collision excites the electron to a higher Bohr orbit. The electron rotates about 1–2 times in that excited orbit and then falls to a lower orbit, emitting one horizontal photon. The photon passes through the grating and forms a spectral line. Orbit radii use the proportions r₁=r₀, r₂=1.5r₀, r₃=2.5r₀, r₄=4r₀, r₅=6r₀, r₆=8.5r₀.</p>
+</section>
+<div class="grid">
+<main>
+<section class="card">
+<h2>Atom, incoming photons, horizontal emission, grating and spectrum</h2>
+<div class="status">
+<div class="pill"><b id="statusLabel">ground state</b><span>state</span></div>
+<div class="pill"><b id="orbitLabel">n = 1</b><span>current electron orbit</span></div>
+<div class="pill"><b id="wavelengthLabel">—</b><span>wavelength</span></div>
+<div class="pill"><b id="seriesLabel">—</b><span>series / region</span></div>
+</div>
+<div class="mainButtons">
+<button class="good" id="kickBtn">Start random photons</button>
+<button class="secondary" id="replayBtn">Replay last photon</button>
+<button class="warn" id="clearSpectrumBtn">Clear spectrum</button>
+<button class="secondary" id="resetBtn">Reset to ground</button>
+</div>
+<div id="canvasWrap"><canvas id="canvas" width="1240" height="720"></canvas></div>
+</section>
+</main>
+<aside class="card bottomPanel">
+<h2>Information</h2>
+<div class="bottomCol">
+<div class="message" id="message">The electron is rotating in the ground state. Press <b>Start random photons</b>.</div>
+<div class="box"><div><span class="hint">Sequence:</span></div><div class="small" style="margin-top:8px">random incoming photons → one successful collision → excitation → 1–2 rotations → downward transition → one horizontal emitted photon → grating → spectral line.</div></div>
+</div>
+<div class="bottomCol">
+<div class="box"><div><b>Latest transition</b></div><div class="small" id="transitionText" style="margin-top:8px">No transition yet.</div></div>
+<div class="box"><div><b>Formula used</b></div><div class="small" style="margin-top:8px">Photon energy: ΔE = 13.6(1/n<sub>f</sub><sup>2</sup> − 1/n<sub>i</sub><sup>2</sup>) eV.<br>Wavelength: λ = hc/ΔE, using hc ≈ 1239.84 eV nm.<br>Display orbit radii: r₁=r₀, r₂=1.5r₀, r₃=2.5r₀, r₄=4r₀, r₅=6r₀, r₆=8.5r₀, with r₀=25 px.</div></div>
+</div>
+<div class="bottomCol">
+<div class="box"><div><b>Spectral lines recorded</b></div><div id="lineList" class="lineList"></div></div>
+<div class="legend">
+<div><span class="sw" style="background:#93c5fd"></span>electron rotates continuously in its current orbit</div>
+<div><span class="sw" style="background:#fbbf24"></span>incoming photons arrive from random directions</div>
+<div><span class="sw" style="background:#ffffff"></span>emitted photon travels horizontally to the grating, then lands on its wavelength line</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+
+<script>
+const canvas=document.getElementById("canvas"),ctx=canvas.getContext("2d"),W=canvas.width,H=canvas.height;
+function $(id){return document.getElementById(id)}
+const atom={cx:250,cy:360,r0:25,maxN:6};
+const orbitScale=[1,1.5,2.5,4.0,6.0,8.5];
+function shellRadius(n){return atom.r0*orbitScale[n-1]}
+const grating={x:760,y:210,w:26,h:310},spectrum={x:900,y:145,w:270,h:430};
+let currentOrbit=1,electronAngle=-Math.PI/2,electronRCurrent=shellRadius(1);
+let phase="idle",phaseT=0,currentOrbitBeforeKick=1,excitedOrbit=null,finalOrbit=null;
+let excitedRotationsNeeded=1.2,excitedRotationCounter=0,currentTransition=null,lastTransition=null;
+let spectralLines=[],incomingPhotons=[],impactPhotonIndex=-1,impactPoint={x:0,y:0},hasRecordedCurrentLine=false;
+
+function setMessage(html,type="normal"){const el=$("message");el.className="message";if(type==="good")el.classList.add("good");if(type==="warn")el.classList.add("warn");if(type==="bad")el.classList.add("bad");el.innerHTML=html}
+function setButtons(enabled){$("kickBtn").disabled=!enabled}
+function randomInt(min,max){return min+Math.floor(Math.random()*(max-min+1))}
+function electronPosition(){return{x:atom.cx+electronRCurrent*Math.cos(electronAngle),y:atom.cy+electronRCurrent*Math.sin(electronAngle)}}
+function randomPointOutsideCanvas(){const s=randomInt(0,3),m=80;if(s===0)return{x:-m,y:Math.random()*H};if(s===1)return{x:W+m,y:Math.random()*H};if(s===2)return{x:Math.random()*W,y:-m};return{x:Math.random()*W,y:H+m}}
+
+function visibleColorForWavelength(wl){
+let r=0,g=0,b=0;
+if(wl>=380&&wl<440){r=-(wl-440)/(440-380);g=0;b=1}
+else if(wl<490){r=0;g=(wl-440)/(490-440);b=1}
+else if(wl<510){r=0;g=1;b=-(wl-510)/(510-490)}
+else if(wl<580){r=(wl-510)/(580-510);g=1;b=0}
+else if(wl<645){r=1;g=-(wl-645)/(645-580);b=0}
+else if(wl<=780){r=1;g=0;b=0}
+else if(wl<380){r=.65;g=.15;b=.85}
+else{r=.9;g=.15;b=.05}
+let f=1;if(wl>=380&&wl<420)f=.3+.7*(wl-380)/(420-380);else if(wl>700&&wl<=780)f=.3+.7*(780-wl)/(780-700);
+const c=x=>Math.max(0,Math.min(255,Math.round(255*x*f)));return`rgb(${c(r)}, ${c(g)}, ${c(b)})`
+}
+function lambdaPosition(lambdaNm){
+const a=90,b=8000,t=(Math.log(lambdaNm)-Math.log(a))/(Math.log(b)-Math.log(a));
+return spectrum.y+Math.max(0,Math.min(1,t))*spectrum.h
+}
+function spectralRegion(lambdaNm){if(lambdaNm<380)return"Ultraviolet";if(lambdaNm<=750)return"Visible";return"Infrared"}
+function seriesName(nLow){if(nLow===1)return"Lyman";if(nLow===2)return"Balmer";if(nLow===3)return"Paschen";if(nLow===4)return"Brackett";if(nLow===5)return"Pfund";return"Humphreys-like"}
+function transitionData(nHigh,nLow){
+const deltaE=13.6*(1/(nLow*nLow)-1/(nHigh*nHigh)),lambda=1239.841984/deltaE;
+return{nHigh,nLow,deltaE,lambda,color:visibleColorForWavelength(lambda),region:spectralRegion(lambda),series:seriesName(nLow),px:spectrum.x+spectrum.w/2,py:lambdaPosition(lambda)}
+}
+function updateStatus(){ $("orbitLabel").textContent=`n = ${currentOrbit}`; if(!currentTransition&&!lastTransition){$("wavelengthLabel").textContent="—";$("seriesLabel").textContent="—";return} const t=currentTransition||lastTransition;$("wavelengthLabel").textContent=`${t.lambda.toFixed(1)} nm`;$("seriesLabel").textContent=`${t.series} · ${t.region}`}
+
+function startRandomPhotons(){
+if(phase!=="idle"&&phase!=="done")return;
+if(currentOrbit>=atom.maxN){currentOrbit=1;electronRCurrent=shellRadius(1)}
+const ep=electronPosition();impactPoint={x:ep.x,y:ep.y};incomingPhotons=[];impactPhotonIndex=randomInt(0,5);
+for(let i=0;i<6;i++){
+const start=randomPointOutsideCanvas();
+const target=i===impactPhotonIndex?{...impactPoint}:{x:atom.cx+(Math.random()-.5)*280,y:atom.cy+(Math.random()-.5)*280};
+incomingPhotons.push({start,target,delay:i*.10+Math.random()*.12,duration:1.15+Math.random()*.35,hit:i===impactPhotonIndex})
+}
+currentOrbitBeforeKick=currentOrbit;excitedOrbit=randomInt(currentOrbit+1,atom.maxN);finalOrbit=randomInt(1,excitedOrbit-1);
+currentTransition=transitionData(excitedOrbit,finalOrbit);lastTransition=currentTransition;hasRecordedCurrentLine=false;
+excitedRotationsNeeded=1+Math.random();excitedRotationCounter=0;phase="incoming";phaseT=0;
+$("statusLabel").textContent="random photons";setButtons(false);
+$("transitionText").innerHTML=`Incoming photons are striking the atom.<br>Successful excitation: <b>n=${currentOrbitBeforeKick} → n=${excitedOrbit}</b>.<br>Emission: <b>n=${excitedOrbit} → n=${finalOrbit}</b><br>Expected wavelength = <b>${currentTransition.lambda.toFixed(1)} nm</b>`;
+setMessage(`Photons are arriving from random directions. One random collision will kick the electron from <b>n=${currentOrbitBeforeKick}</b> to <b>n=${excitedOrbit}</b>.`,"good");updateStatus()
+}
+function replayLast(){if(!lastTransition){setMessage("No previous photon to replay yet.","warn");return}currentTransition=lastTransition;phase="photonToGrating";phaseT=0;hasRecordedCurrentLine=true;$("statusLabel").textContent="replaying photon";setButtons(false)}
+function resetToGround(){currentOrbit=1;electronRCurrent=shellRadius(1);phase="idle";phaseT=0;currentTransition=null;incomingPhotons=[];excitedOrbit=null;finalOrbit=null;$("statusLabel").textContent="ground state";$("transitionText").textContent="No transition yet.";setButtons(true);setMessage("The electron is rotating in the ground state. Press <b>Start random photons</b>.","normal");updateStatus()}
+function clearSpectrum(){spectralLines=[];renderLineList()}
+function addCurrentLineToSpectrum(){if(!currentTransition||hasRecordedCurrentLine)return;spectralLines.push({...currentTransition});hasRecordedCurrentLine=true;renderLineList()}
+function renderLineList(){const box=$("lineList");box.innerHTML="";if(spectralLines.length===0){box.innerHTML='<div class="lineItem">No spectral lines recorded yet.</div>';return}spectralLines.slice().reverse().forEach(line=>{const item=document.createElement("div");item.className="lineItem";item.innerHTML=`<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${line.color};margin-right:8px;vertical-align:middle;border:1px solid rgba(255,255,255,.25)"></span><b>n=${line.nHigh} → n=${line.nLow}</b> · ${line.lambda.toFixed(1)} nm · ${line.series} · ${line.region}`;box.appendChild(item)})}
+
+function drawBackground(){ctx.fillStyle="#000";ctx.fillRect(0,0,W,H);ctx.strokeStyle="rgba(255,255,255,.08)";ctx.lineWidth=2;[560,840].forEach(x=>{ctx.beginPath();ctx.moveTo(x,54);ctx.lineTo(x,H-54);ctx.stroke()});ctx.fillStyle="rgba(235,245,255,.88)";ctx.font="bold 20px Segoe UI";ctx.fillText("Hydrogen atom",150,58);ctx.fillText("Diffraction grating",662,58);ctx.fillText("Spectrum screen",960,58)}
+function drawAtom(){
+ctx.save();ctx.translate(atom.cx,atom.cy);
+const ng=ctx.createRadialGradient(0,0,0,0,0,28);ng.addColorStop(0,"rgba(251,191,36,1)");ng.addColorStop(1,"rgba(251,191,36,0)");ctx.fillStyle=ng;ctx.beginPath();ctx.arc(0,0,34,0,Math.PI*2);ctx.fill();
+ctx.fillStyle="#fbbf24";ctx.beginPath();ctx.arc(0,0,11,0,Math.PI*2);ctx.fill();ctx.fillStyle="#111827";ctx.font="bold 12px Segoe UI";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("p+",0,0);
+for(let n=1;n<=atom.maxN;n++){const r=shellRadius(n),active=n===currentOrbit||n===excitedOrbit||n===finalOrbit;ctx.strokeStyle=active?"rgba(96,165,250,.62)":"rgba(148,163,184,.20)";ctx.lineWidth=active?3:1.4;ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.stroke();ctx.fillStyle=active?"rgba(219,234,254,.95)":"rgba(203,213,225,.55)";ctx.font=active?"bold 12px Segoe UI":"12px Segoe UI";ctx.fillText(`n=${n}`,r+18,0)}
+if(phase==="decay"&&currentTransition){const rHigh=shellRadius(currentTransition.nHigh),rLow=shellRadius(currentTransition.nLow);ctx.strokeStyle="rgba(251,191,36,.95)";ctx.lineWidth=3;ctx.setLineDash([7,6]);ctx.beginPath();ctx.moveTo(0,-rHigh);ctx.lineTo(0,-rLow);ctx.stroke();ctx.setLineDash([])}
+const ex=electronRCurrent*Math.cos(electronAngle),ey=electronRCurrent*Math.sin(electronAngle);
+const eg=ctx.createRadialGradient(ex,ey,0,ex,ey,20);eg.addColorStop(0,"rgba(255,255,255,1)");eg.addColorStop(1,"rgba(255,255,255,0)");ctx.fillStyle=eg;ctx.beginPath();ctx.arc(ex,ey,22,0,Math.PI*2);ctx.fill();ctx.fillStyle="#93c5fd";ctx.beginPath();ctx.arc(ex,ey,7,0,Math.PI*2);ctx.fill();
+ctx.restore()
+}
+function drawGrating(){ctx.save();ctx.fillStyle="rgba(30,41,59,.82)";ctx.fillRect(grating.x,grating.y,grating.w,grating.h);for(let i=0;i<18;i++){const y=grating.y+10+i*(grating.h-20)/17;ctx.fillStyle=i%2===0?"rgba(241,245,249,.92)":"rgba(15,23,42,1)";ctx.fillRect(grating.x+4,y,grating.w-8,7)}ctx.fillStyle="rgba(226,232,240,.86)";ctx.font="13px Segoe UI";ctx.fillText("grating",grating.x-7,grating.y+grating.h+23);ctx.restore()}
+function drawSpectrumPanel(){
+ctx.save();
+ctx.fillStyle="rgba(0,0,0,.98)";
+ctx.fillRect(spectrum.x,spectrum.y,spectrum.w,spectrum.h);
+
+const yUV=lambdaPosition(380),yIR=lambdaPosition(750);
+
+// Rotated spectrum: wavelength axis is vertical.
+// Shorter wavelengths are near the top, longer wavelengths near the bottom.
+let g=ctx.createLinearGradient(0,spectrum.y,0,yUV);
+g.addColorStop(0,"rgba(8,8,18,.70)");
+g.addColorStop(1,"rgba(45,32,68,.55)");
+ctx.fillStyle=g;
+ctx.fillRect(spectrum.x,spectrum.y,spectrum.w,yUV-spectrum.y);
+
+g=ctx.createLinearGradient(0,yUV,0,yIR);
+g.addColorStop(0,"rgba(68,52,90,.44)");
+g.addColorStop(.18,"rgba(45,62,110,.40)");
+g.addColorStop(.36,"rgba(38,86,105,.38)");
+g.addColorStop(.52,"rgba(35,100,72,.36)");
+g.addColorStop(.66,"rgba(110,105,42,.38)");
+g.addColorStop(.80,"rgba(125,78,35,.40)");
+g.addColorStop(1,"rgba(105,38,34,.42)");
+ctx.fillStyle=g;
+ctx.fillRect(spectrum.x,yUV,spectrum.w,yIR-yUV);
+
+g=ctx.createLinearGradient(0,yIR,0,spectrum.y+spectrum.h);
+g.addColorStop(0,"rgba(70,22,18,.46)");
+g.addColorStop(1,"rgba(18,8,8,.70)");
+ctx.fillStyle=g;
+ctx.fillRect(spectrum.x,yIR,spectrum.w,spectrum.y+spectrum.h-yIR);
+
+ctx.fillStyle="rgba(0,0,0,.45)";
+ctx.fillRect(spectrum.x,spectrum.y,spectrum.w,spectrum.h);
+
+ctx.strokeStyle="rgba(226,232,240,.22)";
+ctx.lineWidth=2;
+ctx.strokeRect(spectrum.x,spectrum.y,spectrum.w,spectrum.h);
+
+ctx.fillStyle="rgba(226,232,240,.80)";
+ctx.font="bold 13px Segoe UI";
+ctx.fillText("UV",spectrum.x+spectrum.w+8,spectrum.y+12);
+ctx.fillText("Visible",spectrum.x+spectrum.w+8,yUV+14);
+ctx.fillText("IR",spectrum.x+spectrum.w+8,spectrum.y+spectrum.h-8);
+
+[100,200,400,700,1000,2000,5000].forEach(nm=>{
+const y=lambdaPosition(nm);
+ctx.strokeStyle="rgba(255,255,255,.12)";
+ctx.beginPath();
+ctx.moveTo(spectrum.x-8,y);
+ctx.lineTo(spectrum.x,y);
+ctx.stroke();
+ctx.fillStyle="rgba(203,213,225,.66)";
+ctx.font="10px Segoe UI";
+ctx.fillText(String(nm),spectrum.x-42,y+3)
+});
+
+ctx.save();
+ctx.translate(spectrum.x-58,spectrum.y+spectrum.h/2);
+ctx.rotate(-Math.PI/2);
+ctx.fillStyle="rgba(203,213,225,.66)";
+ctx.font="11px Segoe UI";
+ctx.fillText("wavelength (nm, log scale)",-70,0);
+ctx.restore();
+
+// Spectral emission lines are horizontal and placed exactly where the photon arrives.
+spectralLines.forEach(line=>{
+ctx.strokeStyle=line.color;
+ctx.lineWidth=4;
+ctx.shadowBlur=14;
+ctx.shadowColor=line.color;
+ctx.beginPath();
+ctx.moveTo(spectrum.x+18,line.py);
+ctx.lineTo(spectrum.x+spectrum.w-18,line.py);
+ctx.stroke();
+ctx.shadowBlur=0
+});
+
+ctx.restore()
+}
+function drawWavePacket(x1,y1,x2,y2,color,alpha=1){const dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy);if(L<2)return;const ux=dx/L,uy=dy/L,nx=-uy,ny=ux;ctx.save();ctx.globalAlpha=alpha;ctx.strokeStyle=color;ctx.lineWidth=3;ctx.shadowBlur=14;ctx.shadowColor=color;ctx.beginPath();const amp=8,cycles=Math.max(2,L/26);for(let i=0;i<=90;i++){const t=i/90,s=t*L,envelope=Math.sin(Math.PI*t),off=amp*envelope*Math.sin(2*Math.PI*cycles*t),px=x1+ux*s+nx*off,py=y1+uy*s+ny*off;if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py)}ctx.stroke();ctx.restore()}
+function drawIncomingPhotons(){if(phase!=="incoming")return;incomingPhotons.forEach(p=>{const local=(phaseT-p.delay)/p.duration;if(local<0||local>1.12)return;const t=Math.max(0,Math.min(1,local)),endX=p.start.x+(p.target.x-p.start.x)*t,endY=p.start.y+(p.target.y-p.start.y)*t,color=p.hit?"rgba(255,255,255,1)":"rgba(251,191,36,.78)",alpha=p.hit?1:.45;drawWavePacket(p.start.x,p.start.y,endX,endY,color,alpha);if(p.hit&&t>.95){ctx.save();ctx.strokeStyle="rgba(255,255,255,.95)";ctx.lineWidth=2;ctx.beginPath();ctx.arc(p.target.x,p.target.y,18+8*Math.sin(phaseT*20),0,Math.PI*2);ctx.stroke();ctx.restore()}})}
+function drawPhotonPath(){
+if(!currentTransition)return;
+
+// emitted light is horizontal from atom to grating
+const origin={x:atom.cx+shellRadius(currentOrbit)+8,y:atom.cy};
+const gate={x:grating.x,y:atom.cy};
+
+// after grating, light lands exactly at the spectral-line position
+const target={x:spectrum.x+18,y:currentTransition.py};
+
+if(phase==="photonToGrating"){
+const t=Math.min(1,phaseT/.95),px=origin.x+(gate.x-origin.x)*t;
+drawWavePacket(origin.x,origin.y,px,origin.y,currentTransition.color)
+}
+
+if(phase==="diffract"){
+const t=Math.min(1,phaseT/.95),px=gate.x+(target.x-gate.x)*t,py=gate.y+(target.y-gate.y)*t;
+drawWavePacket(gate.x,gate.y,px,py,currentTransition.color);
+ctx.save();
+ctx.strokeStyle="rgba(255,255,255,.10)";
+ctx.lineWidth=1.5;
+[lambdaPosition(120),lambdaPosition(656),lambdaPosition(2500)].forEach(y2=>{
+ctx.beginPath();
+ctx.moveTo(gate.x,gate.y);
+ctx.lineTo(spectrum.x+18,y2);
+ctx.stroke()
+});
+ctx.restore()
+}
+}
+function drawLatestLineFlash(){
+if(phase!=="done"||!currentTransition)return;
+ctx.save();
+ctx.strokeStyle=currentTransition.color;
+ctx.lineWidth=6;
+ctx.shadowBlur=22;
+ctx.shadowColor=currentTransition.color;
+ctx.beginPath();
+ctx.moveTo(spectrum.x+12,currentTransition.py);
+ctx.lineTo(spectrum.x+spectrum.w-12,currentTransition.py);
+ctx.stroke();
+ctx.restore()
+}
+function drawInfoBox(){if(!currentTransition&&!lastTransition)return;const t=currentTransition||lastTransition,x=900,y=620,w=270,h=72;ctx.save();ctx.fillStyle="rgba(15,23,42,.90)";ctx.strokeStyle="rgba(148,163,184,.20)";roundRect(x,y,w,h,14);ctx.fill();ctx.stroke();ctx.fillStyle="rgba(226,232,240,.95)";ctx.font="bold 14px Segoe UI";ctx.fillText(`emission: n=${t.nHigh} → n=${t.nLow}`,x+14,y+23);ctx.fillStyle=t.color;ctx.fillRect(x+14,y+34,16,16);ctx.fillStyle="rgba(203,213,225,.88)";ctx.font="12px Segoe UI";ctx.fillText(`λ = ${t.lambda.toFixed(1)} nm`,x+40,y+47);ctx.fillText(`${t.series} · ${t.region} · ${t.deltaE.toFixed(3)} eV`,x+14,y+64);ctx.restore()}
+function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+
+function updateAnimation(dt){
+const angularSpeed=2.35;electronAngle+=dt*angularSpeed;
+if(phase==="idle"||phase==="done")return;phaseT+=dt;
+if(phase==="incoming"){const hp=incomingPhotons[impactPhotonIndex],hitTime=hp.delay+hp.duration;if(phaseT>=hitTime){phase="kickOut";phaseT=0;$("statusLabel").textContent="electron kicked";setMessage(`One photon collided successfully. The electron is kicked from <b>n=${currentOrbitBeforeKick}</b> to <b>n=${excitedOrbit}</b>.`,"good")}}
+else if(phase==="kickOut"){const t=Math.min(1,phaseT/.85),r0=shellRadius(currentOrbitBeforeKick),r1=shellRadius(excitedOrbit);electronRCurrent=r0+(r1-r0)*(.5-.5*Math.cos(Math.PI*t));if(t>=1){phase="excitedRotate";phaseT=0;currentOrbit=excitedOrbit;electronRCurrent=shellRadius(currentOrbit);excitedRotationCounter=0;$("statusLabel").textContent="excited orbit";setMessage(`The electron is now rotating in excited orbit <b>n=${currentOrbit}</b>. It will complete about ${excitedRotationsNeeded.toFixed(1)} rotations before emitting.`,"good");updateStatus()}}
+else if(phase==="excitedRotate"){excitedRotationCounter+=dt*angularSpeed/(2*Math.PI);if(excitedRotationCounter>=excitedRotationsNeeded){phase="decay";phaseT=0;$("statusLabel").textContent="downward transition";setMessage(`The electron now falls from <b>n=${excitedOrbit}</b> to <b>n=${finalOrbit}</b>, emitting one photon.`,"good")}}
+else if(phase==="decay"){const t=Math.min(1,phaseT/.9),r0=shellRadius(excitedOrbit),r1=shellRadius(finalOrbit);electronRCurrent=r0+(r1-r0)*(.5-.5*Math.cos(Math.PI*t));if(t>=1){phase="photonToGrating";phaseT=0;currentOrbit=finalOrbit;electronRCurrent=shellRadius(currentOrbit);electronAngle=0;$("statusLabel").textContent="horizontal photon";$("transitionText").innerHTML=`Emission: <b>n=${currentTransition.nHigh} → n=${currentTransition.nLow}</b><br>Photon energy = <b>${currentTransition.deltaE.toFixed(3)} eV</b><br>Wavelength = <b>${currentTransition.lambda.toFixed(1)} nm</b><br>Series = <b>${currentTransition.series}</b> · Region = <b>${currentTransition.region}</b>`;updateStatus()}}
+else if(phase==="photonToGrating"){if(phaseT>=.95){phase="diffract";phaseT=0;$("statusLabel").textContent="through grating"}}
+else if(phase==="diffract"){if(phaseT>=.95){phase="done";phaseT=0;$("statusLabel").textContent="spectral line formed";addCurrentLineToSpectrum();setButtons(true);setMessage(`A spectral line has formed at <b>${currentTransition.lambda.toFixed(1)} nm</b>. The photon wave is no longer shown because the emission event is over.`,"good")}}
+}
+function draw(){drawBackground();drawAtom();drawIncomingPhotons();drawGrating();drawSpectrumPanel();drawPhotonPath();drawLatestLineFlash();drawInfoBox()}
+$("kickBtn").addEventListener("click",startRandomPhotons);$("replayBtn").addEventListener("click",replayLast);$("clearSpectrumBtn").addEventListener("click",clearSpectrum);$("resetBtn").addEventListener("click",resetToGround);
+let prev=performance.now();function loop(now){const dt=Math.min(.05,(now-prev)/1000);prev=now;updateAnimation(dt);draw();requestAnimationFrame(loop)}
+renderLineList();updateStatus();requestAnimationFrame(loop);
+</script>
+</body>
+</html>

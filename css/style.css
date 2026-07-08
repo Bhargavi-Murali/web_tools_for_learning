@@ -297,6 +297,24 @@ a {
   gap: 11px;
 }
 
+.chapter-group {
+  display: grid;
+  gap: 11px;
+}
+
+.chapter-title {
+  margin: 10px 2px 0;
+  color: var(--accent);
+  font-size: 0.88rem;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.chapter-group:first-child .chapter-title {
+  margin-top: 0;
+}
+
 .app-link {
   display: flex;
   justify-content: space-between;

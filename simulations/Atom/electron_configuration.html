@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Electronic Configuration Click Game</title>
+
+<style>
+:root{
+  --bg1:#07111f;
+  --bg2:#10213b;
+  --panel:rgba(15,23,42,.96);
+  --panel2:rgba(30,41,59,.88);
+  --line:rgba(148,163,184,.24);
+  --text:#e5eefc;
+  --muted:#9fb3d9;
+  --blue:#60a5fa;
+  --rose:#fb7185;
+  --green:#34d399;
+  --amber:#fbbf24;
+  --red:#ef4444;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:"Segoe UI",Arial,sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(circle at 18% 12%, rgba(96,165,250,.16), transparent 28rem),
+    radial-gradient(circle at 86% 82%, rgba(52,211,153,.10), transparent 28rem),
+    linear-gradient(135deg,var(--bg1),var(--bg2));
+}
+.wrap{
+  max-width:1400px;
+  margin:22px auto;
+  padding:0 16px 30px;
+}
+.hero,.card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:20px;
+  box-shadow:0 14px 34px rgba(0,0,0,.28);
+}
+.hero{
+  padding:22px 24px;
+  margin-bottom:18px;
+}
+h1{
+  margin:0 0 10px;
+  color:#dbeafe;
+  font-size:clamp(1.9rem,3vw,2.7rem);
+  letter-spacing:-.03em;
+}
+.subtitle,.note{
+  margin:0;
+  color:var(--muted);
+  line-height:1.65;
+}
+.grid{
+  display:grid;
+  grid-template-columns:360px minmax(0,1fr);
+  gap:18px;
+  align-items:start;
+}
+.card{padding:18px}
+h2{
+  margin:0 0 12px;
+  color:#bfdbfe;
+  font-size:1.18rem;
+}
+h3{
+  margin:16px 0 8px;
+  color:#dbeafe;
+  font-size:1rem;
+}
+.control{
+  margin:14px 0 16px;
+}
+label{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  font-weight:650;
+  margin-bottom:7px;
+  color:#dce8ff;
+  line-height:1.35;
+}
+.value{
+  color:#86efac;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+}
+input[type=range],select{
+  width:100%;
+  accent-color:var(--blue);
+}
+select{
+  padding:9px 10px;
+  border-radius:10px;
+  border:1px solid rgba(148,163,184,.30);
+  background:#0f172a;
+  color:#e2e8f0;
+}
+.row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin:14px 0 4px;
+}
+button{
+  padding:10px 13px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:750;
+  background:var(--blue);
+  color:#06111f;
+}
+button.secondary{
+  background:#334155;
+  color:#e2e8f0;
+}
+button.good{
+  background:var(--green);
+  color:#052e1a;
+}
+button.warnBtn{
+  background:var(--amber);
+  color:#3a2500;
+}
+.status{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+  margin-bottom:14px;
+}
+.pill{
+  background:var(--panel2);
+  border:1px solid rgba(148,163,184,.16);
+  border-radius:13px;
+  padding:10px;
+  text-align:center;
+}
+.pill b{
+  display:block;
+  color:#f8fafc;
+  margin-bottom:4px;
+  font-size:.98rem;
+  font-variant-numeric:tabular-nums;
+}
+.pill span{
+  color:var(--muted);
+  font-size:.84rem;
+  line-height:1.25;
+}
+.energyBarOuter{
+  height:12px;
+  background:rgba(2,6,23,.70);
+  border:1px solid rgba(148,163,184,.18);
+  border-radius:999px;
+  overflow:hidden;
+  margin-bottom:12px;
+}
+.energyBarInner{
+  height:100%;
+  width:40%;
+  background:linear-gradient(90deg,var(--green),var(--amber),var(--red));
+  transition:width .18s ease;
+}
+
+/* Shell-row energy diagram */
+.orbitalGrid{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  padding-top:10px;
+}
+.shellRow{
+  display:grid;
+  grid-template-columns:68px minmax(0,1fr);
+  gap:12px;
+  align-items:stretch;
+  border:1px solid rgba(148,163,184,.18);
+  border-radius:18px;
+  padding:12px;
+  background:rgba(2,6,23,.26);
+}
+.shellRow:nth-child(odd){
+  background:rgba(15,23,42,.42);
+}
+.shellLabel{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:14px;
+  background:rgba(30,41,59,.88);
+  color:#fde68a;
+  font-weight:900;
+  font-size:1.35rem;
+  border:1px solid rgba(251,191,36,.24);
+}
+.shellOrbitals{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  align-items:stretch;
+}
+.subshell{
+  border:1px solid rgba(148,163,184,.20);
+  border-radius:16px;
+  background:rgba(15,23,42,.76);
+  padding:12px;
+  min-height:128px;
+  min-width:170px;
+}
+.subshell.problem{
+  border-color:rgba(239,68,68,.56);
+  box-shadow:0 0 0 1px rgba(239,68,68,.12) inset;
+}
+.subHead{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:10px;
+}
+.subLabel{
+  font-weight:850;
+  color:#e0f2fe;
+  font-size:1.25rem;
+}
+.subMeta{
+  color:var(--muted);
+  font-size:.82rem;
+  text-align:right;
+  line-height:1.25;
+}
+.orbitals{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  align-items:flex-start;
+}
+.orbitalWrap{
+  text-align:center;
+}
+.orbitalCell{
+  width:76px;
+  height:52px;
+  border:2px solid rgba(148,163,184,.42);
+  border-radius:11px;
+  background:rgba(2,6,23,.58);
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  overflow:hidden;
+  position:relative;
+}
+.orbitalCell::after{
+  content:"";
+  position:absolute;
+  top:7px;
+  bottom:7px;
+  left:50%;
+  border-left:1px dashed rgba(148,163,184,.30);
+  pointer-events:none;
+}
+.slot{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  font-size:1.35rem;
+  font-weight:900;
+  color:rgba(226,232,240,.36);
+  user-select:none;
+  min-width:36px;
+  min-height:48px;
+  transition:.12s ease;
+}
+.slot:hover{
+  background:rgba(96,165,250,.16);
+  color:#dbeafe;
+}
+.slot.up.filled{
+  color:var(--blue);
+  background:rgba(96,165,250,.22);
+}
+.slot.down.filled{
+  color:var(--rose);
+  background:rgba(251,113,133,.20);
+}
+.orbIndex{
+  font-size:.74rem;
+  color:rgba(203,213,225,.68);
+  margin-top:5px;
+}
+.box{
+  background:rgba(2,6,23,.48);
+  border:1px solid rgba(148,163,184,.16);
+  border-radius:14px;
+  padding:12px;
+  margin-top:12px;
+}
+.configText{
+  color:#fef3c7;
+  font-weight:800;
+  line-height:1.55;
+  word-break:break-word;
+}
+.msg{
+  margin-top:12px;
+  border-radius:14px;
+  padding:12px;
+  line-height:1.55;
+  color:#dbeafe;
+  background:rgba(30,41,59,.82);
+  border-left:5px solid var(--blue);
+}
+.msg.good{border-left-color:var(--green)}
+.msg.warn{border-left-color:var(--amber)}
+.msg.bad{border-left-color:var(--red)}
+.ruleList{
+  display:grid;
+  gap:9px;
+  margin-top:12px;
+}
+.rule{
+  padding:10px;
+  border-radius:12px;
+  background:rgba(2,6,23,.42);
+  border:1px solid rgba(148,163,184,.14);
+  color:#cbd5e1;
+  line-height:1.45;
+  font-size:.92rem;
+}
+.rule b{color:#e0f2fe}
+.small{
+  font-size:.88rem;
+  color:var(--muted);
+  line-height:1.55;
+}
+.legend{
+  display:grid;
+  gap:8px;
+  margin-top:15px;
+  padding-top:14px;
+  border-top:1px solid var(--line);
+  color:var(--muted);
+  font-size:.92rem;
+}
+.sw{
+  display:inline-block;
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  margin-right:8px;
+  vertical-align:middle;
+}
+@media(max-width:980px){
+  .grid{grid-template-columns:1fr}
+  .status{grid-template-columns:1fr 1fr}
+  .shellRow{grid-template-columns:1fr}
+  .shellLabel{min-height:44px}
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+  <a class="back-link" href="../../index.html" style="display:inline-block;margin-bottom:14px;color:#bfdbfe;text-decoration:none;font-weight:700">&larr; Back to Interactive Learning Lab</a>
+  <section class="hero">
+    <h1>Electronic Configuration Click Game</h1>
+    <p class="subtitle">
+      Click the side-by-side ↑ and ↓ slots inside each orbital box. This version covers atomic numbers 1 to 118.
+      Higher shells are shown higher on the page: \(1s\) is at the bottom, \(2s,2p\) above it,
+      \(3s,3p,3d\) above that, then \(4s,4p,4d,4f\), and so on.
+    </p>
+  </section>
+
+  <div class="grid">
+    <aside class="card">
+      <h2>Game controls</h2>
+
+      <div class="control">
+        <label><span>Target atom</span></label>
+        <select id="elementSelect"></select>
+      </div>
+
+      <div class="control">
+        <label><span>Atomic number Z</span><span class="value" id="zVal">8</span></label>
+        <input id="zSlider" type="range" min="1" max="118" step="1" value="8">
+      </div>
+
+      <div class="row">
+        <button class="good" id="hintBtn">Hint</button>
+        <button class="secondary" id="autoBtn">Place next</button>
+        <button class="secondary" id="fillBtn">Fill correct</button>
+        <button class="warnBtn" id="clearBtn">Clear</button>
+      </div>
+
+      <div class="box">
+        <h3>Current configuration</h3>
+        <div class="configText" id="configText">---</div>
+      </div>
+
+      <div class="msg" id="message">
+        Choose an atom and click the boxes to start placing electrons.
+      </div>
+
+      <div class="ruleList">
+        <div class="rule"><b>Aufbau:</b> Fill lower-energy subshells first: 1s, 2s, 2p, 3s, 3p, 4s, 3d, 4p, 5s, 4d, 5p, 6s, 4f, 5d, 6p, 7s, 5f, 6d, 7p.</div>
+        <div class="rule"><b>Pauli:</b> Each orbital box can hold at most two electrons with opposite spins.</div>
+        <div class="rule"><b>Hund:</b> In p, d, f subshells, put one ↑ electron in each box before pairing with ↓.</div>
+      </div>
+
+      <div class="legend">
+        <div><span class="sw" style="background:#60a5fa"></span>↑ spin-up electron</div>
+        <div><span class="sw" style="background:#fb7185"></span>↓ spin-down electron</div>
+        <div><span class="sw" style="background:#ef4444"></span>red border: rule penalty</div>
+      </div>
+
+      <p class="small">
+        The energy is a relative teaching score, not a real spectroscopic atomic energy. For heavy elements, this game uses a simplified Aufbau-based model.
+      </p>
+    </aside>
+
+    <main>
+      <section class="card">
+        <h2>Orbital energy diagram</h2>
+
+        <div class="status">
+          <div class="pill"><b id="electronCount">0 / 8</b><span>electrons placed</span></div>
+          <div class="pill"><b id="energyLabel">0.0</b><span>total energy score</span></div>
+          <div class="pill"><b id="penaltyLabel">0.0</b><span>rule penalty</span></div>
+          <div class="pill"><b id="scoreLabel">0%</b><span>configuration score</span></div>
+        </div>
+
+        <div class="energyBarOuter">
+          <div class="energyBarInner" id="energyBar"></div>
+        </div>
+
+        <p class="small">
+          Click the <b>left half</b> of a box for ↑. Click the <b>right half</b> for ↓.
+          Click an existing electron again to remove it.
+        </p>
+
+        <div class="orbitalGrid" id="orbitalGrid"></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+const elements = [
+  ["H","Hydrogen"],["He","Helium"],["Li","Lithium"],["Be","Beryllium"],["B","Boron"],["C","Carbon"],
+  ["N","Nitrogen"],["O","Oxygen"],["F","Fluorine"],["Ne","Neon"],["Na","Sodium"],["Mg","Magnesium"],
+  ["Al","Aluminium"],["Si","Silicon"],["P","Phosphorus"],["S","Sulfur"],["Cl","Chlorine"],["Ar","Argon"],
+  ["K","Potassium"],["Ca","Calcium"],["Sc","Scandium"],["Ti","Titanium"],["V","Vanadium"],["Cr","Chromium"],
+  ["Mn","Manganese"],["Fe","Iron"],["Co","Cobalt"],["Ni","Nickel"],["Cu","Copper"],["Zn","Zinc"],
+  ["Ga","Gallium"],["Ge","Germanium"],["As","Arsenic"],["Se","Selenium"],["Br","Bromine"],["Kr","Krypton"],
+  ["Rb","Rubidium"],["Sr","Strontium"],["Y","Yttrium"],["Zr","Zirconium"],["Nb","Niobium"],["Mo","Molybdenum"],
+  ["Tc","Technetium"],["Ru","Ruthenium"],["Rh","Rhodium"],["Pd","Palladium"],["Ag","Silver"],["Cd","Cadmium"],
+  ["In","Indium"],["Sn","Tin"],["Sb","Antimony"],["Te","Tellurium"],["I","Iodine"],["Xe","Xenon"],
+  ["Cs","Caesium"],["Ba","Barium"],["La","Lanthanum"],["Ce","Cerium"],["Pr","Praseodymium"],["Nd","Neodymium"],
+  ["Pm","Promethium"],["Sm","Samarium"],["Eu","Europium"],["Gd","Gadolinium"],["Tb","Terbium"],["Dy","Dysprosium"],
+  ["Ho","Holmium"],["Er","Erbium"],["Tm","Thulium"],["Yb","Ytterbium"],["Lu","Lutetium"],["Hf","Hafnium"],
+  ["Ta","Tantalum"],["W","Tungsten"],["Re","Rhenium"],["Os","Osmium"],["Ir","Iridium"],["Pt","Platinum"],
+  ["Au","Gold"],["Hg","Mercury"],["Tl","Thallium"],["Pb","Lead"],["Bi","Bismuth"],["Po","Polonium"],
+  ["At","Astatine"],["Rn","Radon"],["Fr","Francium"],["Ra","Radium"],["Ac","Actinium"],["Th","Thorium"],
+  ["Pa","Protactinium"],["U","Uranium"],["Np","Neptunium"],["Pu","Plutonium"],["Am","Americium"],["Cm","Curium"],
+  ["Bk","Berkelium"],["Cf","Californium"],["Es","Einsteinium"],["Fm","Fermium"],["Md","Mendelevium"],["No","Nobelium"],
+  ["Lr","Lawrencium"],["Rf","Rutherfordium"],["Db","Dubnium"],["Sg","Seaborgium"],["Bh","Bohrium"],["Hs","Hassium"],
+  ["Mt","Meitnerium"],["Ds","Darmstadtium"],["Rg","Roentgenium"],["Cn","Copernicium"],["Nh","Nihonium"],["Fl","Flerovium"],
+  ["Mc","Moscovium"],["Lv","Livermorium"],["Ts","Tennessine"],["Og","Oganesson"]
+];
+
+const subshells = [
+  {id:"1s", n:1, type:"s", boxes:1, energy:-100},
+  {id:"2s", n:2, type:"s", boxes:1, energy:-62},
+  {id:"2p", n:2, type:"p", boxes:3, energy:-52},
+  {id:"3s", n:3, type:"s", boxes:1, energy:-36},
+  {id:"3p", n:3, type:"p", boxes:3, energy:-30},
+  {id:"3d", n:3, type:"d", boxes:5, energy:-22},
+  {id:"4s", n:4, type:"s", boxes:1, energy:-24},
+  {id:"4p", n:4, type:"p", boxes:3, energy:-16},
+  {id:"4d", n:4, type:"d", boxes:5, energy:-10},
+  {id:"4f", n:4, type:"f", boxes:7, energy:-8},
+  {id:"5s", n:5, type:"s", boxes:1, energy:-12},
+  {id:"5p", n:5, type:"p", boxes:3, energy:-7},
+  {id:"5d", n:5, type:"d", boxes:5, energy:-5},
+  {id:"5f", n:5, type:"f", boxes:7, energy:-4},
+  {id:"6s", n:6, type:"s", boxes:1, energy:-6},
+  {id:"6p", n:6, type:"p", boxes:3, energy:-3},
+  {id:"6d", n:6, type:"d", boxes:5, energy:-2},
+  {id:"7s", n:7, type:"s", boxes:1, energy:-2.5},
+  {id:"7p", n:7, type:"p", boxes:3, energy:-1}
+];
+
+// Filling order is separate from display order.
+const fillOrder = ["1s","2s","2p","3s","3p","4s","3d","4p","5s","4d","5p","6s","4f","5d","6p","7s","5f","6d","7p"];
+
+const state = {};
+let targetZ = 8;
+
+function initState(){
+  subshells.forEach(s=>{
+    state[s.id]=[];
+    for(let i=0;i<s.boxes;i++) state[s.id].push({up:false,down:false});
+  });
+}
+
+function getSubshell(id){
+  return subshells.find(s=>s.id===id);
+}
+
+function capacity(s){
+  return s.boxes*2;
+}
+
+function countSubshell(s){
+  return state[s.id].reduce((sum,b)=>sum+(b.up?1:0)+(b.down?1:0),0);
+}
+
+function totalElectrons(){
+  return subshells.reduce((sum,s)=>sum+countSubshell(s),0);
+}
+
+function populateElements(){
+  const select = $("elementSelect");
+  select.innerHTML = "";
+  elements.forEach((e,i)=>{
+    const opt = document.createElement("option");
+    opt.value = i+1;
+    opt.textContent = `${i+1}. ${e[1]} (${e[0]})`;
+    select.appendChild(opt);
+  });
+}
+
+function correctOcc(z){
+  const occ = {};
+  subshells.forEach(s=>occ[s.id]=0);
+  let left = z;
+
+  for(const id of fillOrder){
+    const s = getSubshell(id);
+    const put = Math.min(left, capacity(s));
+    occ[id]=put;
+    left -= put;
+    if(left<=0) break;
+  }
+
+  // Common pedagogical exceptions. This remains an Aufbau-learning game,
+  // but these make familiar transition-metal and f-block cases behave better.
+  const exceptions = {
+    24: {"4s":1,"3d":5},    // Cr
+    29: {"4s":1,"3d":10},   // Cu
+    41: {"5s":1,"4d":4},    // Nb
+    42: {"5s":1,"4d":5},    // Mo
+    44: {"5s":1,"4d":7},    // Ru
+    45: {"5s":1,"4d":8},    // Rh
+    46: {"5s":0,"4d":10},   // Pd
+    47: {"5s":1,"4d":10},   // Ag
+    57: {"6s":2,"4f":0,"5d":1},
+    58: {"6s":2,"4f":1,"5d":1},
+    64: {"6s":2,"4f":7,"5d":1},
+    78: {"6s":1,"4f":14,"5d":9},
+    79: {"6s":1,"4f":14,"5d":10},
+    89: {"7s":2,"5f":0,"6d":1},
+    90: {"7s":2,"5f":0,"6d":2},
+    91: {"7s":2,"5f":2,"6d":1},
+    92: {"7s":2,"5f":3,"6d":1},
+    93: {"7s":2,"5f":4,"6d":1},
+    96: {"7s":2,"5f":7,"6d":1},
+    103:{"7s":2,"5f":14,"6d":1}
+  };
+
+  if(exceptions[z]){
+    Object.entries(exceptions[z]).forEach(([id,n])=>{
+      if(id in occ) occ[id]=n;
+    });
+  }
+
+  return occ;
+}
+
+function clearAll(showMessage=true){
+  subshells.forEach(s=>{
+    state[s.id].forEach(b=>{
+      b.up=false;
+      b.down=false;
+    });
+  });
+  render();
+  if(showMessage) setMessage("Cleared. Click the side-by-side boxes to place electrons.", "warn");
+}
+
+function fillCorrect(){
+  clearAll(false);
+  const occ = correctOcc(targetZ);
+
+  for(const id of fillOrder){
+    const s = getSubshell(id);
+    let n = occ[id] || 0;
+
+    for(let i=0;i<s.boxes && n>0;i++){
+      state[id][i].up = true;
+      n--;
+    }
+    for(let i=0;i<s.boxes && n>0;i++){
+      state[id][i].down = true;
+      n--;
+    }
+  }
+
+  render();
+  setMessage("Filled the expected ground-state configuration for this simplified game.", "good");
+}
+
+function renderOrbitals(){
+  const grid = $("orbitalGrid");
+  grid.innerHTML = "";
+  const rule = analyzeRules();
+  const maxN = Math.max(...subshells.map(s=>s.n));
+
+  // Draw high shells first, so n=1 is at the bottom.
+  for(let shellN=maxN;shellN>=1;shellN--){
+    const rowShells = subshells.filter(s=>s.n===shellN);
+    if(rowShells.length===0) continue;
+
+    const shellRow = document.createElement("div");
+    shellRow.className = "shellRow";
+
+    const shellLabel = document.createElement("div");
+    shellLabel.className = "shellLabel";
+    shellLabel.textContent = `n=${shellN}`;
+
+    const shellOrbitals = document.createElement("div");
+    shellOrbitals.className = "shellOrbitals";
+
+    rowShells.forEach(s=>{
+      const block = document.createElement("div");
+      block.className = "subshell" + (rule.problems.has(s.id) ? " problem" : "");
+
+      const head = document.createElement("div");
+      head.className = "subHead";
+
+      const label = document.createElement("div");
+      label.className = "subLabel";
+      label.textContent = s.id;
+
+      const meta = document.createElement("div");
+      meta.className = "subMeta";
+      meta.innerHTML = `${countSubshell(s)}/${capacity(s)} e<sup>−</sup><br>energy/e = ${s.energy}`;
+
+      head.appendChild(label);
+      head.appendChild(meta);
+
+      const row = document.createElement("div");
+      row.className = "orbitals";
+
+      for(let i=0;i<s.boxes;i++){
+        const wrap = document.createElement("div");
+        wrap.className = "orbitalWrap";
+
+        const cell = document.createElement("div");
+        cell.className = "orbitalCell";
+        cell.title = "Left slot: ↑ spin. Right slot: ↓ spin.";
+
+        const up = document.createElement("div");
+        up.className = "slot up" + (state[s.id][i].up ? " filled" : "");
+        up.textContent = "↑";
+        up.dataset.sub = s.id;
+        up.dataset.idx = i;
+        up.dataset.spin = "up";
+        up.addEventListener("click", handleSlotClick);
+
+        const down = document.createElement("div");
+        down.className = "slot down" + (state[s.id][i].down ? " filled" : "");
+        down.textContent = "↓";
+        down.dataset.sub = s.id;
+        down.dataset.idx = i;
+        down.dataset.spin = "down";
+        down.addEventListener("click", handleSlotClick);
+
+        cell.appendChild(up);
+        cell.appendChild(down);
+
+        const orbLabel = document.createElement("div");
+        orbLabel.className = "orbIndex";
+        orbLabel.textContent = s.boxes===1 ? "orbital" : `${s.type}${i+1}`;
+
+        wrap.appendChild(cell);
+        wrap.appendChild(orbLabel);
+        row.appendChild(wrap);
+      }
+
+      block.appendChild(head);
+      block.appendChild(row);
+      shellOrbitals.appendChild(block);
+    });
+
+    shellRow.appendChild(shellLabel);
+    shellRow.appendChild(shellOrbitals);
+    grid.appendChild(shellRow);
+  }
+}
+
+function handleSlotClick(ev){
+  const sub = ev.currentTarget.dataset.sub;
+  const idx = Number(ev.currentTarget.dataset.idx);
+  const spin = ev.currentTarget.dataset.spin;
+  const box = state[sub][idx];
+
+  if(box[spin]){
+    box[spin] = false;
+    setMessage(`Removed ${spin==="up" ? "↑" : "↓"} from ${sub}.`, "warn");
+  } else {
+    if(totalElectrons() >= targetZ){
+      setMessage("You have already placed all required electrons. Remove one first or press Clear.", "warn");
+      return;
+    }
+    box[spin] = true;
+    setMessage(`Placed ${spin==="up" ? "↑" : "↓"} in ${sub}.`, "good");
+  }
+
+  render();
+}
+
+function analyzeRules(){
+  let baseEnergy = 0;
+  let pairingPenalty = 0;
+  let hundPenalty = 0;
+  let aufbauPenalty = 0;
+  const problems = new Set();
+
+  subshells.forEach(s=>{
+    const count = countSubshell(s);
+    baseEnergy += count * s.energy;
+
+    const pairs = state[s.id].filter(b=>b.up && b.down).length;
+    pairingPenalty += pairs * 2.5;
+
+    if(s.boxes>1){
+      const occupied = state[s.id].filter(b=>b.up || b.down).length;
+
+      if(count <= s.boxes && pairs>0){
+        hundPenalty += 12*pairs;
+        problems.add(s.id);
+      }
+
+      if(count > s.boxes && occupied < s.boxes){
+        hundPenalty += 8*(s.boxes-occupied);
+        problems.add(s.id);
+      }
+
+      state[s.id].forEach(b=>{
+        if(b.down && !b.up){
+          hundPenalty += 2;
+          problems.add(s.id);
+        }
+      });
+    }
+  });
+
+  for(let hi=0; hi<fillOrder.length; hi++){
+    const sh = getSubshell(fillOrder[hi]);
+    if(countSubshell(sh)===0) continue;
+
+    for(let lo=0; lo<hi; lo++){
+      const sl = getSubshell(fillOrder[lo]);
+      const missing = capacity(sl) - countSubshell(sl);
+      if(missing>0){
+        aufbauPenalty += missing*10;
+        problems.add(sh.id);
+        problems.add(sl.id);
+      }
+    }
+  }
+
+  const penalty = pairingPenalty + hundPenalty + aufbauPenalty;
+  const total = baseEnergy + penalty;
+  return {baseEnergy, pairingPenalty, hundPenalty, aufbauPenalty, penalty, total, problems};
+}
+
+function configText(){
+  const parts = [];
+  fillOrder.forEach(id=>{
+    const s = getSubshell(id);
+    const c = countSubshell(s);
+    if(c>0) parts.push(`${id}<sup>${c}</sup>`);
+  });
+  return parts.length ? parts.join(" ") : "No electrons placed";
+}
+
+function expectedText(){
+  const occ = correctOcc(targetZ);
+  const parts = [];
+  fillOrder.forEach(id=>{
+    if((occ[id]||0)>0) parts.push(`${id}<sup>${occ[id]}</sup>`);
+  });
+  return parts.join(" ");
+}
+
+function calcScore(){
+  const placed = totalElectrons();
+  if(placed===0) return 0;
+
+  const occ = correctOcc(targetZ);
+  let correct = 0;
+
+  fillOrder.forEach(id=>{
+    const s = getSubshell(id);
+    correct += Math.min(countSubshell(s), occ[id]||0);
+  });
+
+  const rule = analyzeRules();
+  const penaltyLoss = Math.min(45, rule.penalty*0.8);
+  const electronLoss = Math.abs(targetZ-placed)*6;
+  return Math.max(0, Math.round(100*correct/targetZ - penaltyLoss - electronLoss));
+}
+
+function setMessage(text,type="normal"){
+  const msg = $("message");
+  msg.className = "msg";
+  if(type==="good") msg.classList.add("good");
+  if(type==="warn") msg.classList.add("warn");
+  if(type==="bad") msg.classList.add("bad");
+  msg.innerHTML = text;
+}
+
+function nextCorrectSlot(){
+  const occ = correctOcc(targetZ);
+
+  for(const id of fillOrder){
+    const s = getSubshell(id);
+    if(countSubshell(s) >= (occ[id]||0)) continue;
+
+    for(let i=0;i<s.boxes;i++){
+      if(!state[id][i].up) return {sub:id,idx:i,spin:"up"};
+    }
+    for(let i=0;i<s.boxes;i++){
+      if(!state[id][i].down) return {sub:id,idx:i,spin:"down"};
+    }
+  }
+
+  return null;
+}
+
+function hint(){
+  const n = nextCorrectSlot();
+  if(!n){
+    setMessage("No hint needed. The expected number of electrons is already placed.", "good");
+    return;
+  }
+
+  setMessage(`Hint: next electron goes in <b>${n.sub}</b>, box <b>${n.idx+1}</b>, spin <b>${n.spin==="up" ? "↑" : "↓"}</b>.`, "good");
+}
+
+function placeNext(){
+  const n = nextCorrectSlot();
+  if(!n){
+    setMessage("All expected electrons are already placed.", "good");
+    return;
+  }
+  if(totalElectrons() >= targetZ){
+    setMessage("You already placed all electrons. Remove a wrong electron first or press Clear.", "warn");
+    return;
+  }
+
+  state[n.sub][n.idx][n.spin] = true;
+  setMessage(`Placed next electron in <b>${n.sub}</b>.`, "good");
+  render();
+}
+
+function render(){
+  renderOrbitals();
+
+  const placed = totalElectrons();
+  const rule = analyzeRules();
+  const sc = calcScore();
+
+  $("electronCount").textContent = `${placed} / ${targetZ}`;
+  $("energyLabel").textContent = rule.total.toFixed(1);
+  $("penaltyLabel").textContent = rule.penalty.toFixed(1);
+  $("scoreLabel").textContent = `${sc}%`;
+  $("configText").innerHTML = configText();
+  $("energyBar").style.width = Math.max(3, Math.min(100, 100-sc)) + "%";
+
+  if(placed===targetZ){
+    const expected = expectedText();
+    if(sc>=95){
+      setMessage(`Excellent! Very low-energy configuration. Expected: <b>${expected}</b>`, "good");
+    } else {
+      setMessage(`All electrons placed, but energy can be lowered. Expected: <b>${expected}</b>`, "warn");
+    }
+  }
+}
+
+function setZ(z){
+  targetZ = Number(z);
+  $("zSlider").value = targetZ;
+  $("elementSelect").value = targetZ;
+  $("zVal").textContent = targetZ;
+
+  const e = elements[targetZ-1];
+  clearAll(false);
+  setMessage(`Target atom: <b>${e[1]} (${e[0]})</b>, Z = ${targetZ}. Click side-by-side boxes to place ${targetZ} electrons.`, "normal");
+  render();
+}
+
+function install(){
+  populateElements();
+  $("elementSelect").addEventListener("change", e=>setZ(e.target.value));
+  $("zSlider").addEventListener("input", e=>setZ(e.target.value));
+  $("hintBtn").addEventListener("click", hint);
+  $("autoBtn").addEventListener("click", placeNext);
+  $("fillBtn").addEventListener("click", fillCorrect);
+  $("clearBtn").addEventListener("click", ()=>clearAll(true));
+}
+
+initState();
+install();
+setZ(8);
+console.log("Electronic configuration shell-row click game loaded successfully.");
+</script>
+</body>
+</html>

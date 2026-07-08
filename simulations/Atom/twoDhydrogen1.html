@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>2D Hydrogen Orbitals - Radial Nodes and Probability Dots</title>
+
+  <style>
+    :root{
+      --bg1:#07111f;
+      --bg2:#10213b;
+      --panel:rgba(15,23,42,.95);
+      --line:rgba(148,163,184,.22);
+      --text:#e5eefc;
+      --muted:#9fb3d9;
+      --blue:#60a5fa;
+      --green:#34d399;
+      --amber:#fbbf24;
+      --rose:#fb7185;
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:"Segoe UI",Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 18% 12%, rgba(96,165,250,.16), transparent 28rem),
+        radial-gradient(circle at 86% 82%, rgba(52,211,153,.10), transparent 28rem),
+        linear-gradient(135deg,var(--bg1),var(--bg2));
+    }
+
+    .wrap{
+      max-width:1320px;
+      margin:22px auto;
+      padding:0 16px 30px;
+    }
+
+    .hero,.card{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:20px;
+      box-shadow:0 14px 34px rgba(0,0,0,.28);
+    }
+
+    .hero{
+      padding:22px 24px;
+      margin-bottom:18px;
+    }
+
+    h1{
+      margin:0 0 10px;
+      color:#dbeafe;
+      font-size:clamp(1.9rem,3vw,2.7rem);
+      letter-spacing:-.03em;
+    }
+
+    .subtitle,.note{
+      margin:0;
+      color:var(--muted);
+      line-height:1.65;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:365px minmax(0,1fr);
+      gap:18px;
+      align-items:start;
+    }
+
+    .card{padding:18px}
+
+    h2{
+      margin:0 0 12px;
+      color:#bfdbfe;
+      font-size:1.18rem;
+    }
+
+    h3{
+      margin:16px 0 8px;
+      color:#dbeafe;
+      font-size:1rem;
+    }
+
+    .control{
+      margin:14px 0 16px;
+    }
+
+    label{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      font-weight:650;
+      margin-bottom:7px;
+      color:#dce8ff;
+      line-height:1.35;
+    }
+
+    .value{
+      color:#86efac;
+      font-variant-numeric:tabular-nums;
+      white-space:nowrap;
+    }
+
+    input[type=range], select{
+      width:100%;
+      accent-color:var(--blue);
+    }
+
+    select{
+      padding:9px 10px;
+      border-radius:10px;
+      border:1px solid rgba(148,163,184,.30);
+      background:#0f172a;
+      color:#e2e8f0;
+    }
+
+    .toggle{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin:10px 0;
+      color:#d7e7ff;
+      line-height:1.45;
+    }
+
+    .toggle input{transform:scale(1.1)}
+
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin:16px 0 4px;
+    }
+
+    button{
+      padding:10px 14px;
+      border:none;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:750;
+      background:var(--blue);
+      color:#06111f;
+    }
+
+    button.secondary{
+      background:#334155;
+      color:#e2e8f0;
+    }
+
+    #canvasWrap{
+      width:100%;
+      height:760px;
+      border-radius:16px;
+      overflow:hidden;
+      border:1px solid rgba(148,163,184,.18);
+      background:#000000;
+      position:relative;
+    }
+
+    canvas{
+      width:100%;
+      height:100%;
+      display:block;
+    }
+
+    .status{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:10px;
+      margin-top:14px;
+    }
+
+    .pill{
+      background:rgba(30,41,59,.88);
+      border:1px solid rgba(148,163,184,.16);
+      border-radius:13px;
+      padding:10px;
+      text-align:center;
+    }
+
+    .pill b{
+      display:block;
+      color:#f8fafc;
+      margin-bottom:4px;
+      font-size:.98rem;
+      font-variant-numeric:tabular-nums;
+    }
+
+    .pill span{
+      color:var(--muted);
+      font-size:.86rem;
+      line-height:1.25;
+    }
+
+    .formula{
+      color:#fef3c7;
+      font-weight:700;
+      line-height:1.65;
+      margin:0;
+    }
+
+    .warn{
+      padding:10px 12px;
+      border-radius:12px;
+      background:rgba(251,191,36,.10);
+      border-left:5px solid var(--amber);
+      color:#fde68a;
+      line-height:1.5;
+      margin-top:14px;
+      font-size:.92rem;
+    }
+
+    .legend{
+      display:grid;
+      gap:8px;
+      margin-top:15px;
+      padding-top:14px;
+      border-top:1px solid var(--line);
+      color:var(--muted);
+      font-size:.92rem;
+    }
+
+    .sw{
+      display:inline-block;
+      width:12px;
+      height:12px;
+      border-radius:50%;
+      margin-right:8px;
+      vertical-align:middle;
+    }
+
+    .small{
+      font-size:.88rem;
+      color:var(--muted);
+      line-height:1.55;
+    }
+
+    @media(max-width:980px){
+      .grid{grid-template-columns:1fr}
+      #canvasWrap{height:570px}
+      .status{grid-template-columns:1fr 1fr}
+    }
+  </style>
+</head>
+
+<body>
+<div class="wrap">
+  <a class="back-link" href="../../index.html" style="display:inline-block;margin-bottom:14px;color:#bfdbfe;text-decoration:none;font-weight:700">&larr; Back to Interactive Learning Lab</a>
+  <section class="hero">
+    <h1>2D Hydrogen Orbitals: Probability Dots and Radial Nodes</h1>
+    <p class="subtitle">
+      This reworked version makes radial nodes clearly visible. The background heatmap shows
+      \(|\psi|^2\), dense dots are sampled from the same probability distribution, and dashed yellow
+      rings mark radial nodes where the radial wavefunction changes sign. The inset now plots
+      the radial probability function P(r)=2πr|ψ(r)|² instead of just |ψ|². The canvas background is pure black, the heatmap uses a high-contrast false-color palette, and the probability dots are pure white.
+    </p>
+  </section>
+
+  <div class="grid">
+    <aside class="card">
+      <h2>Controls</h2>
+
+      <div class="control">
+        <label><span>Principal-like quantum number n</span><span class="value" id="nVal">4</span></label>
+        <input id="n" type="range" min="1" max="8" step="1" value="4" />
+      </div>
+
+      <div class="control">
+        <label><span>Angular quantum number m</span><span class="value" id="mVal">1</span></label>
+        <input id="m" type="range" min="0" max="3" step="1" value="1" />
+      </div>
+
+      <div class="control">
+        <label><span>Angular part</span></label>
+        <select id="angularType">
+          <option value="cos">cos(mθ)</option>
+          <option value="sin">sin(mθ)</option>
+        </select>
+      </div>
+
+      <div class="control">
+        <label><span>Dot color</span></label>
+        <select id="colorMode">
+          <option value="sign">Positive/negative wavefunction</option>
+          <option value="density">Probability-density colors</option>
+          <option value="mono">Single-color dots</option>
+        </select>
+      </div>
+
+      <div class="control">
+        <label><span>Dot count</span><span class="value" id="dotCountVal">22000</span></label>
+        <input id="dotCount" type="range" min="2000" max="60000" step="1000" value="22000" />
+      </div>
+
+      <div class="control">
+        <label><span>Dot size</span><span class="value" id="pointSizeVal">1.0</span></label>
+        <input id="pointSize" type="range" min="3" max="20" step="1" value="10" />
+      </div>
+
+      <div class="control">
+        <label><span>Orbital size</span><span class="value" id="radiusVal">1.00×</span></label>
+        <input id="radiusScale" type="range" min="65" max="200" step="5" value="100" />
+      </div>
+
+      <div class="control">
+        <label><span>Heatmap contrast</span><span class="value" id="contrastVal">1.25×</span></label>
+        <input id="contrast" type="range" min="50" max="250" step="5" value="125" />
+      </div>
+
+      <div class="control">
+        <label><span>Refresh rate</span><span class="value" id="refreshVal">800 pts/frame</span></label>
+        <input id="refreshRate" type="range" min="50" max="2500" step="50" value="800" />
+      </div>
+
+      <div class="toggle"><input id="showHeatmap" type="checkbox" checked><span>Show probability heatmap</span></div>
+      <div class="toggle"><input id="showDots" type="checkbox" checked><span>Show dense probability dots</span></div>
+      <div class="toggle"><input id="showRadialNodes" type="checkbox" checked><span>Show radial-node rings</span></div>
+      <div class="toggle"><input id="showAngularNodes" type="checkbox" checked><span>Show angular-node lines</span></div>
+      <div class="toggle"><input id="showRadialPlot" type="checkbox" checked><span>Show radial probability inset</span></div>
+      <div class="toggle"><input id="showAxes" type="checkbox" checked><span>Show axes and reference circles</span></div>
+
+      <div class="row">
+        <button id="playPause">Pause</button>
+        <button class="secondary" id="clearBtn">Redraw</button>
+        <button class="secondary" id="resetBtn">Reset</button>
+      </div>
+
+      <div class="legend">
+        <div><span class="sw" style="background:#60a5fa"></span>white dots: sampled probability points</div>
+        <div><span class="sw" style="background:#fb7185"></span>false-color heatmap: higher density = hotter colors</div>
+        <div><span class="sw" style="background:#fbbf24"></span>yellow rings: radial nodes</div>
+        <div><span class="sw" style="background:#34d399"></span>yellow/orange/magenta: heatmap contrast scale</div>
+      </div>
+
+      <div class="warn">
+        To see radial nodes clearly, try \(n=4, m=0\), \(n=5, m=1\), or \(n=6, m=2\).
+        Radial nodes appear as dark circular gaps/rings.
+      </div>
+    </aside>
+
+    <main>
+      <section class="card">
+        <h2>Orbital probability density and radial probability</h2>
+        <div id="canvasWrap">
+          <canvas id="canvas" width="940" height="760"></canvas>
+        </div>
+
+        <div class="status">
+          <div class="pill"><b id="stateLabel">n = 4, m = 1</b><span>current state</span></div>
+          <div class="pill"><b id="radialNodes">2</b><span>radial nodes</span></div>
+          <div class="pill"><b id="angularNodes">2</b><span>angular nodal lines</span></div>
+          <div class="pill"><b id="acceptedLabel">0</b><span>dots plotted</span></div>
+        </div>
+      </section>
+
+      <section class="card" style="margin-top:18px;">
+        <h2>Why the radial nodes are now visible</h2>
+        <p class="formula">
+          \(\psi(r,\theta)=R_{n,m}(r)\Phi_m(\theta)\), &nbsp;
+          \(P(r)=2\pi r|\psi(r)|^2\)
+        </p>
+        <p class="note">
+          A radial node occurs where \(R_{n,m}(r)=0\). In a pure dot plot, a thin zero-probability ring can be
+          hidden by neighboring dots. This version therefore uses three simultaneous cues: a dark heatmap gap,
+          a dashed yellow node ring, and a smooth radial-probability inset where the zeros are marked.
+        </p>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const canvas = $("canvas");
+const ctx = canvas.getContext("2d");
+const W = canvas.width;
+const H = canvas.height;
+const cx = W / 2;
+const cy = H / 2;
+
+const ui = {
+  n: $("n"),
+  m: $("m"),
+  angularType: $("angularType"),
+  colorMode: $("colorMode"),
+  dotCount: $("dotCount"),
+  pointSize: $("pointSize"),
+  radiusScale: $("radiusScale"),
+  contrast: $("contrast"),
+  refreshRate: $("refreshRate"),
+  showHeatmap: $("showHeatmap"),
+  showDots: $("showDots"),
+  showRadialNodes: $("showRadialNodes"),
+  showAngularNodes: $("showAngularNodes"),
+  showRadialPlot: $("showRadialPlot"),
+  showAxes: $("showAxes"),
+  playPause: $("playPause"),
+  clearBtn: $("clearBtn"),
+  resetBtn: $("resetBtn")
+};
+
+let running = true;
+let currentDots = 0;
+let targetDots = Number(ui.dotCount.value);
+let profile = null;
+let lastKey = "";
+let frameCounter = 0;
+
+function updateLabels() {
+  $("nVal").textContent = ui.n.value;
+  $("mVal").textContent = ui.m.value;
+  $("dotCountVal").textContent = ui.dotCount.value;
+  $("pointSizeVal").textContent = (Number(ui.pointSize.value) / 10).toFixed(1);
+  $("radiusVal").textContent = (Number(ui.radiusScale.value) / 100).toFixed(2) + "×";
+  $("contrastVal").textContent = (Number(ui.contrast.value) / 100).toFixed(2) + "×";
+  $("refreshVal").textContent = ui.refreshRate.value + " pts/frame";
+  $("stateLabel").textContent = `n = ${ui.n.value}, m = ${ui.m.value}`;
+  $("acceptedLabel").textContent = currentDots;
+}
+
+function syncMRange() {
+  const n = Number(ui.n.value);
+  ui.m.max = Math.max(0, n - 1);
+  if (Number(ui.m.value) > Number(ui.m.max)) ui.m.value = ui.m.max;
+  updateLabels();
+}
+
+function assocLaguerre(n, alpha, x) {
+  if (n === 0) return 1;
+  if (n === 1) return 1 + alpha - x;
+
+  let L0 = 1;
+  let L1 = 1 + alpha - x;
+
+  for (let k = 2; k <= n; k++) {
+    const Lk = ((2 * k - 1 + alpha - x) * L1 - (k - 1 + alpha) * L0) / k;
+    L0 = L1;
+    L1 = Lk;
+  }
+
+  return L1;
+}
+
+function radialPart(r, n, m) {
+  const am = Math.abs(m);
+  const nr = Math.max(0, n - am - 1);
+  const rho = 2 * r / Math.max(n, 1e-6);
+
+  return (
+    Math.pow(Math.max(rho, 1e-12), am) *
+    Math.exp(-rho / 2) *
+    assocLaguerre(nr, 2 * am, rho)
+  );
+}
+
+function angularPart(theta, m, angularType) {
+  if (m === 0) return 1;
+  return angularType === "sin" ? Math.sin(m * theta) : Math.cos(m * theta);
+}
+
+function psiValue(x, y, p) {
+  const r = Math.sqrt(x * x + y * y);
+  const theta = Math.atan2(y, x);
+  const rr = radialPart(r / p.radiusScale, p.n, p.m);
+  const aa = angularPart(theta, p.m, p.angularType);
+  return rr * aa;
+}
+
+function findLaguerreZeros(nr, alpha) {
+  if (nr <= 0) return [];
+
+  const zeros = [];
+  const maxX = 4 * nr + 2 * alpha + 10;
+  const steps = 6000;
+  let xPrev = 0;
+  let yPrev = assocLaguerre(nr, alpha, xPrev);
+
+  for (let i = 1; i <= steps; i++) {
+    const x = maxX * i / steps;
+    const y = assocLaguerre(nr, alpha, x);
+
+    if (Math.abs(y) < 1e-8) {
+      zeros.push(x);
+    } else if (yPrev * y < 0) {
+      let a = xPrev;
+      let b = x;
+      let fa = yPrev;
+
+      for (let iter = 0; iter < 45; iter++) {
+        const mid = 0.5 * (a + b);
+        const fm = assocLaguerre(nr, alpha, mid);
+
+        if (fa * fm <= 0) {
+          b = mid;
+        } else {
+          a = mid;
+          fa = fm;
+        }
+      }
+
+      zeros.push(0.5 * (a + b));
+      if (zeros.length === nr) break;
+    }
+
+    xPrev = x;
+    yPrev = y;
+  }
+
+  return zeros.slice(0, nr);
+}
+
+function makeProfile() {
+  const n = Number(ui.n.value);
+  const m = Number(ui.m.value);
+  const angularType = ui.angularType.value;
+  const radiusScale = Number(ui.radiusScale.value) / 100;
+  const contrast = Number(ui.contrast.value) / 100;
+
+  const am = Math.abs(m);
+  const nr = Math.max(0, n - am - 1);
+  const rhoZeros = findLaguerreZeros(nr, 2 * am);
+  const radialNodeR = rhoZeros.map(rho => 0.5 * n * rho * radiusScale);
+
+  const rMax = Math.max(4.2 * radiusScale, Math.max(...radialNodeR, 0) * 1.20 + 0.2);
+
+  let maxDensity = 1e-12;
+  const sampleN = 190;
+
+  const p = { n, m, angularType, radiusScale, contrast, am, nr, radialNodeR, rMax, maxDensity };
+
+  for (let i = 0; i <= sampleN; i++) {
+    const x = -rMax + 2 * rMax * i / sampleN;
+    for (let j = 0; j <= sampleN; j++) {
+      const y = -rMax + 2 * rMax * j / sampleN;
+      const r = Math.sqrt(x * x + y * y);
+      if (r > rMax) continue;
+      const psi = psiValue(x, y, p);
+      const density = psi * psi;
+      if (density > maxDensity) maxDensity = density;
+    }
+  }
+
+  p.maxDensity = maxDensity;
+  p.scalePx = Math.min(W, H) * 0.39 / rMax;
+  return p;
+}
+
+function stateKey() {
+  return [
+    ui.n.value,
+    ui.m.value,
+    ui.angularType.value,
+    ui.colorMode.value,
+    ui.dotCount.value,
+    ui.pointSize.value,
+    ui.radiusScale.value,
+    ui.contrast.value,
+    ui.showHeatmap.checked,
+    ui.showDots.checked,
+    ui.showRadialNodes.checked,
+    ui.showAngularNodes.checked,
+    ui.showRadialPlot.checked,
+    ui.showAxes.checked
+  ].join("|");
+}
+
+function densityColor(s) {
+  s = Math.max(0, Math.min(1, s));
+  s = Math.pow(s, 0.62 / Math.max(profile.contrast, 0.1));
+
+  // High-contrast false-color palette on black:
+  // black -> indigo -> violet -> magenta -> orange -> yellow-white
+  let r, g, b;
+  if (s < 0.18) {
+    const t = s / 0.18;
+    r = Math.floor(8 + 40 * t);
+    g = Math.floor(0 + 8 * t);
+    b = Math.floor(18 + 95 * t);
+  } else if (s < 0.42) {
+    const t = (s - 0.18) / 0.24;
+    r = Math.floor(48 + 100 * t);
+    g = Math.floor(8 + 15 * t);
+    b = Math.floor(113 + 85 * t);
+  } else if (s < 0.68) {
+    const t = (s - 0.42) / 0.26;
+    r = Math.floor(148 + 85 * t);
+    g = Math.floor(23 + 42 * t);
+    b = Math.floor(198 - 95 * t);
+  } else if (s < 0.88) {
+    const t = (s - 0.68) / 0.20;
+    r = Math.floor(233 + 20 * t);
+    g = Math.floor(65 + 125 * t);
+    b = Math.floor(103 - 60 * t);
+  } else {
+    const t = (s - 0.88) / 0.12;
+    r = Math.floor(253 + 2 * t);
+    g = Math.floor(190 + 55 * t);
+    b = Math.floor(43 + 120 * t);
+  }
+  return [r, g, b, 255];
+}
+
+function drawBackground() {
+  ctx.fillStyle = "#000000";
+  ctx.fillRect(0, 0, W, H);
+}
+
+function drawHeatmap() {
+  if (!ui.showHeatmap.checked) return;
+
+  const step = 2;
+  const img = ctx.createImageData(W, H);
+  const data = img.data;
+
+  for (let py = 0; py < H; py += step) {
+    for (let px = 0; px < W; px += step) {
+      const x = (px - cx) / profile.scalePx;
+      const y = -(py - cy) / profile.scalePx;
+      const r = Math.sqrt(x * x + y * y);
+
+      let color = [0, 0, 0, 255];
+
+      if (r <= profile.rMax) {
+        const psi = psiValue(x, y, profile);
+        const density = psi * psi;
+        const s = density / profile.maxDensity;
+        color = densityColor(s);
+      }
+
+      for (let yy = 0; yy < step && py + yy < H; yy++) {
+        for (let xx = 0; xx < step && px + xx < W; xx++) {
+          const idx = 4 * ((py + yy) * W + (px + xx));
+          data[idx] = color[0];
+          data[idx + 1] = color[1];
+          data[idx + 2] = color[2];
+          data[idx + 3] = color[3];
+        }
+      }
+    }
+  }
+
+  ctx.putImageData(img, 0, 0);
+
+}
+
+function drawAxesAndReference() {
+  if (!ui.showAxes.checked) return;
+
+  ctx.save();
+
+  ctx.strokeStyle = "rgba(255,255,255,0.18)";
+  ctx.lineWidth = 1;
+
+  ctx.beginPath();
+  ctx.moveTo(35, cy);
+  ctx.lineTo(W - 35, cy);
+  ctx.moveTo(cx, 35);
+  ctx.lineTo(cx, H - 35);
+  ctx.stroke();
+
+  ctx.strokeStyle = "rgba(255,255,255,0.08)";
+  for (let i = 1; i <= 5; i++) {
+    const rr = profile.scalePx * profile.rMax * i / 5;
+    ctx.beginPath();
+    ctx.arc(cx, cy, rr, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  ctx.fillStyle = "rgba(255,255,255,0.72)";
+  ctx.font = "12px Segoe UI";
+  ctx.fillText("x", W - 28, cy - 8);
+  ctx.fillText("y", cx + 8, 24);
+
+  ctx.restore();
+}
+
+function drawAngularNodes() {
+  if (!ui.showAngularNodes.checked) return;
+  if (profile.m === 0) return;
+
+  ctx.save();
+  ctx.strokeStyle = "rgba(255,255,255,0.30)";
+  ctx.lineWidth = 1.2;
+  ctx.setLineDash([5, 6]);
+
+  const R = profile.scalePx * profile.rMax * 0.98;
+
+  for (let k = 0; k < 2 * profile.m; k++) {
+    let angle;
+    if (profile.angularType === "cos") {
+      angle = Math.PI / (2 * profile.m) + k * Math.PI / profile.m;
+    } else {
+      angle = k * Math.PI / profile.m;
+    }
+
+    ctx.beginPath();
+    ctx.moveTo(cx - R * Math.cos(angle), cy + R * Math.sin(angle));
+    ctx.lineTo(cx + R * Math.cos(angle), cy - R * Math.sin(angle));
+    ctx.stroke();
+  }
+
+  ctx.setLineDash([]);
+  ctx.restore();
+}
+
+function drawRadialNodeRings() {
+  if (!ui.showRadialNodes.checked) return;
+
+  ctx.save();
+
+  profile.radialNodeR.forEach((rNode, idx) => {
+    const rp = rNode * profile.scalePx;
+
+    ctx.strokeStyle = "rgba(251,191,36,0.98)";
+    ctx.lineWidth = 2.2;
+    ctx.setLineDash([8, 7]);
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, rp, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.setLineDash([]);
+    ctx.fillStyle = "rgba(251,191,36,0.95)";
+    ctx.font = "bold 12px Segoe UI";
+    ctx.fillText(`radial node ${idx + 1}`, cx + rp + 8, cy - 8);
+  });
+
+  ctx.restore();
+}
+
+function dotColor(psi, density) {
+  const s = Math.min(1, density / profile.maxDensity);
+  const alpha = 0.18 + 0.72 * Math.pow(s, 0.65);
+  return `rgba(255,255,255,${alpha.toFixed(3)})`;
+}
+
+function drawDots(batch) {
+  if (!ui.showDots.checked) return;
+
+  const pointR = Number(ui.pointSize.value) / 10;
+  let accepted = 0;
+  let tries = 0;
+  const maxTries = batch * 45;
+
+  while (accepted < batch && currentDots < targetDots && tries < maxTries) {
+    tries++;
+
+    // Sample uniformly in disk, then accept by probability density.
+    const u = Math.random();
+    const theta = 2 * Math.PI * Math.random();
+    const r = profile.rMax * Math.sqrt(u);
+    const x = r * Math.cos(theta);
+    const y = r * Math.sin(theta);
+
+    const psi = psiValue(x, y, profile);
+    const density = psi * psi;
+    const prob = density / profile.maxDensity;
+
+    if (Math.random() < prob) {
+      const px = cx + x * profile.scalePx;
+      const py = cy - y * profile.scalePx;
+
+      ctx.fillStyle = dotColor(psi, density);
+      ctx.beginPath();
+      ctx.arc(px, py, pointR, 0, Math.PI * 2);
+      ctx.fill();
+
+      currentDots++;
+      accepted++;
+    }
+  }
+
+  $("acceptedLabel").textContent = currentDots;
+}
+
+function drawRadialProfileInset() {
+  if (!ui.showRadialPlot.checked) return;
+
+  const boxW = 350;
+  const boxH = 230;
+  const x0 = W - boxW - 22;
+  const y0 = H - boxH - 22;
+  const padL = 46;
+  const padR = 22;
+  const padT = 42;
+  const padB = 42;
+
+  ctx.save();
+
+  ctx.fillStyle = "rgba(15,23,42,0.88)";
+  ctx.strokeStyle = "rgba(148,163,184,0.34)";
+  ctx.lineWidth = 1;
+  roundRect(x0, y0, boxW, boxH, 15);
+  ctx.fill();
+  ctx.stroke();
+
+  const plotX0 = x0 + padL;
+  const plotY0 = y0 + boxH - padB;
+  const plotW = boxW - padL - padR;
+  const plotH = boxH - padT - padB;
+
+  // Smooth high-resolution radial-probability curve:
+  // P(r) is proportional to 2πr|R(r)|². The angular factor changes only normalization.
+  let maxP = 1e-12;
+  const samples = [];
+  const N = 760;
+
+  for (let i = 0; i <= N; i++) {
+    const r = profile.rMax * i / N;
+    const Rv = radialPart(r / profile.radiusScale, profile.n, profile.m);
+    const radialProbability = 2 * Math.PI * r * Rv * Rv;
+    samples.push({ r, radialProbability });
+    maxP = Math.max(maxP, radialProbability);
+  }
+
+  // Soft grid.
+  ctx.strokeStyle = "rgba(148,163,184,0.12)";
+  ctx.lineWidth = 1;
+
+  for (let i = 1; i <= 4; i++) {
+    const gx = plotX0 + plotW * i / 4;
+    ctx.beginPath();
+    ctx.moveTo(gx, plotY0);
+    ctx.lineTo(gx, plotY0 - plotH);
+    ctx.stroke();
+
+    const gy = plotY0 - plotH * i / 4;
+    ctx.beginPath();
+    ctx.moveTo(plotX0, gy);
+    ctx.lineTo(plotX0 + plotW, gy);
+    ctx.stroke();
+  }
+
+  // Axes.
+  ctx.strokeStyle = "rgba(203,213,225,0.42)";
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.moveTo(plotX0, plotY0);
+  ctx.lineTo(plotX0 + plotW, plotY0);
+  ctx.moveTo(plotX0, plotY0);
+  ctx.lineTo(plotX0, plotY0 - plotH);
+  ctx.stroke();
+
+  // Light filled area under the curve.
+  ctx.beginPath();
+  samples.forEach((s, i) => {
+    const px = plotX0 + (s.r / profile.rMax) * plotW;
+    const py = plotY0 - (s.radialProbability / maxP) * plotH;
+    if (i === 0) ctx.moveTo(px, plotY0);
+    ctx.lineTo(px, py);
+  });
+  ctx.lineTo(plotX0 + plotW, plotY0);
+  ctx.closePath();
+  ctx.fillStyle = "rgba(52,211,153,0.10)";
+  ctx.fill();
+
+  // Smooth clean curve.
+  ctx.strokeStyle = "rgba(52,211,153,0.98)";
+  ctx.lineWidth = 3;
+  ctx.lineJoin = "round";
+  ctx.lineCap = "round";
+  ctx.beginPath();
+
+  samples.forEach((s, i) => {
+    const px = plotX0 + (s.r / profile.rMax) * plotW;
+    const py = plotY0 - (s.radialProbability / maxP) * plotH;
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  });
+
+  ctx.stroke();
+
+  // Mark radial nodes.
+  profile.radialNodeR.forEach((rNode, idx) => {
+    const px = plotX0 + (rNode / profile.rMax) * plotW;
+
+    ctx.strokeStyle = "rgba(251,191,36,0.95)";
+    ctx.lineWidth = 1.4;
+    ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    ctx.moveTo(px, plotY0);
+    ctx.lineTo(px, plotY0 - plotH);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.fillStyle = "rgba(251,191,36,0.95)";
+    ctx.font = "11px Segoe UI";
+    ctx.fillText(String(idx + 1), px + 4, plotY0 - plotH + 13);
+  });
+
+  // Labels.
+  ctx.fillStyle = "rgba(226,232,240,0.94)";
+  ctx.font = "bold 13px Segoe UI";
+  ctx.fillText("Radial probability", x0 + 16, y0 + 22);
+
+  ctx.fillStyle = "rgba(52,211,153,0.95)";
+  ctx.font = "12px Segoe UI";
+  ctx.fillText("P(r) ∝ 2πr|ψ(r)|²", x0 + 16, y0 + 40);
+
+  ctx.fillStyle = "rgba(203,213,225,0.76)";
+  ctx.font = "11px Segoe UI";
+  ctx.fillText("0", plotX0 - 12, plotY0 + 14);
+  ctx.fillText("r", plotX0 + plotW + 10, plotY0 + 4);
+  ctx.save();
+  ctx.translate(plotX0 - 32, plotY0 - plotH / 2 + 34);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText("relative probability in annulus", 0, 0);
+  ctx.restore();
+
+  ctx.restore();
+}
+
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function redrawBase() {
+  drawBackground();
+  drawHeatmap();
+  drawAxesAndReference();
+  drawAngularNodes();
+  drawRadialNodeRings();
+  drawRadialProfileInset();
+}
+
+function rebuild() {
+  syncMRange();
+  profile = makeProfile();
+  targetDots = Number(ui.dotCount.value);
+  currentDots = 0;
+  lastKey = stateKey();
+
+  $("radialNodes").textContent = profile.nr;
+  $("angularNodes").textContent = profile.m === 0 ? 0 : 2 * Math.abs(profile.m);
+  updateLabels();
+
+  redrawBase();
+
+  // Seed dots immediately so the plot is visible on page load.
+  drawDots(Math.min(targetDots, Number(ui.refreshRate.value) * 10));
+}
+
+function animate() {
+  frameCounter++;
+
+  if (stateKey() !== lastKey) {
+    rebuild();
+  }
+
+  if (running) {
+    if (currentDots < targetDots) {
+      drawDots(Number(ui.refreshRate.value));
+      if (frameCounter % 10 === 0) {
+        drawRadialNodeRings();
+        drawAngularNodes();
+        drawRadialProfileInset();
+      }
+    }
+  }
+
+  requestAnimationFrame(animate);
+}
+
+[
+  ui.n, ui.m, ui.angularType, ui.colorMode, ui.dotCount, ui.pointSize,
+  ui.radiusScale, ui.contrast, ui.refreshRate, ui.showHeatmap, ui.showDots,
+  ui.showRadialNodes, ui.showAngularNodes, ui.showRadialPlot, ui.showAxes
+].forEach(control => {
+  control.addEventListener("input", rebuild);
+  control.addEventListener("change", rebuild);
+});
+
+ui.playPause.addEventListener("click", () => {
+  running = !running;
+  ui.playPause.textContent = running ? "Pause" : "Play";
+});
+
+ui.clearBtn.addEventListener("click", rebuild);
+
+ui.resetBtn.addEventListener("click", () => {
+  ui.n.value = 4;
+  ui.m.value = 1;
+  ui.angularType.value = "cos";
+  ui.colorMode.value = "sign";
+  ui.dotCount.value = 22000;
+  ui.pointSize.value = 10;
+  ui.radiusScale.value = 100;
+  ui.contrast.value = 125;
+  ui.refreshRate.value = 800;
+  ui.showHeatmap.checked = true;
+  ui.showDots.checked = true;
+  ui.showRadialNodes.checked = true;
+  ui.showAngularNodes.checked = true;
+  ui.showRadialPlot.checked = true;
+  ui.showAxes.checked = true;
+  rebuild();
+});
+
+rebuild();
+console.log("2D hydrogen orbital radial-node visualizer loaded successfully.");
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>

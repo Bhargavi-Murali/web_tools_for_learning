@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Superposition</title>
+<style>
+:root{
+  --bg1:#07111f;
+  --bg2:#10213b;
+  --panel:rgba(15,23,42,0.94);
+  --line:rgba(148,163,184,0.22);
+  --text:#e5eefc;
+  --muted:#9fb3d9;
+  --blue:#60a5fa;
+  --green:#34d399;
+  --amber:#fbbf24;
+  --rose:#fb7185;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:"Segoe UI",Arial,sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(circle at 18% 12%,rgba(96,165,250,0.16),transparent 28rem),
+    radial-gradient(circle at 86% 82%,rgba(52,211,153,0.10),transparent 28rem),
+    linear-gradient(135deg,var(--bg1),var(--bg2));
+}
+.wrap{
+  max-width:1280px;
+  margin:24px auto;
+  padding:0 16px 30px;
+}
+.hero,.card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:20px;
+  box-shadow:0 14px 34px rgba(0,0,0,0.28);
+}
+.hero{
+  padding:22px 24px;
+  margin-bottom:18px;
+}
+h1{
+  margin:0 0 10px;
+  color:#dbeafe;
+  font-size:clamp(1.85rem,3vw,2.75rem);
+  letter-spacing:-0.035em;
+}
+.subtitle,.note{
+  margin:0;
+  color:var(--muted);
+  line-height:1.65;
+}
+.grid{
+  display:grid;
+  grid-template-columns:380px minmax(0,1fr);
+  gap:18px;
+  align-items:start;
+}
+.card{padding:18px}
+h2{
+  margin:0 0 12px;
+  color:#bfdbfe;
+  font-size:1.18rem;
+}
+h3{
+  margin:16px 0 8px;
+  color:#dbeafe;
+  font-size:1rem;
+}
+.control{
+  margin:14px 0 16px;
+}
+label{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  font-weight:650;
+  margin-bottom:7px;
+  color:#dce8ff;
+  line-height:1.35;
+}
+.value{
+  color:#86efac;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+}
+input[type=range]{
+  width:100%;
+  accent-color:var(--blue);
+}
+.toggle{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:10px 0;
+  color:#d7e7ff;
+  line-height:1.45;
+}
+.toggle input{transform:scale(1.1)}
+.row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin:14px 0;
+}
+button{
+  padding:10px 14px;
+  border:0;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:750;
+  background:var(--blue);
+  color:#06111f;
+}
+button.secondary{
+  background:#334155;
+  color:#e2e8f0;
+}
+canvas{
+  width:100%;
+  height:auto;
+  display:block;
+  background:
+    radial-gradient(circle at center,rgba(30,41,59,0.55),rgba(2,6,23,0.92)),
+    #020617;
+  border-radius:16px;
+  border:1px solid rgba(148,163,184,0.18);
+}
+.status{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+  margin-top:14px;
+}
+.pill{
+  background:rgba(30,41,59,0.88);
+  border:1px solid rgba(148,163,184,0.16);
+  border-radius:13px;
+  padding:10px;
+  text-align:center;
+}
+.pill b{
+  display:block;
+  color:#f8fafc;
+  margin-bottom:4px;
+  font-size:0.98rem;
+  font-variant-numeric:tabular-nums;
+}
+.pill span{
+  color:var(--muted);
+  font-size:0.86rem;
+  line-height:1.25;
+}
+.wave-list{
+  display:grid;
+  gap:10px;
+  max-height:720px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding-right:4px;
+}
+.wave-card{
+  background:rgba(30,41,59,0.82);
+  border:1px solid rgba(148,163,184,0.20);
+  border-radius:14px;
+  padding:12px;
+}
+.wave-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:8px;
+}
+.wave-title strong{
+  color:#e0f2fe;
+}
+.wave-title small{
+  color:#cbd5e1;
+}
+.mini-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:9px;
+}
+.small-control label{
+  font-size:0.86rem;
+  margin-bottom:4px;
+}
+.small-control input[type=range]{
+  height:18px;
+}
+.formula{
+  color:#fef3c7;
+  font-weight:700;
+  line-height:1.6;
+  margin:0;
+}
+.legend{
+  display:grid;
+  gap:8px;
+  margin-top:15px;
+  padding-top:14px;
+  border-top:1px solid var(--line);
+  color:var(--muted);
+  font-size:0.92rem;
+}
+.sw{
+  display:inline-block;
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  margin-right:8px;
+  vertical-align:middle;
+}
+.warn{
+  padding:10px 12px;
+  border-radius:12px;
+  background:rgba(251,191,36,0.10);
+  border-left:5px solid var(--amber);
+  color:#fde68a;
+  line-height:1.5;
+  margin-top:14px;
+  font-size:0.92rem;
+}
+@media(max-width:980px){
+  .grid{grid-template-columns:1fr}
+  .status{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+  <a class="back-link" href="../../index.html" style="display:inline-block;margin-bottom:14px;color:#bfdbfe;text-decoration:none;font-weight:700">&larr; Back to Interactive Learning Lab</a>
+  <section class="hero">
+    <h1>Superposition</h1>
+    <p class="subtitle">
+      This page adds ten travelling sine waves. Each wave has its own wavelength, amplitude, phase, and 
+	  velocity.
+      The Reset button now loads a wave-packet preset: nearby wave numbers, center-weighted amplitudes,
+      and aligned phases so that the resultant forms a localized packet.
+	  To understand how things work deactivate all components and use only two components and see how 
+	  the resultant changes. Add individual components one by one to create a wave packet kind of thing.
+	  
+    </p>
+  </section>
+
+  <div class="grid">
+    <aside class="card">
+      <h2>Global controls</h2>
+
+      <div class="control">
+        <label><span>Global velocity multiplier</span><span class="value" id="speedVal">1.00</span></label>
+        <input id="speed" type="range" min="-3" max="3" step="0.05" value="1" />
+      </div>
+
+      <div class="control">
+        <label><span>Animation speed</span><span class="value" id="animVal">1.00×</span></label>
+        <input id="animSpeed" type="range" min="0" max="250" step="5" value="100" />
+      </div>
+
+      <div class="control">
+        <label><span>Vertical scale</span><span class="value" id="scaleVal">1.00×</span></label>
+        <input id="scale" type="range" min="20" max="180" step="5" value="100" />
+      </div>
+
+      <div class="toggle"><input id="showIndividual" type="checkbox" checked><span>Show individual waves</span></div>
+      <div class="toggle"><input id="showResultant" type="checkbox" checked><span>Show resultant wave</span></div>
+      <div class="toggle"><input id="normalizeResult" type="checkbox"><span>Normalize resultant by active wave count</span></div>
+
+      <div class="row">
+        <button id="playPause">Pause</button>
+        <button class="secondary" id="resetBtn">Reset to Wave Packet</button>
+        <button class="secondary" id="randomBtn">Randomize phases</button>
+      </div>
+
+      <h2>Ten adjustable waves</h2>
+      <p class="note" style="margin-bottom:10px;">Scroll this panel if needed. Each wave has wavelength, amplitude, phase, velocity, and active/inactive controls.</p>
+      <div class="wave-list" id="waveControls"><div class="warn">Loading wave sliders...</div></div>
+
+      <div class="legend">
+        <div><span class="sw" style="background:#60a5fa"></span>blue/colored thin curves: individual waves, each with its own velocity</div>
+        <div><span class="sw" style="background:#34d399"></span>green thick curve: resultant wave</div>
+        <div><span class="sw" style="background:#fbbf24"></span>yellow marker: moving phase reference</div>
+      </div>
+    </aside>
+
+    <main>
+      <section class="card">
+        <h2>Wave animation</h2>
+        <canvas id="sim" width="940" height="560"></canvas>
+
+        <div class="status">
+          <div class="pill"><b id="activeVal">10</b><span>active waves</span></div>
+          <div class="pill"><b id="timeVal">0.00</b><span>time</span></div>
+          <div class="pill"><b id="resultAmpVal">0.00</b><span>resultant peak</span></div>
+          <div class="pill"><b id="equationVal">yᵢ=Aᵢ sin...</b><span>wave form</span></div>
+        </div>
+      </section>
+
+      <section class="card" style="margin-top:18px;">
+        <h2>Mathematical model</h2>
+        <p class="formula">
+          yᵢ(x,t) = Aᵢ sin[2π(x − m vᵢt)/λᵢ + φᵢ], &nbsp;&nbsp;
+          y_resultant(x,t) = Σ yᵢ(x,t)
+        </p>
+        <p class="note">
+          Each component has its own velocity \(vᵢ\). Wavelength \(λᵢ\), amplitude \(Aᵢ\), phase \(φᵢ\), and velocity \(vᵢ\)
+          can be adjusted separately for each of the ten waves. The global velocity multiplier \(m\) scales all component velocities together. Constructive and destructive interference
+          are visible directly in the resultant curve.
+        </p>
+        <div class="warn">
+          Tip: press Reset to return to a packet-like preset. The component phases are aligned so the waves
+          add strongly near one region and cancel away from it.
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById("sim");
+const ctx = canvas.getContext("2d");
+const $ = id => document.getElementById(id);
+
+const W = canvas.width;
+const H = canvas.height;
+const xmin = -10;
+const xmax = 10;
+
+let t = 0;
+let last = null;
+let playing = true;
+
+const colors = [
+  "#60a5fa", "#f472b6", "#34d399", "#fbbf24", "#a78bfa",
+  "#fb7185", "#22d3ee", "#c084fc", "#f97316", "#84cc16"
+];
+
+const defaultWaves = [
+  {lambda: 1.963, amp: 0.39, phase: 90, velocity: 1.00, active: true},
+  {lambda: 1.745, amp: 0.57, phase: 90, velocity: 1.00, active: true},
+  {lambda: 1.571, amp: 0.80, phase: 90, velocity: 1.00, active: true},
+  {lambda: 1.428, amp: 1.04, phase: 90, velocity: 1.00, active: true},
+  {lambda: 1.309, amp: 1.20, phase: 90, velocity: 1.00, active: true},
+  {lambda: 1.208, amp: 1.20, phase: 90, velocity: 1.00, active: true},
+  {lambda: 1.122, amp: 1.04, phase: 90, velocity: 1.00, active: true},
+  {lambda: 1.047, amp: 0.80, phase: 90, velocity: 1.00, active: true},
+  {lambda: 0.982, amp: 0.57, phase: 90, velocity: 1.00, active: true},
+  {lambda: 0.924, amp: 0.39, phase: 90, velocity: 1.00, active: true}
+];
+
+let waves = JSON.parse(JSON.stringify(defaultWaves));
+
+function buildWaveControls(){
+  const box = $("waveControls");
+  box.innerHTML = "";
+
+  waves.forEach((wave, i) => {
+    const card = document.createElement("div");
+    card.className = "wave-card";
+    card.innerHTML = `
+      <div class="wave-title">
+        <strong style="color:${colors[i]}">Wave ${i + 1}</strong>
+        <label style="margin:0;justify-content:flex-end;font-size:0.86rem;">
+          <input type="checkbox" id="active${i}" ${wave.active ? "checked" : ""}>
+          <small>active</small>
+        </label>
+      </div>
+
+      <div class="mini-grid">
+        <div class="small-control">
+          <label><span>Wavelength λ</span><span class="value" id="lambdaVal${i}">${wave.lambda.toFixed(2)}</span></label>
+          <input id="lambda${i}" type="range" min="0.5" max="8" step="0.05" value="${wave.lambda}">
+        </div>
+
+        <div class="small-control">
+          <label><span>Amplitude A</span><span class="value" id="ampVal${i}">${wave.amp.toFixed(2)}</span></label>
+          <input id="amp${i}" type="range" min="0" max="2" step="0.02" value="${wave.amp}">
+        </div>
+
+        <div class="small-control">
+          <label><span>Phase φ</span><span class="value" id="phaseVal${i}">${wave.phase.toFixed(0)}°</span></label>
+          <input id="phase${i}" type="range" min="0" max="360" step="1" value="${wave.phase}">
+        </div>
+
+        <div class="small-control">
+          <label><span>Velocity vᵢ</span><span class="value" id="velocityVal${i}">${wave.velocity.toFixed(2)}</span></label>
+          <input id="velocity${i}" type="range" min="-3" max="3" step="0.05" value="${wave.velocity}">
+        </div>
+      </div>
+    `;
+    box.appendChild(card);
+
+    $("active" + i).addEventListener("change", e => {
+      waves[i].active = e.target.checked;
+      draw();
+    });
+
+    $("lambda" + i).addEventListener("input", e => {
+      waves[i].lambda = Number(e.target.value);
+      $("lambdaVal" + i).textContent = waves[i].lambda.toFixed(2);
+      draw();
+    });
+
+    $("amp" + i).addEventListener("input", e => {
+      waves[i].amp = Number(e.target.value);
+      $("ampVal" + i).textContent = waves[i].amp.toFixed(2);
+      draw();
+    });
+
+    $("phase" + i).addEventListener("input", e => {
+      waves[i].phase = Number(e.target.value);
+      $("phaseVal" + i).textContent = waves[i].phase.toFixed(0) + "°";
+      draw();
+    });
+
+    $("velocity" + i).addEventListener("input", e => {
+      waves[i].velocity = Number(e.target.value);
+      $("velocityVal" + i).textContent = waves[i].velocity.toFixed(2);
+      draw();
+    });
+  });
+}
+
+function params(){
+  return {
+    speed: Number($("speed").value), // global velocity multiplier
+    animSpeed: Number($("animSpeed").value) / 100,
+    scale: Number($("scale").value) / 100,
+    showIndividual: $("showIndividual").checked,
+    showResultant: $("showResultant").checked,
+    normalize: $("normalizeResult").checked
+  };
+}
+
+function waveValue(wave, x, time, speedMultiplier){
+  const phi = wave.phase * Math.PI / 180;
+  const velocity = speedMultiplier * wave.velocity;
+  return wave.amp * Math.sin(2 * Math.PI * (x - velocity * time) / wave.lambda + phi);
+}
+
+function resultantValue(x, time, speed, normalize){
+  let y = 0;
+  let count = 0;
+
+  for (const wave of waves) {
+    if (!wave.active) continue;
+    y += waveValue(wave, x, time, speed);
+    count++;
+  }
+
+  if (normalize && count > 0) y /= count;
+  return y;
+}
+
+function xToCanvas(x){
+  return 55 + (x - xmin) / (xmax - xmin) * (W - 110);
+}
+
+function yToCanvas(y, mid, scale){
+  return mid - y * scale;
+}
+
+function drawGrid(){
+  ctx.save();
+
+  ctx.strokeStyle = "rgba(148,163,184,0.08)";
+  ctx.lineWidth = 1;
+
+  for(let x = Math.ceil(xmin); x <= xmax; x++){
+    const cx = xToCanvas(x);
+    ctx.beginPath();
+    ctx.moveTo(cx, 40);
+    ctx.lineTo(cx, H - 55);
+    ctx.stroke();
+  }
+
+  for(let y = -4; y <= 4; y++){
+    const cy = yToCanvas(y, H / 2, 45);
+    ctx.beginPath();
+    ctx.moveTo(45, cy);
+    ctx.lineTo(W - 45, cy);
+    ctx.stroke();
+  }
+
+  ctx.strokeStyle = "rgba(203,213,225,0.34)";
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.moveTo(45, H / 2);
+  ctx.lineTo(W - 45, H / 2);
+  ctx.stroke();
+
+  ctx.fillStyle = "rgba(203,213,225,0.78)";
+  ctx.font = "12px Segoe UI";
+  ctx.textAlign = "center";
+  for(let x = -10; x <= 10; x += 2){
+    ctx.fillText(String(x), xToCanvas(x), H - 28);
+  }
+
+  ctx.fillText("x", W - 52, H - 28);
+
+  ctx.restore();
+}
+
+function drawIndividualWaves(p){
+  if (!p.showIndividual) return;
+
+  ctx.save();
+  ctx.lineWidth = 1.15;
+
+  waves.forEach((wave, i) => {
+    if (!wave.active) return;
+
+    ctx.strokeStyle = colors[i] + "b0";
+    ctx.beginPath();
+
+    for(let px = 0; px <= W - 110; px++){
+      const x = xmin + px / (W - 110) * (xmax - xmin);
+      const y = waveValue(wave, x, t, p.speed);
+      const cx = xToCanvas(x);
+      const cy = yToCanvas(y, H / 2, 52 * p.scale);
+
+      if (px === 0) ctx.moveTo(cx, cy);
+      else ctx.lineTo(cx, cy);
+    }
+
+    ctx.stroke();
+  });
+
+  ctx.restore();
+}
+
+function drawResultant(p){
+  if (!p.showResultant) return;
+
+  let maxAbs = 0;
+  const samples = [];
+
+  for(let px = 0; px <= W - 110; px++){
+    const x = xmin + px / (W - 110) * (xmax - xmin);
+    const y = resultantValue(x, t, p.speed, p.normalize);
+    maxAbs = Math.max(maxAbs, Math.abs(y));
+    samples.push({x, y});
+  }
+
+  ctx.save();
+
+  // faint filled band under resultant
+  ctx.fillStyle = "rgba(52,211,153,0.10)";
+  ctx.beginPath();
+  samples.forEach((s, i) => {
+    const cx = xToCanvas(s.x);
+    const cy = yToCanvas(s.y, H / 2, 52 * p.scale);
+    if (i === 0) ctx.moveTo(cx, H / 2);
+    ctx.lineTo(cx, cy);
+  });
+  for(let i = samples.length - 1; i >= 0; i--){
+    ctx.lineTo(xToCanvas(samples[i].x), H / 2);
+  }
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.strokeStyle = "rgba(52,211,153,0.98)";
+  ctx.lineWidth = 3.4;
+  ctx.beginPath();
+
+  samples.forEach((s, i) => {
+    const cx = xToCanvas(s.x);
+    const cy = yToCanvas(s.y, H / 2, 52 * p.scale);
+    if (i === 0) ctx.moveTo(cx, cy);
+    else ctx.lineTo(cx, cy);
+  });
+
+  ctx.stroke();
+
+  ctx.restore();
+
+  $("resultAmpVal").textContent = maxAbs.toFixed(2);
+}
+
+function drawPhaseMarker(p){
+  const active = waves.filter(w => w.active);
+  if(active.length === 0) return;
+
+  const meanVelocity = active.reduce((sum, w) => sum + w.velocity, 0) / active.length;
+  const x = ((p.speed * meanVelocity * t + 10) % 20) - 10;
+  const cx = xToCanvas(x);
+
+  ctx.save();
+  ctx.strokeStyle = "rgba(251,191,36,0.65)";
+  ctx.setLineDash([6, 6]);
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(cx, 50);
+  ctx.lineTo(cx, H - 60);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.fillStyle = "rgba(251,191,36,0.95)";
+  ctx.font = "13px Segoe UI";
+  ctx.textAlign = "center";
+  ctx.fillText("mean velocity reference", cx, 42);
+  ctx.restore();
+}
+
+function drawLabels(p){
+  const active = waves.filter(w => w.active).length;
+
+  $("speedVal").textContent = p.speed.toFixed(2);
+  $("animVal").textContent = p.animSpeed.toFixed(2) + "×";
+  $("scaleVal").textContent = p.scale.toFixed(2) + "×";
+  $("activeVal").textContent = active;
+  $("timeVal").textContent = t.toFixed(2);
+  $("equationVal").textContent = "Σ yᵢ";
+
+  ctx.save();
+  ctx.fillStyle = "rgba(15,23,42,0.78)";
+  ctx.strokeStyle = "rgba(148,163,184,0.25)";
+  ctx.lineWidth = 1;
+  roundRect(24, 22, 430, 112, 14);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = "#e2e8f0";
+  ctx.font = "13px Segoe UI";
+  ctx.textAlign = "left";
+  ctx.fillText("Each wave: yᵢ = Aᵢ sin[2π(x − m vᵢt)/λᵢ + φᵢ]", 42, 50);
+  ctx.fillText("Global velocity multiplier m = " + p.speed.toFixed(2), 42, 74);
+  ctx.fillText("Resultant: y = y₁ + y₂ + ... + y₁₀", 42, 98);
+  ctx.fillText("Reset preset: aligned phases + nearby wavelengths → packet", 42, 122);
+  ctx.restore();
+}
+
+function roundRect(x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function draw(){
+  const p = params();
+
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = "#020617";
+  ctx.fillRect(0, 0, W, H);
+
+  drawGrid();
+  drawPhaseMarker(p);
+  drawIndividualWaves(p);
+  drawResultant(p);
+  drawLabels(p);
+}
+
+function animate(now){
+  if (last === null) last = now;
+  const dt = Math.min(0.035, (now - last) / 1000);
+  last = now;
+
+  const p = params();
+  if (playing) {
+    t += dt * p.animSpeed;
+  }
+
+  draw();
+  requestAnimationFrame(animate);
+}
+
+function reset(){
+  t = 0;
+  waves = JSON.parse(JSON.stringify(defaultWaves));
+
+  $("speed").value = 1;
+  $("animSpeed").value = 100;
+  $("scale").value = 70;
+  $("showIndividual").checked = true;
+  $("showResultant").checked = true;
+  $("normalizeResult").checked = false;
+
+  buildWaveControls();
+  draw();
+}
+
+function randomizePhases(){
+  waves.forEach(wave => {
+    wave.phase = Math.floor(Math.random() * 361);
+  });
+  buildWaveControls();
+  draw();
+}
+
+["speed", "animSpeed", "scale", "showIndividual", "showResultant", "normalizeResult"].forEach(id => {
+  $(id).addEventListener("input", draw);
+  $(id).addEventListener("change", draw);
+});
+
+$("playPause").addEventListener("click", () => {
+  playing = !playing;
+  $("playPause").textContent = playing ? "Pause" : "Play";
+});
+
+$("resetBtn").addEventListener("click", reset);
+$("randomBtn").addEventListener("click", randomizePhases);
+
+buildWaveControls();
+console.log("Ten travelling waves simulation loaded successfully.");
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>J. J. Thomson Cathode Ray Experiment</title>
+<style>
+:root{--bg:#07111f;--panel:#0f172a;--text:#e5eefc;--muted:#9fb3d9;--blue:#60a5fa;--green:#34d399;--amber:#fbbf24;--red:#fb7185}
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;color:var(--text);background:radial-gradient(circle at 20% 15%,rgba(96,165,250,.16),transparent 28rem),linear-gradient(135deg,#07111f,#10213b);min-height:100vh}
+.wrap{max-width:1240px;margin:24px auto;padding:0 16px 30px}
+.hero,.card{background:rgba(15,23,42,.94);border:1px solid rgba(148,163,184,.22);border-radius:20px;box-shadow:0 14px 34px rgba(0,0,0,.28)}
+.hero{padding:22px 24px;margin-bottom:18px}
+h1{margin:0 0 10px;color:#dbeafe;font-size:clamp(1.8rem,3vw,2.7rem)}
+.subtitle,.note{color:var(--muted);line-height:1.6;margin:0}
+.grid{display:grid;grid-template-columns:340px 1fr;gap:18px}
+.card{padding:18px}
+h2{margin:0 0 12px;color:#bfdbfe;font-size:1.18rem}
+h3{margin:16px 0 8px;color:#dbeafe;font-size:1rem}
+.control{margin:14px 0}
+label{display:flex;justify-content:space-between;gap:10px;font-weight:650;margin-bottom:7px;color:#dce8ff}
+.value{color:#86efac;font-variant-numeric:tabular-nums;white-space:nowrap}
+input[type=range]{width:100%;accent-color:var(--blue)}
+.toggle{display:flex;align-items:center;gap:10px;margin:10px 0;color:#d7e7ff;line-height:1.45}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+button{padding:10px 13px;border:0;border-radius:10px;font-weight:750;cursor:pointer;background:var(--blue);color:#06111f}
+button.secondary{background:#334155;color:#e2e8f0}
+button.tab{background:#1e293b;color:#dbeafe;border:1px solid rgba(148,163,184,.28)}
+button.tab.active{background:#2563eb;color:#fff}
+canvas{width:100%;height:auto;display:block;background:radial-gradient(circle at center,rgba(30,41,59,.55),rgba(2,6,23,.92)),#020617;border:1px solid rgba(148,163,184,.18);border-radius:16px}
+.status{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+.pill{background:rgba(30,41,59,.88);border:1px solid rgba(148,163,184,.16);border-radius:13px;padding:10px;text-align:center}
+.pill b{display:block;color:#f8fafc;font-variant-numeric:tabular-nums;margin-bottom:4px}
+.pill span{color:var(--muted);font-size:.86rem}
+.legend{display:grid;gap:8px;margin-top:15px;padding-top:14px;border-top:1px solid rgba(148,163,184,.22);color:var(--muted);font-size:.92rem}
+.sw{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:8px;vertical-align:middle}
+.warn{padding:10px 12px;border-radius:12px;background:rgba(251,191,36,.10);border-left:5px solid var(--amber);color:#fde68a;line-height:1.5;margin-top:14px;font-size:.92rem}
+.formula{color:#fef3c7;font-weight:700;line-height:1.6}
+table{width:100%;border-collapse:collapse;margin-top:12px;color:#e2e8f0;font-size:.9rem}
+td,th{border:1px solid rgba(148,163,184,.22);padding:8px 9px;text-align:left}
+th{background:rgba(96,165,250,.15);color:#bfdbfe}
+@media(max-width:920px){.grid{grid-template-columns:1fr}.status{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<a class="back-link" href="../../index.html" style="display:inline-block;margin-bottom:14px;color:#bfdbfe;text-decoration:none;font-weight:700">&larr; Back to Interactive Learning Lab</a>
+<section class="hero">
+<h1>J. J. Thomson Cathode-Ray Experiment</h1>
+<p class="subtitle">A cathode-ray beam passes through electric and magnetic fields. The simulation integrates the electron path using the Lorentz force, \(F=q(E+v\times B)\), and shows how Thomson could balance the deflections and estimate the electron charge-to-mass ratio \(e/m\).</p>
+</section>
+
+<div class="grid">
+<aside class="card">
+<h2>Controls</h2>
+
+<div class="control"><label><span>Accelerating voltage \(V_a\)</span><span class="value" id="vaVal"></span></label><input id="va" type="range" min="200" max="5000" step="50" value="1500"></div>
+
+<h3>Electric field plates</h3>
+<div class="toggle"><input id="electricOn" type="checkbox" checked><span>Electric field ON</span></div>
+<div class="control"><label><span>Plate voltage \(V_p\)</span><span class="value" id="vpVal"></span></label><input id="vp" type="range" min="0" max="500" step="5" value="120"></div>
+<div class="control"><label><span>Plate separation</span><span class="value" id="sepVal"></span></label><input id="sep" type="range" min="8" max="60" step="1" value="25"></div>
+<div class="toggle"><input id="reverseE" type="checkbox"><span>Reverse electric field</span></div>
+
+<h3>Magnetic field coils</h3>
+<div class="toggle"><input id="magneticOn" type="checkbox"><span>Magnetic field ON</span></div>
+<div class="control"><label><span>Magnetic field \(B\)</span><span class="value" id="bVal"></span></label><input id="bfield" type="range" min="0" max="500" step="5" value="150"></div>
+<div class="toggle"><input id="reverseB" type="checkbox"><span>Reverse magnetic field</span></div>
+
+<div class="row"><button id="balanceBtn">Set B to balance E</button><button class="secondary" id="resetBtn">Reset</button></div>
+
+<h3>Display</h3>
+<div class="toggle"><input id="showForces" type="checkbox" checked><span>Show force arrows</span></div>
+<div class="toggle"><input id="showTrail" type="checkbox" checked><span>Show beam trail</span></div>
+<div class="toggle"><input id="showFormula" type="checkbox" checked><span>Show formulas</span></div>
+
+<div class="legend">
+<div><span class="sw" style="background:#38bdf8"></span>cyan beam: electron/cathode ray</div>
+<div><span class="sw" style="background:#fb7185"></span>red arrow: electric force</div>
+<div><span class="sw" style="background:#34d399"></span>green arrow: magnetic force</div>
+<div><span class="sw" style="background:#fbbf24"></span>yellow spot: screen impact</div>
+</div>
+
+<div class="warn">The equations are physical, but the display is a simplified 2D vacuum tube for teaching.</div>
+</aside>
+
+<main>
+<section class="card">
+<div class="row" style="margin-top:0"><button class="tab active" id="tabExperiment">Experiment view</button><button class="tab" id="tabMeasurement">Measurement view</button></div>
+<canvas id="sim" width="940" height="560"></canvas>
+<div class="status">
+<div class="pill"><b id="speedReadout"></b><span>electron speed</span></div>
+<div class="pill"><b id="deflectionReadout"></b><span>screen deflection</span></div>
+<div class="pill"><b id="balanceReadout"></b><span>E/B condition</span></div>
+<div class="pill"><b id="emReadout"></b><span>modern \(e/m\)</span></div>
+</div>
+</section>
+
+<section class="card" style="margin-top:18px">
+<h2>How the measurement works</h2>
+<p class="formula">Balance condition: \(eE=evB\Rightarrow v=E/B\). Magnetic curvature: \(evB=mv^2/r\Rightarrow e/m=v/(Br)\).</p>
+<p class="note">The button <b>Set B to balance E</b> chooses the magnetic field that nearly cancels electric deflection. In measurement view, the simulation fits a circular arc in the magnetic-field region and estimates \(e/m\).</p>
+<div id="measurementTable"></div>
+</section>
+</main>
+</div>
+</div>
+
+<script>
+const el=id=>document.getElementById(id);
+const canvas=el("sim"),ctx=canvas.getContext("2d");
+const va=el("va"),vp=el("vp"),sep=el("sep"),bfield=el("bfield");
+const electricOn=el("electricOn"),magneticOn=el("magneticOn"),reverseE=el("reverseE"),reverseB=el("reverseB");
+const showForces=el("showForces"),showTrail=el("showTrail"),showFormula=el("showFormula");
+const W=canvas.width,H=canvas.height;
+const qe=-1.602176634e-19, eAbs=1.602176634e-19, me=9.1093837015e-31, trueEM=eAbs/me;
+const tube={x0:0,x1:.42,yHalf:.09,fieldStart:.10,fieldEnd:.30,screenX:.40};
+let viewMode="experiment";
+
+function sup(n){const m={"-":"⁻","0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹"};return String(n).split("").map(c=>m[c]||c).join("")}
+function sci(v,d=3){if(!isFinite(v)||v===0)return"0";let ex=Math.floor(Math.log10(Math.abs(v))),ma=v/10**ex;return ma.toFixed(d-1)+"×10"+sup(ex)}
+function params(){
+  const Va=+va.value, Vp=+vp.value, d=+sep.value/1000;
+  const E=electricOn.checked?(reverseE.checked?-1:1)*Vp/d:0;
+  const B=magneticOn.checked?(reverseB.checked?-1:1)*(+bfield.value)/100000:0;
+  const v0=Math.sqrt(2*eAbs*Va/me);
+  return{Va,Vp,d,E,B,v0};
+}
+function map(x,y){
+  const L=60,R=W-80,T=70,B=H-80;
+  return{x:L+(x-tube.x0)/(tube.x1-tube.x0)*(R-L),y:(T+B)/2-y/tube.yHalf*((B-T)/2)};
+}
+function labels(){
+  const p=params();
+  el("vaVal").textContent=p.Va.toFixed(0)+" V";
+  el("vpVal").textContent=p.Vp.toFixed(0)+" V";
+  el("sepVal").textContent=(p.d*1000).toFixed(0)+" mm";
+  el("bVal").textContent=Math.abs(p.B*1000).toFixed(2)+" mT";
+  el("speedReadout").textContent=sci(p.v0)+" m/s";
+  el("emReadout").textContent=sci(trueEM)+" C/kg";
+}
+function simulate(){
+  const p=params(), pts=[];
+  let x=.015,y=0,vx=p.v0,vy=0,dt=2.2e-11;
+  for(let k=0;k<20000&&x<tube.screenX;k++){
+    let E=0,B=0;
+    if(x>=tube.fieldStart&&x<=tube.fieldEnd){E=p.E;B=p.B}
+    const ax=(qe/me)*(vy*B);
+    const ay=(qe/me)*(E-vx*B);
+    vx+=ax*dt; vy+=ay*dt; x+=vx*dt; y+=vy*dt;
+    if(k%3===0)pts.push({x,y,vx,vy});
+    if(Math.abs(y)>tube.yHalf*1.18)break;
+  }
+  return{points:pts,hit:{x,y,vx,vy}};
+}
+function radiusFit(points){
+  const p=params();
+  if(!magneticOn.checked||Math.abs(p.B)<1e-10)return null;
+  const a=points.filter(pt=>pt.x>tube.fieldStart&&pt.x<tube.fieldEnd);
+  if(a.length<12)return null;
+  const p1=a[Math.floor(a.length*.25)],p2=a[Math.floor(a.length*.5)],p3=a[Math.floor(a.length*.75)];
+  const x1=p1.x,y1=p1.y,x2=p2.x,y2=p2.y,x3=p3.x,y3=p3.y;
+  const A=x1*(y2-y3)-y1*(x2-x3)+x2*y3-x3*y2;
+  if(Math.abs(A)<1e-12)return null;
+  const Bc=(x1*x1+y1*y1)*(y3-y2)+(x2*x2+y2*y2)*(y1-y3)+(x3*x3+y3*y3)*(y2-y1);
+  const Cc=(x1*x1+y1*y1)*(x2-x3)+(x2*x2+y2*y2)*(x3-x1)+(x3*x3+y3*y3)*(x1-x2);
+  const Dc=(x1*x1+y1*y1)*(x3*y2-x2*y3)+(x2*x2+y2*y2)*(x1*y3-x3*y1)+(x3*x3+y3*y3)*(x2*y1-x1*y2);
+  const cx=-Bc/(2*A),cy=-Cc/(2*A),r=Math.sqrt((Bc*Bc+Cc*Cc-4*A*Dc)/(4*A*A));
+  return{cx,cy,r};
+}
+function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+function arrow(x1,y1,x2,y2,color,w=2){const a=Math.atan2(y2-y1,x2-x1),h=8;ctx.save();ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-h*Math.cos(a-Math.PI/7),y2-h*Math.sin(a-Math.PI/7));ctx.lineTo(x2-h*Math.cos(a+Math.PI/7),y2-h*Math.sin(a+Math.PI/7));ctx.closePath();ctx.fill();ctx.restore()}
+function bmark(x,y,out){ctx.save();ctx.strokeStyle="rgba(52,211,153,.8)";ctx.fillStyle="rgba(52,211,153,.8)";ctx.lineWidth=1.6;if(out){ctx.beginPath();ctx.arc(x,y,5,0,7);ctx.stroke();ctx.beginPath();ctx.arc(x,y,1.8,0,7);ctx.fill()}else{ctx.beginPath();ctx.moveTo(x-5,y-5);ctx.lineTo(x+5,y+5);ctx.moveTo(x+5,y-5);ctx.lineTo(x-5,y+5);ctx.stroke()}ctx.restore()}
+function tubeDraw(){
+  ctx.clearRect(0,0,W,H);ctx.fillStyle="#020617";ctx.fillRect(0,0,W,H);
+  const a=map(tube.x0,tube.yHalf),b=map(tube.x1,-tube.yHalf),cy=map(0,0).y;
+  ctx.save();
+  ctx.strokeStyle="rgba(191,219,254,.28)";ctx.lineWidth=3;rr(a.x,a.y,b.x-a.x,b.y-a.y,26);ctx.stroke();
+  let c=map(.02,0);ctx.strokeStyle="rgba(96,165,250,.95)";ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(c.x,c.y-42);ctx.lineTo(c.x,c.y+42);ctx.stroke();ctx.fillStyle="#bfdbfe";ctx.font="bold 14px Segoe UI";ctx.textAlign="center";ctx.fillText("Cathode",c.x,c.y+64);
+  let an=map(.075,0);ctx.strokeStyle="rgba(226,232,240,.75)";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(an.x,an.y-38);ctx.lineTo(an.x,an.y-10);ctx.moveTo(an.x,an.y+10);ctx.lineTo(an.x,an.y+38);ctx.stroke();ctx.fillText("Anode slit",an.x,an.y+62);
+  let fsT=map(tube.fieldStart,.05),feT=map(tube.fieldEnd,.05),fsB=map(tube.fieldStart,-.05),feB=map(tube.fieldEnd,-.05);
+  ctx.fillStyle="rgba(251,191,36,.22)";ctx.strokeStyle="rgba(251,191,36,.9)";ctx.lineWidth=2;rr(fsT.x,fsT.y-8,feT.x-fsT.x,16,8);ctx.fill();ctx.stroke();rr(fsB.x,fsB.y-8,feB.x-fsB.x,16,8);ctx.fill();ctx.stroke();ctx.fillStyle="#fde68a";ctx.fillText("Deflection plates",(fsT.x+feT.x)/2,fsT.y-18);
+  let rg0=map(tube.fieldStart,tube.yHalf*.82),rg1=map(tube.fieldEnd,-tube.yHalf*.82);
+  ctx.strokeStyle=magneticOn.checked?"rgba(52,211,153,.45)":"rgba(148,163,184,.16)";ctx.setLineDash([7,6]);ctx.strokeRect(rg0.x,rg0.y,rg1.x-rg0.x,rg1.y-rg0.y);ctx.setLineDash([]);ctx.fillStyle=magneticOn.checked?"#bbf7d0":"rgba(203,213,225,.55)";ctx.fillText("B-field region",(rg0.x+rg1.x)/2,rg1.y+22);
+  if(magneticOn.checked){let B=params().B;for(let i=0;i<5;i++)for(let j=0;j<4;j++)bmark(rg0.x+(i+.5)*(rg1.x-rg0.x)/5,rg0.y+(j+.5)*(rg1.y-rg0.y)/4,B>0)}
+  let s=map(tube.screenX,0);ctx.strokeStyle="rgba(248,250,252,.9)";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(s.x,s.y-120);ctx.lineTo(s.x,s.y+120);ctx.stroke();ctx.fillStyle="#e2e8f0";ctx.fillText("Fluorescent screen",s.x,s.y+142);
+  ctx.restore();
+}
+function drawBeam(path){
+  const pts=path.points;if(!pts.length)return;ctx.save();
+  if(showTrail.checked){ctx.strokeStyle="rgba(56,189,248,.34)";ctx.lineWidth=9;ctx.beginPath();pts.forEach((p,i)=>{let q=map(p.x,p.y);i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y)});ctx.stroke()}
+  ctx.strokeStyle="rgba(125,211,252,.98)";ctx.lineWidth=2.8;ctx.beginPath();pts.forEach((p,i)=>{let q=map(p.x,p.y);i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y)});ctx.stroke();
+  const hit=map(path.hit.x,path.hit.y),g=ctx.createRadialGradient(hit.x,hit.y,2,hit.x,hit.y,22);g.addColorStop(0,"rgba(254,240,138,1)");g.addColorStop(.35,"rgba(251,191,36,.84)");g.addColorStop(1,"rgba(251,191,36,0)");ctx.fillStyle=g;ctx.beginPath();ctx.arc(hit.x,hit.y,22,0,7);ctx.fill();ctx.fillStyle="#fde68a";ctx.beginPath();ctx.arc(hit.x,hit.y,5.5,0,7);ctx.fill();ctx.restore()
+}
+function drawForces(path){
+  if(!showForces.checked)return;const p=params();const s=path.points.find(pt=>pt.x>tube.fieldStart+.08&&pt.x<tube.fieldEnd-.02);if(!s)return;const q=map(s.x,s.y);
+  const FyE=qe*p.E,FyB=qe*(-s.vx*p.B);
+  if(electricOn.checked&&Math.abs(p.E)>1){let dir=FyE>0?-1:1;arrow(q.x-20,q.y,q.x-20,q.y+dir*45,"rgba(251,113,133,.94)",2.4);ctx.fillStyle="rgba(251,113,133,.94)";ctx.font="13px Segoe UI";ctx.fillText("F_E",q.x-44,q.y+dir*52)}
+  if(magneticOn.checked&&Math.abs(p.B)>1e-8){let dir=FyB>0?-1:1;arrow(q.x+20,q.y,q.x+20,q.y+dir*45,"rgba(52,211,153,.94)",2.4);ctx.fillStyle="rgba(52,211,153,.94)";ctx.fillText("F_B",q.x+28,q.y+dir*52)}
+}
+function overlay(path){
+  if(viewMode!=="measurement")return;const r=radiusFit(path.points);if(!r)return;let cen=map(r.cx,r.cy),edge=map(r.cx+r.r,r.cy),rp=Math.abs(edge.x-cen.x);ctx.save();ctx.strokeStyle="rgba(167,139,250,.42)";ctx.lineWidth=2;ctx.setLineDash([8,8]);ctx.beginPath();ctx.arc(cen.x,cen.y,rp,0,7);ctx.stroke();ctx.setLineDash([]);let mid=path.points[Math.floor(path.points.length*.55)];if(mid){let mp=map(mid.x,mid.y);ctx.strokeStyle="rgba(167,139,250,.85)";ctx.beginPath();ctx.moveTo(cen.x,cen.y);ctx.lineTo(mp.x,mp.y);ctx.stroke();ctx.fillStyle="#ddd6fe";ctx.font="14px Segoe UI";ctx.fillText("r ≈ "+(r.r*1000).toFixed(1)+" mm",(cen.x+mp.x)/2+8,(cen.y+mp.y)/2)}ctx.restore()
+}
+function formula(){
+  if(!showFormula.checked)return;const p=params(),E=Math.abs(p.E),B=Math.abs(p.B),bal=E/p.v0,ratio=B>0?E/(p.v0*B):Infinity;
+  ctx.save();ctx.fillStyle="rgba(15,23,42,.84)";ctx.strokeStyle="rgba(148,163,184,.26)";rr(22,22,330,122,14);ctx.fill();ctx.stroke();ctx.fillStyle="#e2e8f0";ctx.font="13px Segoe UI";ctx.textAlign="left";ctx.fillText("Lorentz force: F = q(E + v × B)",38,48);ctx.fillText("E = Vp/d = "+sci(E)+" V/m",38,72);ctx.fillText("v = √(2eVa/m) = "+sci(p.v0)+" m/s",38,96);ctx.fillText("Balance: B = E/v = "+(bal*1000).toFixed(3)+" mT",38,120);ctx.fillText(isFinite(ratio)?"E/(vB) = "+ratio.toFixed(3):"E/(vB): B is off",38,142);ctx.restore()
+}
+function updateTable(path){
+  const p=params(),def=path.hit.y*1000,E=Math.abs(p.E),B=Math.abs(p.B),bal=E/p.v0,err=B?Math.abs(B-bal)/Math.max(bal,1e-12):Infinity;
+  el("deflectionReadout").textContent=def.toFixed(1)+" mm";
+  el("balanceReadout").textContent=(!electricOn.checked||!magneticOn.checked)?"need E and B":(err<.03?"balanced":"not balanced");
+  const r=radiusFit(path.points);let em=null;if(r&&B>0)em=p.v0/(B*r.r);
+  el("measurementTable").innerHTML=`<table><tr><th>Quantity</th><th>Value</th><th>Use</th></tr>
+  <tr><td>Accelerating voltage V<sub>a</sub></td><td>${p.Va.toFixed(0)} V</td><td>sets kinetic energy</td></tr>
+  <tr><td>Beam speed v</td><td>${sci(p.v0)} m/s</td><td>from √(2eV<sub>a</sub>/m)</td></tr>
+  <tr><td>Electric field E</td><td>${sci(E)} V/m</td><td>between plates</td></tr>
+  <tr><td>Magnetic field B</td><td>${(B*1000).toFixed(3)} mT</td><td>coil field</td></tr>
+  <tr><td>Balance B = E/v</td><td>${(bal*1000).toFixed(3)} mT</td><td>undeflected beam</td></tr>
+  <tr><td>e/m from curvature</td><td>${em?sci(em)+" C/kg":"Turn on B and use measurement view"}</td><td>uses e/m = v/(Br)</td></tr>
+  <tr><td>Modern reference</td><td>${sci(trueEM)} C/kg</td><td>electron value</td></tr></table>`;
+}
+function redraw(){labels();const path=simulate();tubeDraw();drawBeam(path);drawForces(path);overlay(path);formula();updateTable(path)}
+function balance(){
+  const p=params(),E=Math.abs(p.E);if(E<=0){alert("Turn on electric field and set non-zero plate voltage.");return}
+  const need=E/p.v0; bfield.value=Math.max(+bfield.min,Math.min(+bfield.max,Math.round(need*100000/5)*5)); magneticOn.checked=true; reverseB.checked=Math.sign(p.E)<0; redraw()
+}
+function reset(){va.value=1500;electricOn.checked=true;vp.value=120;sep.value=25;reverseE.checked=false;magneticOn.checked=false;bfield.value=150;reverseB.checked=false;showForces.checked=true;showTrail.checked=true;showFormula.checked=true;viewMode="experiment";el("tabExperiment").classList.add("active");el("tabMeasurement").classList.remove("active");redraw()}
+[va,vp,sep,bfield,electricOn,magneticOn,reverseE,reverseB,showForces,showTrail,showFormula].forEach(x=>{x.addEventListener("input",redraw);x.addEventListener("change",redraw)});
+el("balanceBtn").addEventListener("click",balance);el("resetBtn").addEventListener("click",reset);
+el("tabExperiment").onclick=()=>{viewMode="experiment";el("tabExperiment").classList.add("active");el("tabMeasurement").classList.remove("active");redraw()};
+el("tabMeasurement").onclick=()=>{viewMode="measurement";el("tabMeasurement").classList.add("active");el("tabExperiment").classList.remove("active");redraw()};
+redraw();
+</script>
+</body>
+</html>

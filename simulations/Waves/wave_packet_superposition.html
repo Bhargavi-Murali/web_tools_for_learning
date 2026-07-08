@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Wave Packets</title>
+<style>
+:root{--bg1:#07111f;--bg2:#10213b;--panel:rgba(15,23,42,.94);--line:rgba(148,163,184,.22);--text:#e5eefc;--muted:#9fb3d9;--blue:#60a5fa;--green:#34d399;--amber:#fbbf24;--rose:#fb7185}*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:"Segoe UI",Arial,sans-serif;color:var(--text);background:radial-gradient(circle at 18% 12%,rgba(96,165,250,.16),transparent 28rem),radial-gradient(circle at 86% 82%,rgba(52,211,153,.10),transparent 28rem),linear-gradient(135deg,var(--bg1),var(--bg2))}.wrap{max-width:1260px;margin:24px auto;padding:0 16px 30px}.hero,.card{background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:0 14px 34px rgba(0,0,0,.28)}.hero{padding:22px 24px;margin-bottom:18px}h1{margin:0 0 10px;color:#dbeafe;font-size:clamp(1.85rem,3vw,2.75rem);letter-spacing:-.035em}.subtitle,.note{margin:0;color:var(--muted);line-height:1.65}.grid{display:grid;grid-template-columns:350px minmax(0,1fr);gap:18px;align-items:start}.card{padding:18px}h2{margin:0 0 12px;color:#bfdbfe;font-size:1.18rem}h3{margin:16px 0 8px;color:#dbeafe;font-size:1rem}.control{margin:14px 0 16px}label{display:flex;justify-content:space-between;gap:12px;font-weight:650;margin-bottom:7px;color:#dce8ff;line-height:1.35}.value{color:#86efac;font-variant-numeric:tabular-nums;white-space:nowrap}input[type=range]{width:100%;accent-color:var(--blue)}.toggle{display:flex;align-items:center;gap:10px;margin:10px 0;color:#d7e7ff;line-height:1.45}.toggle input{transform:scale(1.1)}.row{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 4px}button{padding:10px 14px;border:0;border-radius:10px;cursor:pointer;font-weight:750;background:var(--blue);color:#06111f}button.secondary{background:#334155;color:#e2e8f0}canvas{width:100%;height:auto;display:block;background:radial-gradient(circle at center,rgba(30,41,59,.55),rgba(2,6,23,.92)),#020617;border-radius:16px;border:1px solid rgba(148,163,184,.18)}.status{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}.pill{background:rgba(30,41,59,.88);border:1px solid rgba(148,163,184,.16);border-radius:13px;padding:10px;text-align:center}.pill b{display:block;color:#f8fafc;margin-bottom:4px;font-size:.98rem;font-variant-numeric:tabular-nums}.pill span{color:var(--muted);font-size:.86rem;line-height:1.25}.formula{color:#fef3c7;font-weight:700;line-height:1.6;margin:0}.legend{display:grid;gap:8px;margin-top:15px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:.92rem}.sw{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:8px;vertical-align:middle}.warn{padding:10px 12px;border-radius:12px;background:rgba(251,191,36,.10);border-left:5px solid var(--amber);color:#fde68a;line-height:1.5;margin-top:14px;font-size:.92rem}.small{font-size:.88rem;color:var(--muted);line-height:1.5}@media(max-width:950px){.grid{grid-template-columns:1fr}.status{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<a class="back-link" href="../../index.html" style="display:inline-block;margin-bottom:14px;color:#bfdbfe;text-decoration:none;font-weight:700">&larr; Back to Interactive Learning Lab</a>
+<section class="hero"><h1>Wave Packets/ Wave Particle Duality</h1>
+<p class="subtitle">
+This simulation shows how a localized wave packet is formed by superposing many 
+travelling waves with nearby wave numbers.
+ Each individual wave is spread throughout space, but their combination can produce
+ a particle-like localized pulse. By changing the number of waves, bandwidth, 
+ dispersion, and phase speed, you can explore wave-particle duality and the 
+ basic idea behind the uncertainty principle: increasing wave-number spread 
+ localizes the packet, while decreasing it makes the packet more spread out.
+
+</p></section>
+<div class="grid">
+<aside class="card"><h2>Controls</h2>
+<div class="control"><label><span>Number of component waves</span><span class="value" id="nVal">21</span></label><input id="numWaves" type="range" min="1" max="81" step="2" value="21" /></div>
+<div class="control"><label><span>Central wave number k₀</span><span class="value" id="k0Val">7.0</span></label><input id="k0" type="range" min="1" max="18" step="0.1" value="7" /></div>
+<div class="control"><label><span>Bandwidth Δk</span><span class="value" id="dkVal">2.0</span></label><input id="dk" type="range" min="0" max="8" step="0.05" value="2" /></div>
+<div class="control"><label><span>Phase velocity vₚ</span><span class="value" id="vpVal">1.00</span></label><input id="vp" type="range" min="-3" max="3" step="0.05" value="1" /></div>
+<div class="control"><label><span>Dispersion strength</span><span class="value" id="dispVal">0.00</span></label><input id="dispersion" type="range" min="-1.5" max="1.5" step="0.02" value="0" /></div>
+<div class="control"><label><span>Amplitude scale</span><span class="value" id="ampVal">1.00×</span></label><input id="ampScale" type="range" min="20" max="180" step="5" value="100" /></div>
+<div class="control"><label><span>Animation speed</span><span class="value" id="speedVal">1.00×</span></label><input id="speed" type="range" min="0" max="250" step="5" value="100" /></div>
+<h3>Display options</h3><div class="toggle"><input id="showPacket" type="checkbox" checked><span>Show resultant wave packet</span></div><div class="toggle"><input id="showEnvelope" type="checkbox" checked><span>Show envelope ±|ψ|</span></div><div class="toggle"><input id="showComponents" type="checkbox"><span>Show individual component waves</span></div><div class="toggle"><input id="showDensity" type="checkbox" checked><span>Show intensity/probability-like |ψ|²</span></div><div class="toggle"><input id="showKSpace" type="checkbox" checked><span>Show wave-number distribution</span></div>
+<div class="row"><button id="playPause">Pause</button>
+<button class="secondary" id="resetBtn">Reset</button></div>
+<div class="legend"><div><span class="sw" style="background:#60a5fa"></span>
+blue: resultant real wave</div><div><span class="sw" style="background:#34d399"></span>green: envelope</div><div><span class="sw" style="background:#fbbf24"></span>yellow: component waves</div><div><span class="sw" style="background:#fb7185"></span>red/orange: |ψ|² intensity</div></div>
+<div class="warn">Large Δk makes a narrow packet. Small Δk makes a broad packet. This illustrates the Fourier idea: localization in space requires spread in wave number.</div>
+</aside>
+<main><section class="card"><h2>Travelling wave superposition</h2><canvas id="sim" width="940" 
+height="560"></canvas>
+<div class="status"><div class="pill">
+<b id="groupVal">1.00</b><span>group velocity estimate</span></div>
+<div class="pill"><b id="widthVal">broad</b><span>packet width</span></div>
+<div class="pill"><b id="lambdaVal">0.90</b><span>central wavelength</span></div><div class="pill"><b id="timeVal">0.00</b><span>time</span></div></div></section><section class="card" style="margin-top:18px;"><h2>Concept</h2><p class="formula">ψ(x,t) = Σ A(k) cos(kx − ω(k)t), where A(k) is peaked around k₀.</p><p class="note">When all waves have nearly the same wave number, their sum is spread out. When many different nearby wave numbers are added, constructive interference occurs only in a limited region, forming a packet. If the medium is dispersive, different k components travel at different speeds and the packet can change shape.</p></section></main>
+</div></div>
+<script>
+const canvas=document.getElementById("sim"),ctx=canvas.getContext("2d"),$=id=>document.getElementById(id);
+const controls={numWaves:$("numWaves"),k0:$("k0"),dk:$("dk"),vp:$("vp"),dispersion:$("dispersion"),ampScale:$("ampScale"),speed:$("speed"),showPacket:$("showPacket"),showEnvelope:$("showEnvelope"),showComponents:$("showComponents"),showDensity:$("showDensity"),showKSpace:$("showKSpace")};
+let t=0,last=null,playing=true;const W=canvas.width,H=canvas.height,xmin=-12,xmax=12;
+function params(){return{N:+controls.numWaves.value,k0:+controls.k0.value,dk:+controls.dk.value,vp:+controls.vp.value,disp:+controls.dispersion.value,amp:+controls.ampScale.value/100,speed:+controls.speed.value/100}}
+function updateLabels(){const p=params();$("nVal").textContent=p.N;$("k0Val").textContent=p.k0.toFixed(1);$("dkVal").textContent=p.dk.toFixed(2);$("vpVal").textContent=p.vp.toFixed(2);$("dispVal").textContent=p.disp.toFixed(2);$("ampVal").textContent=p.amp.toFixed(2)+"×";$("speedVal").textContent=p.speed.toFixed(2)+"×";$("groupVal").textContent=(p.vp+2*p.disp*p.k0).toFixed(2);$("lambdaVal").textContent=(2*Math.PI/p.k0).toFixed(2);$("timeVal").textContent=t.toFixed(2);$("widthVal").textContent=p.dk<.6?"very broad":p.dk<1.6?"broad":p.dk<3.5?"medium":"narrow"}
+function xToCanvas(x){return 50+(x-xmin)/(xmax-xmin)*(W-100)}function yToCanvas(y,mid,scale){return mid-y*scale}function omega(k,p){return p.vp*k+p.disp*k*k}
+function components(p){if(p.N===1||p.dk===0)return[{k:p.k0,a:1}];const list=[],sigma=Math.max(p.dk/2.6,.05);for(let i=0;i<p.N;i++){const u=(i-(p.N-1)/2)/((p.N-1)/2),k=p.k0+u*p.dk;if(k<=.05)continue;list.push({k,a:Math.exp(-.5*((k-p.k0)/sigma)**2)})}const norm=list.reduce((s,c)=>s+c.a,0)||1;return list.map(c=>({k:c.k,a:c.a/norm}))}
+function psiAt(x,p,comps){let re=0,im=0;for(const c of comps){const ph=c.k*x-omega(c.k,p)*t;re+=c.a*Math.cos(ph);im+=c.a*Math.sin(ph)}return{re:re*p.amp,im:im*p.amp}}
+function drawAxes(){ctx.save();ctx.strokeStyle="rgba(148,163,184,.22)";ctx.lineWidth=1;for(const mid of[150,330,485]){ctx.beginPath();ctx.moveTo(45,mid);ctx.lineTo(W-45,mid);ctx.stroke()}for(let x=-12;x<=12;x+=2){const cx=xToCanvas(x);ctx.strokeStyle="rgba(148,163,184,.08)";ctx.beginPath();ctx.moveTo(cx,40);ctx.lineTo(cx,H-40);ctx.stroke();ctx.fillStyle="rgba(203,213,225,.72)";ctx.font="11px Segoe UI";ctx.textAlign="center";ctx.fillText(x.toString(),cx,535)}ctx.fillStyle="rgba(226,232,240,.9)";ctx.font="14px Segoe UI";ctx.textAlign="left";ctx.fillText("Real wave packet ψ(x,t)",55,36);ctx.fillText("Intensity / probability-like |ψ|²",55,255);ctx.fillText("Wave-number distribution A(k)",55,405);ctx.fillText("x",W-55,535);ctx.restore()}
+function drawComponents(p,comps){if(!controls.showComponents.checked)return;ctx.save();ctx.lineWidth=.7;const shown=comps.length>19?comps.filter((_,i)=>i%Math.ceil(comps.length/19)===0):comps;for(const c of shown){ctx.strokeStyle="rgba(251,191,36,.20)";ctx.beginPath();for(let px=0;px<=W-100;px++){const x=xmin+px/(W-100)*(xmax-xmin),y=.65*Math.cos(c.k*x-omega(c.k,p)*t),cx=xToCanvas(x),cy=yToCanvas(y,150,70);px===0?ctx.moveTo(cx,cy):ctx.lineTo(cx,cy)}ctx.stroke()}ctx.restore()}
+function drawPacket(p,comps){const samples=[];let maxAbs=0,maxDens=0;for(let px=0;px<=W-100;px++){const x=xmin+px/(W-100)*(xmax-xmin),val=psiAt(x,p,comps),env=Math.hypot(val.re,val.im),dens=env*env;maxAbs=Math.max(maxAbs,Math.abs(val.re),env);maxDens=Math.max(maxDens,dens);samples.push({x,re:val.re,env,dens})}const yScale=95/Math.max(maxAbs,.001);if(controls.showEnvelope.checked){ctx.save();ctx.strokeStyle="rgba(52,211,153,.88)";ctx.lineWidth=2.2;for(const sign of[1,-1]){ctx.beginPath();samples.forEach((s,i)=>{const cx=xToCanvas(s.x),cy=yToCanvas(sign*s.env,150,yScale);i===0?ctx.moveTo(cx,cy):ctx.lineTo(cx,cy)});ctx.stroke()}ctx.restore()}if(controls.showPacket.checked){ctx.save();ctx.strokeStyle="rgba(96,165,250,.98)";ctx.lineWidth=2.6;ctx.beginPath();samples.forEach((s,i)=>{const cx=xToCanvas(s.x),cy=yToCanvas(s.re,150,yScale);i===0?ctx.moveTo(cx,cy):ctx.lineTo(cx,cy)});ctx.stroke();ctx.restore()}if(controls.showDensity.checked){ctx.save();ctx.fillStyle="rgba(251,113,133,.20)";ctx.strokeStyle="rgba(251,113,133,.88)";ctx.lineWidth=2.2;ctx.beginPath();samples.forEach((s,i)=>{const cx=xToCanvas(s.x),y=330-(s.dens/Math.max(maxDens,.0001))*105;if(i===0)ctx.moveTo(cx,330);ctx.lineTo(cx,y)});for(let i=samples.length-1;i>=0;i--){ctx.lineTo(xToCanvas(samples[i].x),330)}ctx.closePath();ctx.fill();ctx.beginPath();samples.forEach((s,i)=>{const cx=xToCanvas(s.x),y=330-(s.dens/Math.max(maxDens,.0001))*105;i===0?ctx.moveTo(cx,y):ctx.lineTo(cx,y)});ctx.stroke();ctx.restore()}}
+function drawKSpace(p,comps){if(!controls.showKSpace.checked)return;ctx.save();const kMin=Math.max(0,p.k0-Math.max(p.dk*1.4,2)),kMax=p.k0+Math.max(p.dk*1.4,2),left=65,right=W-65,base=485,top=415;ctx.strokeStyle="rgba(203,213,225,.45)";ctx.beginPath();ctx.moveTo(left,base);ctx.lineTo(right,base);ctx.stroke();ctx.fillStyle="rgba(203,213,225,.75)";ctx.font="11px Segoe UI";ctx.textAlign="center";for(let i=0;i<=6;i++){const k=kMin+i*(kMax-kMin)/6,x=left+(k-kMin)/(kMax-kMin)*(right-left);ctx.strokeStyle="rgba(148,163,184,.18)";ctx.beginPath();ctx.moveTo(x,top);ctx.lineTo(x,base+7);ctx.stroke();ctx.fillText(k.toFixed(1),x,base+22)}ctx.fillText("k",right+18,base+4);const maxA=Math.max(...comps.map(c=>c.a),.001);for(const c of comps){if(c.k<kMin||c.k>kMax)continue;const x=left+(c.k-kMin)/(kMax-kMin)*(right-left),h=(c.a/maxA)*(base-top);ctx.strokeStyle="rgba(251,191,36,.85)";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,base);ctx.lineTo(x,base-h);ctx.stroke();ctx.fillStyle="rgba(251,191,36,.25)";ctx.fillRect(x-2,base-h,4,h)}const k0x=left+(p.k0-kMin)/(kMax-kMin)*(right-left);ctx.strokeStyle="rgba(96,165,250,.85)";ctx.setLineDash([6,5]);ctx.beginPath();ctx.moveTo(k0x,top-6);ctx.lineTo(k0x,base);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle="#bfdbfe";ctx.fillText("k₀",k0x,top-12);ctx.restore()}
+function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);
+ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+function drawInfo(p){return;ctx.save();ctx.fillStyle="rgba(15,23,42,.78)";
+ctx.strokeStyle="rgba(148,163,184,.25)";
+roundRect(590,22,310,98,14);ctx.fill();ctx.stroke();
+ctx.fillStyle="#e2e8f0";ctx.font="13px Segoe UI";ctx.textAlign="left";
+const vg=p.vp+2*p.disp*p.k0,lambda=2*Math.PI/p.k0;
+ctx.fillText("ω(k) = vₚ k + dispersion · k²",608,48);
+ctx.fillText("Group velocity v_g = dω/dk",608,72);
+ctx.fillText("v_g ≈ "+vg.toFixed(2),608,96);
+ctx.fillText("Central wavelength λ₀ = "+lambda.toFixed(2),608,118);
+ctx.restore()
+}
+function draw(){const p=params(),comps=components(p);updateLabels();ctx.clearRect(0,0,W,H);ctx.fillStyle="#020617";ctx.fillRect(0,0,W,H);drawAxes();drawComponents(p,comps);drawPacket(p,comps);drawKSpace(p,comps);drawInfo(p)}
+function animate(now){if(last===null)last=now;const dt=Math.min(.035,(now-last)/1000);last=now;if(playing)t+=dt*params().speed;draw();requestAnimationFrame(animate)}
+Object.values(controls).forEach(c=>{c.addEventListener("input",draw);c.addEventListener("change",draw)});$("playPause").addEventListener("click",()=>{playing=!playing;$("playPause").textContent=playing?"Pause":"Play"});$("resetBtn").addEventListener("click",()=>{t=0;controls.numWaves.value=21;controls.k0.value=7;controls.dk.value=2;controls.vp.value=1;controls.dispersion.value=0;controls.ampScale.value=100;controls.speed.value=100;controls.showPacket.checked=true;controls.showEnvelope.checked=true;controls.showComponents.checked=false;controls.showDensity.checked=true;controls.showKSpace.checked=true;draw()});requestAnimationFrame(animate);
+</script>
+</body>
+</html>
