@@ -713,6 +713,9 @@
     </aside>
   </main>
 
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.2/dist/umd/supabase.min.js"></script>
+  <script defer src="../js/supabase-client.js"></script>
+  <script defer src="../js/progress-store.js"></script>
   <script>
     const identities = [
       { deg: "sin(90° + θ)", rad: "sin(π/2 + θ)", ans: "cosθ" },
@@ -767,6 +770,7 @@
     let seconds = 0;
     let timerInterval = null;
     let angleMode = "degrees";
+    let cloudAttemptId = null;
 
     const startScreen = document.getElementById("start-screen");
     const quizScreen = document.getElementById("quiz-screen");
@@ -827,6 +831,7 @@
       answers = new Array(quiz.length).fill(null);
       current = 0;
       seconds = 0;
+      cloudAttemptId = window.ProgressStore?.createAttemptId() || null;
 
       clearInterval(timerInterval);
       timerInterval = setInterval(updateTimer, 1000);
@@ -904,6 +909,23 @@
 
       const elapsed = Math.max(0, seconds - 1);
       const percent = Math.round((score / quiz.length) * 100);
+
+      if (window.ProgressStore && cloudAttemptId) {
+        void window.ProgressStore.recordAttempt({
+          clientAttemptId: cloudAttemptId,
+          quizId: "trig-angles-v1",
+          score,
+          total: quiz.length,
+          durationSeconds: elapsed,
+          details: {
+            percent,
+            angleMode,
+            answerStyle: document.getElementById("answerStyle").value
+          }
+        }).catch(error => {
+          console.warn("Cloud progress could not be saved.", error);
+        });
+      }
 
       document.getElementById("finalScore").textContent = `${score}/${quiz.length}`;
       document.getElementById("finalPercent").textContent = `${percent}%`;

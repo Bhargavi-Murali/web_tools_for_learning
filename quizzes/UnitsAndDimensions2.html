@@ -330,6 +330,9 @@
     <div id="resultArea" style="display:none;"></div>
   </div>
 
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.2/dist/umd/supabase.min.js"></script>
+  <script defer src="../js/supabase-client.js"></script>
+  <script defer src="../js/progress-store.js"></script>
   <script>
     const questions = [
       {
@@ -537,6 +540,7 @@
     let userAnswers = Array(questions.length).fill(null);
     let checked = false;
     let quizActive = true;
+    let cloudAttemptId = window.ProgressStore?.createAttemptId() || null;
 
     // -------------------------------
     // Cheat Counter Variables
@@ -750,6 +754,21 @@
 
       let message = "";
       const percentage = (score / questions.length) * 100;
+      cloudAttemptId ||= window.ProgressStore?.createAttemptId() || null;
+
+      if (window.ProgressStore && cloudAttemptId) {
+        void window.ProgressStore.recordAttempt({
+          clientAttemptId: cloudAttemptId,
+          quizId: "units-and-dimensions-v1",
+          score,
+          total: questions.length,
+          details: {
+            percent: Math.round(percentage)
+          }
+        }).catch(error => {
+          console.warn("Cloud progress could not be saved.", error);
+        });
+      }
 
       if (percentage >= 85) {
         message = "Excellent work. Your dimensional analysis is strong.";
@@ -804,6 +823,7 @@
       userAnswers = Array(questions.length).fill(null);
       checked = false;
       quizActive = true;
+      cloudAttemptId = window.ProgressStore?.createAttemptId() || null;
 
       cheatCounter = 0;
       cheatLog = [];

@@ -805,6 +805,9 @@
     </aside>
   </main>
 
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.2/dist/umd/supabase.min.js"></script>
+  <script defer src="../js/supabase-client.js"></script>
+  <script defer src="../js/progress-store.js"></script>
   <script>
     const QUESTION_BANK = [
   {
@@ -2326,8 +2329,13 @@
 
     function saveResult(percent, scoreValue, total, filter) {
       const history = JSON.parse(localStorage.getItem("oxidation_numbers_quiz_history_v1") || "[]");
+      const clientAttemptId = window.ProgressStore?.createAttemptId();
+      const completedAt = new Date().toISOString();
 
       history.unshift({
+        clientAttemptId,
+        completedAt,
+        ownerId: window.ProgressStore?.currentOwnerId() || null,
         date: new Date().toLocaleDateString(),
         percent,
         score: scoreValue,
@@ -2336,10 +2344,29 @@
       });
 
       localStorage.setItem("oxidation_numbers_quiz_history_v1", JSON.stringify(history.slice(0, 8)));
+
+      if (window.ProgressStore) {
+        void window.ProgressStore.recordAttempt({
+          clientAttemptId,
+          completedAt,
+          quizId: "oxidation-numbers-v1",
+          score: scoreValue,
+          total,
+          details: {
+            percent,
+            difficulty: filter
+          }
+        }).catch(error => {
+          console.warn("Cloud progress could not be saved.", error);
+        });
+      }
     }
 
     function updateHistoryTable() {
-      const history = JSON.parse(localStorage.getItem("oxidation_numbers_quiz_history_v1") || "[]");
+      const storedHistory = JSON.parse(localStorage.getItem("oxidation_numbers_quiz_history_v1") || "[]");
+      const history = window.ProgressStore
+        ? window.ProgressStore.visibleLocalEntries(storedHistory)
+        : storedHistory.filter(item => !item.ownerId);
       const historyBox = document.getElementById("historyBox");
 
       if (history.length === 0) {
@@ -2385,7 +2412,15 @@
     });
 
     document.getElementById("clearHistoryBtn").addEventListener("click", () => {
-      localStorage.removeItem("oxidation_numbers_quiz_history_v1");
+      const storedHistory = JSON.parse(localStorage.getItem("oxidation_numbers_quiz_history_v1") || "[]");
+      const remaining = window.ProgressStore
+        ? window.ProgressStore.otherOwnerEntries(storedHistory)
+        : storedHistory.filter(item => Boolean(item.ownerId));
+      if (remaining.length) {
+        localStorage.setItem("oxidation_numbers_quiz_history_v1", JSON.stringify(remaining));
+      } else {
+        localStorage.removeItem("oxidation_numbers_quiz_history_v1");
+      }
       updateHistoryTable();
     });
 
@@ -2396,6 +2431,11 @@
     });
 
     updateHistoryTable();
+    document.addEventListener("DOMContentLoaded", () => {
+      if (!window.ProgressStore) return;
+      window.ProgressStore.subscribeToOwnerChanges?.(updateHistoryTable);
+      void window.ProgressStore.getCurrentUserId().catch(() => null).finally(updateHistoryTable);
+    });
   </script>
 </body>
 </html>

@@ -704,6 +704,9 @@
     </aside>
   </main>
 
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.2/dist/umd/supabase.min.js"></script>
+  <script defer src="../js/supabase-client.js"></script>
+  <script defer src="../js/progress-store.js"></script>
   <script>
     const defaultTables = [3, 4, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
     let selectedTables = new Set(defaultTables);
@@ -943,8 +946,13 @@
 
     function saveResult(speed, accuracy, count, bestStreakValue) {
       const history = JSON.parse(localStorage.getItem("multiplication_practice_history_v1") || "[]");
+      const clientAttemptId = window.ProgressStore?.createAttemptId();
+      const completedAt = new Date().toISOString();
 
       history.unshift({
+        clientAttemptId,
+        completedAt,
+        ownerId: window.ProgressStore?.currentOwnerId() || null,
         date: new Date().toLocaleDateString(),
         speed: speed.toFixed(2),
         accuracy: accuracy.toFixed(0),
@@ -953,10 +961,31 @@
       });
 
       localStorage.setItem("multiplication_practice_history_v1", JSON.stringify(history.slice(0, 8)));
+
+      if (window.ProgressStore) {
+        void window.ProgressStore.recordAttempt({
+          clientAttemptId,
+          completedAt,
+          quizId: "multiplication-practice-v1",
+          score: correctCount,
+          total: count,
+          durationSeconds: Math.max(0, Math.round(speed * count)),
+          details: {
+            averageSeconds: Number(speed.toFixed(2)),
+            accuracyPercent: Number(accuracy.toFixed(0)),
+            bestStreak: bestStreakValue
+          }
+        }).catch(error => {
+          console.warn("Cloud progress could not be saved.", error);
+        });
+      }
     }
 
     function updateHistoryTable() {
-      const history = JSON.parse(localStorage.getItem("multiplication_practice_history_v1") || "[]");
+      const storedHistory = JSON.parse(localStorage.getItem("multiplication_practice_history_v1") || "[]");
+      const history = window.ProgressStore
+        ? window.ProgressStore.visibleLocalEntries(storedHistory)
+        : storedHistory.filter(item => !item.ownerId);
       const historyBox = document.getElementById("historyBox");
 
       if (history.length === 0) {
@@ -987,7 +1016,10 @@
     }
 
     function updateDayDisplay() {
-      const history = JSON.parse(localStorage.getItem("multiplication_practice_history_v1") || "[]");
+      const storedHistory = JSON.parse(localStorage.getItem("multiplication_practice_history_v1") || "[]");
+      const history = window.ProgressStore
+        ? window.ProgressStore.visibleLocalEntries(storedHistory)
+        : storedHistory.filter(item => !item.ownerId);
       const day = Math.min(21, history.length + 1);
       document.getElementById("day-display").textContent = day;
     }
@@ -1028,7 +1060,15 @@
     });
 
     document.getElementById("clearHistoryBtn").addEventListener("click", () => {
-      localStorage.removeItem("multiplication_practice_history_v1");
+      const storedHistory = JSON.parse(localStorage.getItem("multiplication_practice_history_v1") || "[]");
+      const remaining = window.ProgressStore
+        ? window.ProgressStore.otherOwnerEntries(storedHistory)
+        : storedHistory.filter(item => Boolean(item.ownerId));
+      if (remaining.length) {
+        localStorage.setItem("multiplication_practice_history_v1", JSON.stringify(remaining));
+      } else {
+        localStorage.removeItem("multiplication_practice_history_v1");
+      }
       updateHistoryTable();
       updateDayDisplay();
     });
@@ -1036,6 +1076,17 @@
     createTableChips();
     updateHistoryTable();
     updateDayDisplay();
+    document.addEventListener("DOMContentLoaded", () => {
+      if (!window.ProgressStore) return;
+      window.ProgressStore.subscribeToOwnerChanges?.(() => {
+        updateHistoryTable();
+        updateDayDisplay();
+      });
+      void window.ProgressStore.getCurrentUserId().catch(() => null).finally(() => {
+        updateHistoryTable();
+        updateDayDisplay();
+      });
+    });
   </script>
 </body>
 </html>

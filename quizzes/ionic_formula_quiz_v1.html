@@ -822,6 +822,9 @@
     Keyboard shortcuts: press <span class="kbd">Enter</span> to submit or move to the next question.
   </div>
 
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.2/dist/umd/supabase.min.js"></script>
+  <script defer src="../js/supabase-client.js"></script>
+  <script defer src="../js/progress-store.js"></script>
   <script>
     const EMBEDDED_CSV = `Chemical Name,Chemical Formula
 Hydrogen Cation,H+
@@ -873,6 +876,7 @@ Aluminate,AlO2(-)`;
     let score = 0;
     let answered = false;
     let attemptLog = [];
+    let cloudAttemptId = null;
 
     const startScreen = document.getElementById("start-screen");
     const quizScreen = document.getElementById("quiz-screen");
@@ -1202,6 +1206,7 @@ Aluminate,AlO2(-)`;
       score = 0;
       answered = false;
       attemptLog = [];
+      cloudAttemptId = window.ProgressStore?.createAttemptId() || null;
     }
 
     function startQuiz() {
@@ -1315,6 +1320,21 @@ Aluminate,AlO2(-)`;
       showScreen(resultScreen);
 
       const pct = Math.round((score / currentQuiz.length) * 100);
+
+      if (window.ProgressStore && cloudAttemptId) {
+        void window.ProgressStore.recordAttempt({
+          clientAttemptId: cloudAttemptId,
+          quizId: "ionic-formula-v1",
+          score,
+          total: currentQuiz.length,
+          details: {
+            percent: pct,
+            mode: selectedMode
+          }
+        }).catch(error => {
+          console.warn("Cloud progress could not be saved.", error);
+        });
+      }
 
       document.getElementById("progressBar").style.width = "100%";
       document.getElementById("finalScore").textContent = `${score}/${currentQuiz.length}`;
