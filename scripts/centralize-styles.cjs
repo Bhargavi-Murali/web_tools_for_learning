@@ -100,68 +100,12 @@ for (const file of htmlFiles) {
 }
 
 const foundation = `/*
-  Central design system for Interactive Learning Lab
-  Theme source: BrightPath reference supplied by the site owner.
-  Change the variables below to update the visual theme across every page.
+  Central stylesheet for Interactive Learning Lab.
+  Each page's original design is preserved in its scoped section below.
 */
-:root {
-  --canvas: #fdf6ec;
-  --ink: #2e2a74;
-  --accent: #f05030;
-  --lavender: #796bb3;
-  --muted-blue: #386694;
-  --surface: rgba(255, 255, 255, 0.82);
-  --line: rgba(46, 42, 116, 0.14);
-  --text-muted: rgba(46, 42, 116, 0.68);
-  --shadow-soft: 0 18px 45px rgba(46, 42, 116, 0.10);
-  --shadow-card: 0 12px 30px rgba(46, 42, 116, 0.08);
-  --radius-card: 2rem;
-  --radius-control: 1rem;
-  --radius-pill: 999px;
-  --font-ui: Inter, ui-rounded, "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-}
-
-html { scroll-behavior: smooth; }
-
-body {
-  margin: 0;
-  color: var(--ink);
-  background:
-    radial-gradient(circle at 8% 10%, rgba(121, 107, 179, 0.12), transparent 24rem),
-    radial-gradient(circle at 94% 7%, rgba(240, 80, 48, 0.10), transparent 26rem),
-    var(--canvas);
-  font-family: var(--font-ui);
-  -webkit-font-smoothing: antialiased;
-}
-
-::selection { color: white; background: var(--lavender); }
-:focus-visible { outline: 3px solid rgba(240, 80, 48, 0.42); outline-offset: 3px; }
 `;
 
-const themeOverrides = `
-/* Shared BrightPath treatment. These rules intentionally come last. */
-body {
-  --bg: var(--canvas);
-  --background: var(--canvas);
-  --panel: #ffffff;
-  --card: #ffffff;
-  --text: var(--ink);
-  --muted: var(--text-muted);
-  --border: var(--line);
-  --primary: var(--accent);
-  --blue: var(--muted-blue);
-  --blue-dark: var(--ink);
-  --physics: var(--muted-blue);
-  --chemistry: var(--accent);
-  --mathematics: var(--lavender);
-  --english: var(--accent);
-  --shadow: var(--shadow-soft);
-}
-
-button, input, select, textarea { font: inherit; }
-button, .button, [class*="-button"], [class*="-action"] { border-radius: var(--radius-control); }
-article, .card, [class$="-card"] { border-color: var(--line); }
-`;
+const themeOverrides = "";
 
 fs.mkdirSync(path.dirname(output), { recursive: true });
 fs.writeFileSync(output, `${foundation}\n${sections.join("\n\n")}\n${themeOverrides}`, "utf8");
