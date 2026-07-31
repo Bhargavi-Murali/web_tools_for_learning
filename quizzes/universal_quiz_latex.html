@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title> General Chemistry Quiz </title>
-  <link rel="stylesheet" href="../styles/quiz_style_light.css?v=13" />
+  
 
   <script>
     window.MathJax = {
@@ -23,289 +23,12 @@
     };
   </script>
 
-  <style>
-    .quiz-options-panel {
-      background: #f8fafc;
-      border: 2px solid #cbd5e1;
-      border-radius: 12px;
-      padding: 13px 15px;
-      margin: 14px 0 18px;
-      color: #334155;
-      line-height: 1.55;
-    }
-
-    .quiz-options-panel h3 {
-      margin: 0 0 8px;
-      color: #1e3a8a;
-      font-size: 1rem;
-    }
-
-    .quiz-option-line {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: 8px;
-      font-weight: 600;
-    }
-
-    .quiz-option-line input {
-      transform: scale(1.15);
-    }
-
-    .student-tools {
-      margin: 16px 0 18px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    .tool-card {
-      border: 2px solid #cbd5e1;
-      border-radius: 12px;
-      background: #f8fafc;
-      padding: 12px;
-    }
-
-    .tool-card h3 {
-      margin: 0 0 8px;
-      color: #1e3a8a;
-      font-size: 1rem;
-    }
-
-    .tool-card p {
-      margin: 5px 0 10px;
-      color: #475569;
-      font-size: 0.9rem;
-      line-height: 1.45;
-    }
-
-    .tool-row {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .tool-row input {
-      flex: 1 1 90px;
-      min-width: 0;
-      padding: 9px 10px;
-      border: 1px solid #94a3b8;
-      border-radius: 9px;
-      font-size: 0.95rem;
-    }
-
-    .tool-row button {
-      padding: 9px 12px;
-      border-radius: 9px;
-      background: #2563eb;
-      color: white;
-      font-size: 0.9rem;
-    }
-
-    .tool-result {
-      margin-top: 9px;
-      padding: 9px 10px;
-      border-radius: 9px;
-      background: #ffffff;
-      border: 1px solid #dbeafe;
-      color: #1e293b;
-      min-height: 38px;
-      line-height: 1.45;
-      font-size: 0.94rem;
-    }
-
-    .tool-result.error {
-      background: #fee2e2;
-      border-color: #fecaca;
-      color: #7f1d1d;
-    }
-
-    .tool-result.ok {
-      background: #dcfce7;
-      border-color: #bbf7d0;
-      color: #14532d;
-    }
-
-    .tools-toggle-btn {
-      background: #0f766e;
-      color: white;
-      margin: 8px 0 0;
-    }
-
-    .student-tools.collapsed {
-      display: none;
-    }
-
-    @media (max-width: 700px) {
-      .student-tools {
-        grid-template-columns: 1fr;
-      }
-    }
   
-    .exam-layout {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 220px;
-      gap: 16px;
-      align-items: start;
-    }
 
-    .question-panel {
-      min-width: 0;
-    }
-
-    .palette-panel {
-      position: sticky;
-      top: 12px;
-      border: 2px solid #cbd5e1;
-      border-radius: 14px;
-      background: #f8fafc;
-      padding: 12px;
-    }
-
-    .palette-panel h3 {
-      margin: 0 0 10px;
-      color: #1e3a8a;
-      font-size: 1rem;
-    }
-
-    .palette-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 7px;
-    }
-
-    .qnav-btn {
-      padding: 8px 0;
-      border-radius: 9px;
-      background: #e2e8f0;
-      color: #1e293b;
-      border: 1px solid #cbd5e1;
-      font-weight: 700;
-      font-size: 0.9rem;
-      cursor: pointer;
-    }
-
-    .qnav-btn:hover {
-      background: #dbeafe;
-      border-color: #2563eb;
-    }
-
-    .qnav-btn.current {
-      outline: 3px solid #2563eb;
-      outline-offset: 1px;
-    }
-
-    .qnav-btn.not-visited {
-      background: #e2e8f0;
-      color: #334155;
-    }
-
-    .qnav-btn.not-attempted {
-      background: #fee2e2;
-      color: #7f1d1d;
-      border-color: #fecaca;
-    }
-
-    .qnav-btn.attempted {
-      background: #dcfce7;
-      color: #14532d;
-      border-color: #bbf7d0;
-    }
-
-    .qnav-btn.marked {
-      background: #fef3c7;
-      color: #78350f;
-      border-color: #fde68a;
-    }
-
-    .qnav-btn.attempted.marked {
-      background: linear-gradient(135deg, #dcfce7 0%, #dcfce7 52%, #fef3c7 52%, #fef3c7 100%);
-      color: #1e293b;
-    }
-
-    .palette-legend {
-      display: grid;
-      gap: 6px;
-      margin-top: 12px;
-      font-size: 0.82rem;
-      color: #475569;
-    }
-
-    .legend-dot {
-      display: inline-block;
-      width: 12px;
-      height: 12px;
-      border-radius: 4px;
-      margin-right: 6px;
-      vertical-align: -1px;
-      border: 1px solid #cbd5e1;
-    }
-
-    .nav-status-strip {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      margin: 12px 0 16px;
-    }
-
-    .nav-status-pill {
-      background: #f1f5f9;
-      border: 1px solid #cbd5e1;
-      border-radius: 10px;
-      padding: 8px;
-      text-align: center;
-      color: #334155;
-      font-size: 0.86rem;
-    }
-
-    .nav-status-pill b {
-      display: block;
-      color: #1e293b;
-      font-size: 1.1rem;
-      line-height: 1;
-      margin-bottom: 3px;
-    }
-
-    .mark-btn {
-      background: #f59e0b;
-      color: #111827;
-    }
-
-    .finish-btn {
-      background: #7c3aed;
-      color: white;
-    }
-
-    @media (max-width: 850px) {
-      .exam-layout {
-        grid-template-columns: 1fr;
-      }
-
-      .palette-panel {
-        position: static;
-      }
-
-      .palette-grid {
-        grid-template-columns: repeat(8, 1fr);
-      }
-
-      .nav-status-strip {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-
-    @media (max-width: 520px) {
-      .palette-grid {
-        grid-template-columns: repeat(5, 1fr);
-      }
-    }
-
-  </style>
-
+  <link rel="stylesheet" href="../css/mystyle.css">
 </head>
 
-<body>
+<body data-page="quizzes-universal-quiz-latex">
   <div id="cheatWarning" class="cheat-warning"></div>
   <div id="teacherReport" class="teacher-report"></div>
   <button id="secretCheatBtn" class="secret-cheat-btn" onclick="toggleCheatReport()" title="Teacher only"></button>
@@ -328,7 +51,7 @@
         <h3>Quiz options</h3>
         <div class="quiz-option-line">
           <input type="checkbox" id="enableHints" checked>
-          <label for="enableHints" style="margin:0;">Allow students to use hints during this quiz</label>
+          <label for="enableHints" class="central-inline-1">Allow students to use hints during this quiz</label>
         </div>
         <div class="small">
           Uncheck this while creating the quiz if you want the hint button to be hidden for the whole attempt.
@@ -336,7 +59,7 @@
       </div>
 
       <div id="loadStatus" class="status-note">Loading question banks...</div>
-      <div id="mathStatus" class="status-note" style="display:none;"></div>
+      <div id="mathStatus" class="status-note central-inline-2"></div>
 
       <div class="score-strip">
         <span class="score-pill">Banks: <span id="bankCount">0</span></span>
@@ -356,7 +79,7 @@
       <div class="topic-list" id="topicList"></div>
     </div>
 
-    <div id="quizArea" style="display:none;">
+    <div id="quizArea" class="central-inline-3">
       <div class="exam-layout">
         <div class="question-panel">
           <div class="progress" id="progress"></div>
@@ -419,16 +142,16 @@
           <div class="palette-grid" id="questionPalette"></div>
 
           <div class="palette-legend">
-            <div><span class="legend-dot" style="background:#dcfce7;"></span>Attempted</div>
-            <div><span class="legend-dot" style="background:#fee2e2;"></span>Visited, not attempted</div>
-            <div><span class="legend-dot" style="background:#fef3c7;"></span>Marked for later</div>
-            <div><span class="legend-dot" style="background:#e2e8f0;"></span>Not visited</div>
+            <div><span class="legend-dot central-inline-4"></span>Attempted</div>
+            <div><span class="legend-dot central-inline-5"></span>Visited, not attempted</div>
+            <div><span class="legend-dot central-inline-6"></span>Marked for later</div>
+            <div><span class="legend-dot central-inline-7"></span>Not visited</div>
           </div>
         </aside>
       </div>
     </div>
 
-    <div id="resultArea" style="display:none;"></div>
+    <div id="resultArea" class="central-inline-8"></div>
   </div>
 
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.2/dist/umd/supabase.min.js"></script>

@@ -4,59 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Elastic Collision</title>
-  <style>
-    :root{
-      --bg1:#07111f; --bg2:#10213b; --panel:rgba(15,23,42,.95);
-      --line:rgba(148,163,184,.22); --text:#e5eefc; --muted:#9fb3d9;
-      --blue:#60a5fa; --green:#34d399; --amber:#fbbf24; --rose:#fb7185;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0; min-height:100vh; font-family:"Segoe UI",Arial,sans-serif; color:var(--text);
-      background:radial-gradient(circle at 18% 12%, rgba(96,165,250,.16), transparent 28rem),
-                 radial-gradient(circle at 86% 82%, rgba(52,211,153,.10), transparent 28rem),
-                 linear-gradient(135deg,var(--bg1),var(--bg2));
-    }
-    .wrap{max-width:1220px;margin:22px auto;padding:0 16px 30px}
-    .hero,.card{background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:0 14px 34px rgba(0,0,0,.28)}
-    .hero{padding:22px 24px;margin-bottom:18px}
-    h1{margin:0 0 10px;color:#dbeafe;font-size:clamp(1.8rem,3vw,2.5rem);letter-spacing:-.03em}
-    .subtitle,.note{margin:0;color:var(--muted);line-height:1.65}
-    .grid{display:grid;grid-template-columns:350px minmax(0,1fr);gap:18px;align-items:start}
-    .card{padding:18px}
-    h2{margin:0 0 12px;color:#bfdbfe;font-size:1.18rem}
-    h3{margin:18px 0 8px;color:#dbeafe;font-size:1rem}
-    .control{margin:14px 0 17px}
-    label{display:flex;justify-content:space-between;gap:12px;font-weight:650;margin-bottom:7px;color:#dce8ff;line-height:1.35}
-    .value{color:#86efac;font-variant-numeric:tabular-nums;white-space:nowrap}
-    input[type=range],select{width:100%;accent-color:var(--blue)}
-    select{padding:9px 10px;border-radius:10px;border:1px solid rgba(148,163,184,.30);background:#0f172a;color:#e2e8f0}
-    .row{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 4px}
-    button{padding:10px 14px;border:none;border-radius:10px;cursor:pointer;font-weight:750;background:var(--blue);color:#06111f}
-    button.secondary{background:#334155;color:#e2e8f0}
-    button.preset{background:#1e293b;color:#e2e8f0;border:1px solid rgba(148,163,184,.24);padding:8px 10px;font-size:.88rem}
-    #canvasWrap{width:100%;height:440px;border-radius:16px;overflow:hidden;border:1px solid rgba(148,163,184,.18);
-      background:radial-gradient(circle at center, rgba(30,41,59,.55), rgba(2,6,23,.92)),#020617;position:relative}
-    canvas{width:100%;height:100%;display:block}
-    .status{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}
-    .pill{background:rgba(30,41,59,.88);border:1px solid rgba(148,163,184,.16);border-radius:13px;padding:10px;text-align:center}
-    .pill b{display:block;color:#f8fafc;margin-bottom:4px;font-size:.96rem;font-variant-numeric:tabular-nums}
-    .pill span{color:var(--muted);font-size:.82rem;line-height:1.25}
-    .formula{color:#fef3c7;font-weight:700;line-height:1.65;margin:0}
-    .small{font-size:.88rem;color:var(--muted);line-height:1.55}
-    .legend{display:grid;gap:8px;margin-top:15px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:.92rem}
-    .sw{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:8px;vertical-align:middle}
-    table{width:100%;border-collapse:collapse;margin-top:12px;color:#dbeafe;font-size:.92rem}
-    th,td{padding:8px;border-bottom:1px solid rgba(148,163,184,.16);text-align:right;font-variant-numeric:tabular-nums}
-    th:first-child,td:first-child{text-align:left}
-    th{color:#93c5fd;font-weight:750}
-    .warn{padding:10px 12px;border-radius:12px;background:rgba(251,191,36,.10);border-left:5px solid var(--amber);color:#fde68a;line-height:1.5;margin-top:14px;font-size:.92rem}
-    @media(max-width:900px){.grid{grid-template-columns:1fr}#canvasWrap{height:370px}.status{grid-template-columns:1fr 1fr}}
-  </style>
+  
+  <link rel="stylesheet" href="../../css/mystyle.css">
 </head>
-<body>
+<body data-page="simulations-mechanics-elastic-collision">
 <div class="wrap">
-  <a class="back-link" href="../../index.html" style="display:inline-block;margin-bottom:14px;color:#bfdbfe;text-decoration:none;font-weight:700">&larr; Back to Interactive Learning Lab</a>
+  <a class="back-link central-inline-1" href="../../index.html">&larr; Back to Interactive Learning Lab</a>
   <section class="hero">
     <h1> Elastic Collision </h1>
     <p class="subtitle">
@@ -113,9 +66,9 @@
       </div>
 
       <div class="legend">
-        <div><span class="sw" style="background:#60a5fa"></span>Ball A</div>
-        <div><span class="sw" style="background:#fb7185"></span>Ball B</div>
-        <div><span class="sw" style="background:#34d399"></span>velocity arrows</div>
+        <div><span class="sw central-inline-2"></span>Ball A</div>
+        <div><span class="sw central-inline-3"></span>Ball B</div>
+        <div><span class="sw central-inline-4"></span>velocity arrows</div>
       </div>
 
       <div class="warn">
@@ -138,7 +91,7 @@
         </div>
       </section>
 
-      <section class="card" style="margin-top:18px;">
+      <section class="card central-inline-5">
         <h2>Elastic-collision calculation</h2>
         <p class="formula">
           v'_A = [(m_A-m_B)u_A + 2m_Bu_B]/(m_A+m_B), &nbsp;

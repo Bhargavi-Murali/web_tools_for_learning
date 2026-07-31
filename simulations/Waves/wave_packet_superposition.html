@@ -4,13 +4,12 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Wave Packets</title>
-<style>
-:root{--bg1:#07111f;--bg2:#10213b;--panel:rgba(15,23,42,.94);--line:rgba(148,163,184,.22);--text:#e5eefc;--muted:#9fb3d9;--blue:#60a5fa;--green:#34d399;--amber:#fbbf24;--rose:#fb7185}*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:"Segoe UI",Arial,sans-serif;color:var(--text);background:radial-gradient(circle at 18% 12%,rgba(96,165,250,.16),transparent 28rem),radial-gradient(circle at 86% 82%,rgba(52,211,153,.10),transparent 28rem),linear-gradient(135deg,var(--bg1),var(--bg2))}.wrap{max-width:1260px;margin:24px auto;padding:0 16px 30px}.hero,.card{background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:0 14px 34px rgba(0,0,0,.28)}.hero{padding:22px 24px;margin-bottom:18px}h1{margin:0 0 10px;color:#dbeafe;font-size:clamp(1.85rem,3vw,2.75rem);letter-spacing:-.035em}.subtitle,.note{margin:0;color:var(--muted);line-height:1.65}.grid{display:grid;grid-template-columns:350px minmax(0,1fr);gap:18px;align-items:start}.card{padding:18px}h2{margin:0 0 12px;color:#bfdbfe;font-size:1.18rem}h3{margin:16px 0 8px;color:#dbeafe;font-size:1rem}.control{margin:14px 0 16px}label{display:flex;justify-content:space-between;gap:12px;font-weight:650;margin-bottom:7px;color:#dce8ff;line-height:1.35}.value{color:#86efac;font-variant-numeric:tabular-nums;white-space:nowrap}input[type=range]{width:100%;accent-color:var(--blue)}.toggle{display:flex;align-items:center;gap:10px;margin:10px 0;color:#d7e7ff;line-height:1.45}.toggle input{transform:scale(1.1)}.row{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 4px}button{padding:10px 14px;border:0;border-radius:10px;cursor:pointer;font-weight:750;background:var(--blue);color:#06111f}button.secondary{background:#334155;color:#e2e8f0}canvas{width:100%;height:auto;display:block;background:radial-gradient(circle at center,rgba(30,41,59,.55),rgba(2,6,23,.92)),#020617;border-radius:16px;border:1px solid rgba(148,163,184,.18)}.status{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}.pill{background:rgba(30,41,59,.88);border:1px solid rgba(148,163,184,.16);border-radius:13px;padding:10px;text-align:center}.pill b{display:block;color:#f8fafc;margin-bottom:4px;font-size:.98rem;font-variant-numeric:tabular-nums}.pill span{color:var(--muted);font-size:.86rem;line-height:1.25}.formula{color:#fef3c7;font-weight:700;line-height:1.6;margin:0}.legend{display:grid;gap:8px;margin-top:15px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:.92rem}.sw{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:8px;vertical-align:middle}.warn{padding:10px 12px;border-radius:12px;background:rgba(251,191,36,.10);border-left:5px solid var(--amber);color:#fde68a;line-height:1.5;margin-top:14px;font-size:.92rem}.small{font-size:.88rem;color:var(--muted);line-height:1.5}@media(max-width:950px){.grid{grid-template-columns:1fr}.status{grid-template-columns:1fr 1fr}}
-</style>
+
+  <link rel="stylesheet" href="../../css/mystyle.css">
 </head>
-<body>
+<body data-page="simulations-waves-wave-packet-superposition">
 <div class="wrap">
-<a class="back-link" href="../../index.html" style="display:inline-block;margin-bottom:14px;color:#bfdbfe;text-decoration:none;font-weight:700">&larr; Back to Interactive Learning Lab</a>
+<a class="back-link central-inline-1" href="../../index.html">&larr; Back to Interactive Learning Lab</a>
 <section class="hero"><h1>Wave Packets/ Wave Particle Duality</h1>
 <p class="subtitle">
 This simulation shows how a localized wave packet is formed by superposing many 
@@ -34,8 +33,8 @@ travelling waves with nearby wave numbers.
 <h3>Display options</h3><div class="toggle"><input id="showPacket" type="checkbox" checked><span>Show resultant wave packet</span></div><div class="toggle"><input id="showEnvelope" type="checkbox" checked><span>Show envelope ±|ψ|</span></div><div class="toggle"><input id="showComponents" type="checkbox"><span>Show individual component waves</span></div><div class="toggle"><input id="showDensity" type="checkbox" checked><span>Show intensity/probability-like |ψ|²</span></div><div class="toggle"><input id="showKSpace" type="checkbox" checked><span>Show wave-number distribution</span></div>
 <div class="row"><button id="playPause">Pause</button>
 <button class="secondary" id="resetBtn">Reset</button></div>
-<div class="legend"><div><span class="sw" style="background:#60a5fa"></span>
-blue: resultant real wave</div><div><span class="sw" style="background:#34d399"></span>green: envelope</div><div><span class="sw" style="background:#fbbf24"></span>yellow: component waves</div><div><span class="sw" style="background:#fb7185"></span>red/orange: |ψ|² intensity</div></div>
+<div class="legend"><div><span class="sw central-inline-2"></span>
+blue: resultant real wave</div><div><span class="sw central-inline-3"></span>green: envelope</div><div><span class="sw central-inline-4"></span>yellow: component waves</div><div><span class="sw central-inline-5"></span>red/orange: |ψ|² intensity</div></div>
 <div class="warn">Large Δk makes a narrow packet. Small Δk makes a broad packet. This illustrates the Fourier idea: localization in space requires spread in wave number.</div>
 </aside>
 <main><section class="card"><h2>Travelling wave superposition</h2><canvas id="sim" width="940" 
@@ -43,7 +42,7 @@ height="560"></canvas>
 <div class="status"><div class="pill">
 <b id="groupVal">1.00</b><span>group velocity estimate</span></div>
 <div class="pill"><b id="widthVal">broad</b><span>packet width</span></div>
-<div class="pill"><b id="lambdaVal">0.90</b><span>central wavelength</span></div><div class="pill"><b id="timeVal">0.00</b><span>time</span></div></div></section><section class="card" style="margin-top:18px;"><h2>Concept</h2><p class="formula">ψ(x,t) = Σ A(k) cos(kx − ω(k)t), where A(k) is peaked around k₀.</p><p class="note">When all waves have nearly the same wave number, their sum is spread out. When many different nearby wave numbers are added, constructive interference occurs only in a limited region, forming a packet. If the medium is dispersive, different k components travel at different speeds and the packet can change shape.</p></section></main>
+<div class="pill"><b id="lambdaVal">0.90</b><span>central wavelength</span></div><div class="pill"><b id="timeVal">0.00</b><span>time</span></div></div></section><section class="card central-inline-6"><h2>Concept</h2><p class="formula">ψ(x,t) = Σ A(k) cos(kx − ω(k)t), where A(k) is peaked around k₀.</p><p class="note">When all waves have nearly the same wave number, their sum is spread out. When many different nearby wave numbers are added, constructive interference occurs only in a limited region, forming a packet. If the medium is dispersive, different k components travel at different speeds and the packet can change shape.</p></section></main>
 </div></div>
 <script>
 const canvas=document.getElementById("sim"),ctx=canvas.getContext("2d"),$=id=>document.getElementById(id);

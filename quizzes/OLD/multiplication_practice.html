@@ -4,85 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Multiplication Tables Speed Practice: 21-Day Challenge</title>
-    <style>
-        :root {
-            --primary: #2563eb;
-            --secondary: #7c3aed;
-            --bg: #f8fafc;
-            --text: #1e293b;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            background: white;
-            padding: 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 500px;
-            text-align: center;
-        }
-        .stats-bar {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 1rem;
-            font-weight: bold;
-            font-size: 0.9rem;
-            color: var(--primary);
-        }
-        #question {
-            font-size: 3rem;
-            margin: 1.5rem 0;
-            font-weight: 800;
-        }
-        input {
-            width: 80%;
-            padding: 1rem;
-            font-size: 1.5rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 0.5rem;
-            text-align: center;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        input:focus { border-color: var(--primary); }
-        .btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: 0.5rem;
-            font-size: 1.1rem;
-            cursor: pointer;
-            margin-top: 1rem;
-        }
-        #feedback {
-            height: 2rem;
-            margin-top: 1rem;
-            font-weight: bold;
-        }
-        .history {
-            margin-top: 2rem;
-            width: 100%;
-            max-width: 500px;
-        }
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 0.5rem; overflow: hidden; }
-        th, td { padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: left; }
-        th { background: #f1f5f9; }
-        .correct { color: #059669; }
-        .wrong { color: #dc2626; }
-    </style>
+    
+  <link rel="stylesheet" href="../../css/mystyle.css">
 </head>
-<body>
+<body data-page="quizzes-old-multiplication-practice">
 
     <div class="container" id="game-container">
         <h1>🚀 Multiplication Tables Practice</h1>
@@ -93,7 +18,7 @@
             <button class="btn" onclick="startGame()">Start Practice Session</button>
         </div>
 
-        <div id="quiz-screen" style="display:none;">
+        <div id="quiz-screen" class="central-inline-1">
             <div class="stats-bar">
                 <span>Progress: <span id="progress">0</span>/20</span>
                 <span>Time: <span id="timer">0.0</span>s</span>
@@ -103,7 +28,7 @@
             <div id="feedback"></div>
         </div>
 
-        <div id="result-screen" style="display:none;">
+        <div id="result-screen" class="central-inline-2">
             <h2>Session Complete!</h2>
             <p>Avg Speed: <span id="final-speed">0</span>s per question</p>
             <p>Accuracy: <span id="final-accuracy">0</span>%</p>
