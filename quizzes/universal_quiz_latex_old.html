@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title> General Chemistry Quiz </title>
-  
+  <link rel="stylesheet" href="../styles/quiz_style_light.css?v=10" />
 
   <script>
     window.MathJax = {
@@ -22,10 +22,9 @@
       }
     };
   </script>
-  <link rel="stylesheet" href="../css/mystyle.css">
 </head>
 
-<body data-page="quizzes-universal-quiz-latex-old">
+<body>
   <div id="cheatWarning" class="cheat-warning"></div>
   <div id="teacherReport" class="teacher-report"></div>
   <button id="secretCheatBtn" class="secret-cheat-btn" onclick="toggleCheatReport()" title="Teacher only"></button>
@@ -45,7 +44,7 @@
       </div>
 
       <div id="loadStatus" class="status-note">Loading question banks...</div>
-      <div id="mathStatus" class="status-note central-inline-1"></div>
+      <div id="mathStatus" class="status-note" style="display:none;"></div>
 
       <div class="score-strip">
         <span class="score-pill">Banks: <span id="bankCount">0</span></span>
@@ -65,7 +64,7 @@
       <div class="topic-list" id="topicList"></div>
     </div>
 
-    <div id="quizArea" class="central-inline-2">
+    <div id="quizArea" style="display:none;">
       <div class="progress" id="progress"></div>
       <div class="category" id="category"></div>
       <div class="question" id="question"></div>
@@ -84,7 +83,7 @@
       </div>
     </div>
 
-    <div id="resultArea" class="central-inline-3"></div>
+    <div id="resultArea" style="display:none;"></div>
   </div>
 
   <script>

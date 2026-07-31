@@ -4,12 +4,37 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Hydrogen Spectral Lines: Random Photon Excitation</title>
-
-  <link rel="stylesheet" href="../../css/mystyle.css">
+<style>
+:root{--panel:rgba(8,12,24,.96);--panel2:rgba(18,25,42,.92);--line:rgba(148,163,184,.22);--text:#e5eefc;--muted:#9fb3d9;--blue:#60a5fa;--green:#34d399;--amber:#fbbf24;--red:#ef4444}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:"Segoe UI",Arial,sans-serif;color:var(--text);background:#000}
+.wrap{max-width:1460px;margin:20px auto;padding:0 16px 30px}
+.hero,.card{background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:0 14px 34px rgba(0,0,0,.34)}
+.hero{padding:22px 24px;margin-bottom:18px}
+h1{margin:0 0 10px;color:#dbeafe;font-size:clamp(1.9rem,3vw,2.7rem);letter-spacing:-.03em}
+.subtitle,.small{margin:0;color:var(--muted);line-height:1.65}
+.grid{display:grid;grid-template-columns:1fr;gap:18px}.card{padding:18px}
+h2{margin:0 0 12px;color:#bfdbfe;font-size:1.18rem}
+.status{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.pill{background:var(--panel2);border:1px solid rgba(148,163,184,.16);border-radius:13px;padding:10px;text-align:center}
+.pill b{display:block;color:#f8fafc;margin-bottom:4px;font-size:.98rem;font-variant-numeric:tabular-nums}
+.pill span{color:var(--muted);font-size:.84rem;line-height:1.25}
+.mainButtons{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 14px}
+button{padding:11px 15px;border:none;border-radius:10px;cursor:pointer;font-weight:800;background:var(--blue);color:#06111f}
+button.good{background:var(--green);color:#052e1a}button.secondary{background:#334155;color:#e2e8f0}button.warn{background:var(--amber);color:#3a2500}button:disabled{opacity:.52;cursor:not-allowed}
+#canvasWrap{width:100%;height:720px;border-radius:18px;overflow:hidden;border:1px solid rgba(148,163,184,.18);background:#000;position:relative}
+canvas{width:100%;height:100%;display:block}
+.bottomPanel{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:start}.bottomPanel h2{grid-column:1/-1;margin-bottom:0}.bottomCol{display:flex;flex-direction:column;gap:12px;min-width:0}
+.box,.message{background:rgba(2,6,23,.62);border:1px solid rgba(148,163,184,.16);border-radius:14px;padding:12px}
+.message{line-height:1.55;color:#dbeafe;background:rgba(30,41,59,.82);border-left:5px solid var(--blue)}.message.good{border-left-color:var(--green)}.message.warn{border-left-color:var(--amber)}.message.bad{border-left-color:var(--red)}
+.hint{color:#fde68a;font-weight:800}.lineList{display:grid;gap:8px;margin-top:10px;max-height:245px;overflow:auto}.lineItem{background:rgba(2,6,23,.44);border:1px solid rgba(148,163,184,.12);border-radius:12px;padding:8px 10px;color:#dbeafe;font-size:.92rem}
+.legend{display:grid;gap:8px;padding-top:12px;border-top:1px solid var(--line);color:var(--muted);font-size:.92rem}.sw{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:8px;vertical-align:middle}
+@media(max-width:980px){.status{grid-template-columns:1fr 1fr}.bottomPanel{grid-template-columns:1fr}#canvasWrap{height:580px}}
+</style>
 </head>
-<body data-page="simulations-atom-bohr-model">
+<body>
 <div class="wrap">
-<a class="back-link central-inline-1" href="../../index.html">&larr; Back to Interactive Learning Lab</a>
+<a class="back-link" href="../../index.html" style="display:inline-block;margin-bottom:14px;color:#bfdbfe;text-decoration:none;font-weight:700">&larr; Back to Interactive Learning Lab</a>
 <section class="hero">
 <h1>Hydrogen Spectral Lines: Random Photon Excitation</h1>
 <p class="subtitle">Photons arrive from random directions. One random collision excites the electron to a higher Bohr orbit. The electron rotates about 1–2 times in that excited orbit and then falls to a lower orbit, emitting one horizontal photon. The photon passes through the grating and forms a spectral line. Orbit radii use the proportions r₁=r₀, r₂=1.5r₀, r₃=2.5r₀, r₄=4r₀, r₅=6r₀, r₆=8.5r₀.</p>
@@ -37,18 +62,18 @@
 <h2>Information</h2>
 <div class="bottomCol">
 <div class="message" id="message">The electron is rotating in the ground state. Press <b>Start random photons</b>.</div>
-<div class="box"><div><span class="hint">Sequence:</span></div><div class="small central-inline-2">random incoming photons → one successful collision → excitation → 1–2 rotations → downward transition → one horizontal emitted photon → grating → spectral line.</div></div>
+<div class="box"><div><span class="hint">Sequence:</span></div><div class="small" style="margin-top:8px">random incoming photons → one successful collision → excitation → 1–2 rotations → downward transition → one horizontal emitted photon → grating → spectral line.</div></div>
 </div>
 <div class="bottomCol">
-<div class="box"><div><b>Latest transition</b></div><div class="small central-inline-3" id="transitionText">No transition yet.</div></div>
-<div class="box"><div><b>Formula used</b></div><div class="small central-inline-4">Photon energy: ΔE = 13.6(1/n<sub>f</sub><sup>2</sup> − 1/n<sub>i</sub><sup>2</sup>) eV.<br>Wavelength: λ = hc/ΔE, using hc ≈ 1239.84 eV nm.<br>Display orbit radii: r₁=r₀, r₂=1.5r₀, r₃=2.5r₀, r₄=4r₀, r₅=6r₀, r₆=8.5r₀, with r₀=25 px.</div></div>
+<div class="box"><div><b>Latest transition</b></div><div class="small" id="transitionText" style="margin-top:8px">No transition yet.</div></div>
+<div class="box"><div><b>Formula used</b></div><div class="small" style="margin-top:8px">Photon energy: ΔE = 13.6(1/n<sub>f</sub><sup>2</sup> − 1/n<sub>i</sub><sup>2</sup>) eV.<br>Wavelength: λ = hc/ΔE, using hc ≈ 1239.84 eV nm.<br>Display orbit radii: r₁=r₀, r₂=1.5r₀, r₃=2.5r₀, r₄=4r₀, r₅=6r₀, r₆=8.5r₀, with r₀=25 px.</div></div>
 </div>
 <div class="bottomCol">
 <div class="box"><div><b>Spectral lines recorded</b></div><div id="lineList" class="lineList"></div></div>
 <div class="legend">
-<div><span class="sw central-inline-5"></span>electron rotates continuously in its current orbit</div>
-<div><span class="sw central-inline-6"></span>incoming photons arrive from random directions</div>
-<div><span class="sw central-inline-7"></span>emitted photon travels horizontally to the grating, then lands on its wavelength line</div>
+<div><span class="sw" style="background:#93c5fd"></span>electron rotates continuously in its current orbit</div>
+<div><span class="sw" style="background:#fbbf24"></span>incoming photons arrive from random directions</div>
+<div><span class="sw" style="background:#ffffff"></span>emitted photon travels horizontally to the grating, then lands on its wavelength line</div>
 </div>
 </div>
 </aside>
@@ -118,7 +143,7 @@ function replayLast(){if(!lastTransition){setMessage("No previous photon to repl
 function resetToGround(){currentOrbit=1;electronRCurrent=shellRadius(1);phase="idle";phaseT=0;currentTransition=null;incomingPhotons=[];excitedOrbit=null;finalOrbit=null;$("statusLabel").textContent="ground state";$("transitionText").textContent="No transition yet.";setButtons(true);setMessage("The electron is rotating in the ground state. Press <b>Start random photons</b>.","normal");updateStatus()}
 function clearSpectrum(){spectralLines=[];renderLineList()}
 function addCurrentLineToSpectrum(){if(!currentTransition||hasRecordedCurrentLine)return;spectralLines.push({...currentTransition});hasRecordedCurrentLine=true;renderLineList()}
-function renderLineList(){const box=$("lineList");box.innerHTML="";if(spectralLines.length===0){box.innerHTML='<div class="lineItem">No spectral lines recorded yet.</div>';return}spectralLines.slice().reverse().forEach(line=>{const item=document.createElement("div");item.className="lineItem";item.innerHTML=`<span class="central-inline-8"></span><b>n=${line.nHigh} → n=${line.nLow}</b> · ${line.lambda.toFixed(1)} nm · ${line.series} · ${line.region}`;box.appendChild(item)})}
+function renderLineList(){const box=$("lineList");box.innerHTML="";if(spectralLines.length===0){box.innerHTML='<div class="lineItem">No spectral lines recorded yet.</div>';return}spectralLines.slice().reverse().forEach(line=>{const item=document.createElement("div");item.className="lineItem";item.innerHTML=`<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${line.color};margin-right:8px;vertical-align:middle;border:1px solid rgba(255,255,255,.25)"></span><b>n=${line.nHigh} → n=${line.nLow}</b> · ${line.lambda.toFixed(1)} nm · ${line.series} · ${line.region}`;box.appendChild(item)})}
 
 function drawBackground(){ctx.fillStyle="#000";ctx.fillRect(0,0,W,H);ctx.strokeStyle="rgba(255,255,255,.08)";ctx.lineWidth=2;[560,840].forEach(x=>{ctx.beginPath();ctx.moveTo(x,54);ctx.lineTo(x,H-54);ctx.stroke()});ctx.fillStyle="rgba(235,245,255,.88)";ctx.font="bold 20px Segoe UI";ctx.fillText("Hydrogen atom",150,58);ctx.fillText("Diffraction grating",662,58);ctx.fillText("Spectrum screen",960,58)}
 function drawAtom(){
