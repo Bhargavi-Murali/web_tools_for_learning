@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Review your previous Interactive Learning Lab quiz scores.">
+  <title>My Scores | Interactive Learning Lab</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/account.css">
+</head>
+<body class="account-page">
+  <header class="account-header">
+    <nav class="top-nav" aria-label="Scores navigation">
+      <a class="brand brand-link" href="index.html"><span class="brand-icon" aria-hidden="true">&#10022;</span><span>Interactive Learning Lab</span></a>
+      <div class="nav-links"><a href="index.html">Learning tools</a><a href="account.html">Account</a><a class="active" href="scores.html" aria-current="page">My scores</a></div>
+    </nav>
+  </header>
+  <main class="dashboard-main">
+    <div class="dashboard-heading">
+      <div><p class="section-kicker">Your learning history</p><h1>Previous scores</h1><p>Every quiz attempt saved to your account, newest first.</p></div>
+      <button id="refreshScoresButton" class="secondary-action" type="button" hidden>Refresh</button>
+    </div>
+    <section class="dashboard-card" aria-live="polite">
+      <p id="scoresStatus" class="dashboard-status">Checking your account&hellip;</p>
+      <div id="scoresTableWrap" class="score-table-wrap" hidden>
+        <table class="data-table"><thead><tr><th>Activity</th><th>Score</th><th>Percentage</th><th>Completed</th></tr></thead><tbody id="scoresBody"></tbody></table>
+      </div>
+      <div id="scoresSignIn" class="access-message" hidden><p>Sign in to view your saved scores.</p><a class="primary-action link-action" href="account.html">Go to sign in</a></div>
+    </section>
+  </main>
+  <footer class="site-footer"><p>Interactive Learning Lab &middot; Your progress belongs to your account.</p></footer>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.2/dist/umd/supabase.min.js"></script>
+  <script defer src="js/supabase-client.js"></script>
+  <script defer src="js/progress-store.js"></script>
+  <script defer src="js/scores.js"></script>
+</body>
+</html>

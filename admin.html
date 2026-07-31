@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Users | Interactive Learning Lab</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/account.css">
+</head>
+<body class="account-page">
+  <header class="account-header">
+    <nav class="top-nav" aria-label="Administrator navigation">
+      <a class="brand brand-link" href="index.html"><span class="brand-icon" aria-hidden="true">&#10022;</span><span>Interactive Learning Lab</span></a>
+      <div class="nav-links"><a href="index.html">Learning tools</a><a href="scores.html">My scores</a><a class="active" href="admin.html" aria-current="page">Users</a></div>
+    </nav>
+  </header>
+  <main class="dashboard-main">
+    <div class="dashboard-heading"><div><p class="section-kicker">Administrator</p><h1>People who signed in</h1><p>Registered learners and their most recent sign-in.</p></div><button id="refreshUsersButton" class="secondary-action" type="button" hidden>Refresh</button></div>
+    <section class="dashboard-card" aria-live="polite">
+      <p id="adminStatus" class="dashboard-status">Checking administrator access&hellip;</p>
+      <div id="usersTableWrap" class="score-table-wrap" hidden><table class="data-table"><thead><tr><th>Name</th><th>Email</th><th>Joined</th><th>Last signed in</th></tr></thead><tbody id="usersBody"></tbody></table></div>
+      <div id="adminDenied" class="access-message" hidden><p>This page is available only to the site administrator.</p><a class="primary-action link-action" href="index.html">Return home</a></div>
+    </section>
+  </main>
+  <footer class="site-footer"><p>Interactive Learning Lab &middot; Administrator access only.</p></footer>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.2/dist/umd/supabase.min.js"></script>
+  <script defer src="js/supabase-client.js"></script>
+  <script defer src="js/admin.js"></script>
+</body>
+</html>

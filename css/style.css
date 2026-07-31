@@ -2,6 +2,10 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 :root {
   --bg: #f6f8fc;
   --text: #172033;
@@ -91,6 +95,35 @@ a {
 .nav-links a:hover {
   background: rgba(255, 255, 255, 0.12);
   color: white;
+}
+
+.auth-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.signed-in-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  color: #dcfce7;
+  background: rgba(22, 163, 74, 0.2);
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.signed-in-indicator::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.16);
 }
 
 .hero {

@@ -31,6 +31,78 @@
   align-items: center;
 }
 
+.dashboard-main {
+  width: min(1120px, calc(100% - 32px));
+  min-height: calc(100vh - 170px);
+  margin: 0 auto;
+  padding: 48px 0 64px;
+}
+
+.dashboard-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: end;
+  margin-bottom: 24px;
+}
+
+.dashboard-heading h1 {
+  margin: 0;
+  font-size: clamp(2.2rem, 6vw, 4.2rem);
+  letter-spacing: -0.05em;
+}
+
+.dashboard-heading p:not(.section-kicker) {
+  margin: 10px 0 0;
+  color: var(--muted);
+}
+
+.dashboard-card {
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--shadow);
+}
+
+.dashboard-status {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.score-table-wrap { overflow-x: auto; }
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th,
+.data-table td {
+  padding: 13px 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.data-table th {
+  color: var(--muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.data-table td { color: #334155; }
+.data-table .score-value { color: #166534; font-weight: 900; }
+
+.access-message {
+  padding: 22px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 16px;
+  text-align: center;
+}
+
 .account-intro {
   max-width: 620px;
 }
@@ -447,4 +519,8 @@ button:disabled {
   .benefit-list {
     font-size: 0.96rem;
   }
+
+  .dashboard-main { width: min(100% - 24px, 1120px); padding-top: 30px; }
+  .dashboard-heading { align-items: flex-start; flex-direction: column; }
+  .dashboard-card { padding: 18px; border-radius: 21px; }
 }
