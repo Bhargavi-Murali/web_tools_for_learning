@@ -5,13 +5,369 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Electronic Configuration Click Game</title>
 
+<style>
+:root{
+  --bg1:#07111f;
+  --bg2:#10213b;
+  --panel:rgba(15,23,42,.96);
+  --panel2:rgba(30,41,59,.88);
+  --line:rgba(148,163,184,.24);
+  --text:#e5eefc;
+  --muted:#9fb3d9;
+  --blue:#60a5fa;
+  --rose:#fb7185;
+  --green:#34d399;
+  --amber:#fbbf24;
+  --red:#ef4444;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:"Segoe UI",Arial,sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(circle at 18% 12%, rgba(96,165,250,.16), transparent 28rem),
+    radial-gradient(circle at 86% 82%, rgba(52,211,153,.10), transparent 28rem),
+    linear-gradient(135deg,var(--bg1),var(--bg2));
+}
+.wrap{
+  max-width:1400px;
+  margin:22px auto;
+  padding:0 16px 30px;
+}
+.hero,.card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:20px;
+  box-shadow:0 14px 34px rgba(0,0,0,.28);
+}
+.hero{
+  padding:22px 24px;
+  margin-bottom:18px;
+}
+h1{
+  margin:0 0 10px;
+  color:#dbeafe;
+  font-size:clamp(1.9rem,3vw,2.7rem);
+  letter-spacing:-.03em;
+}
+.subtitle,.note{
+  margin:0;
+  color:var(--muted);
+  line-height:1.65;
+}
+.grid{
+  display:grid;
+  grid-template-columns:360px minmax(0,1fr);
+  gap:18px;
+  align-items:start;
+}
+.card{padding:18px}
+h2{
+  margin:0 0 12px;
+  color:#bfdbfe;
+  font-size:1.18rem;
+}
+h3{
+  margin:16px 0 8px;
+  color:#dbeafe;
+  font-size:1rem;
+}
+.control{
+  margin:14px 0 16px;
+}
+label{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  font-weight:650;
+  margin-bottom:7px;
+  color:#dce8ff;
+  line-height:1.35;
+}
+.value{
+  color:#86efac;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+}
+input[type=range],select{
+  width:100%;
+  accent-color:var(--blue);
+}
+select{
+  padding:9px 10px;
+  border-radius:10px;
+  border:1px solid rgba(148,163,184,.30);
+  background:#0f172a;
+  color:#e2e8f0;
+}
+.row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin:14px 0 4px;
+}
+button{
+  padding:10px 13px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:750;
+  background:var(--blue);
+  color:#06111f;
+}
+button.secondary{
+  background:#334155;
+  color:#e2e8f0;
+}
+button.good{
+  background:var(--green);
+  color:#052e1a;
+}
+button.warnBtn{
+  background:var(--amber);
+  color:#3a2500;
+}
+.status{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+  margin-bottom:14px;
+}
+.pill{
+  background:var(--panel2);
+  border:1px solid rgba(148,163,184,.16);
+  border-radius:13px;
+  padding:10px;
+  text-align:center;
+}
+.pill b{
+  display:block;
+  color:#f8fafc;
+  margin-bottom:4px;
+  font-size:.98rem;
+  font-variant-numeric:tabular-nums;
+}
+.pill span{
+  color:var(--muted);
+  font-size:.84rem;
+  line-height:1.25;
+}
+.energyBarOuter{
+  height:12px;
+  background:rgba(2,6,23,.70);
+  border:1px solid rgba(148,163,184,.18);
+  border-radius:999px;
+  overflow:hidden;
+  margin-bottom:12px;
+}
+.energyBarInner{
+  height:100%;
+  width:40%;
+  background:linear-gradient(90deg,var(--green),var(--amber),var(--red));
+  transition:width .18s ease;
+}
 
-  <link rel="stylesheet" href="../../css/mystyle.css">
+/* Shell-row energy diagram */
+.orbitalGrid{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  padding-top:10px;
+}
+.shellRow{
+  display:grid;
+  grid-template-columns:68px minmax(0,1fr);
+  gap:12px;
+  align-items:stretch;
+  border:1px solid rgba(148,163,184,.18);
+  border-radius:18px;
+  padding:12px;
+  background:rgba(2,6,23,.26);
+}
+.shellRow:nth-child(odd){
+  background:rgba(15,23,42,.42);
+}
+.shellLabel{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:14px;
+  background:rgba(30,41,59,.88);
+  color:#fde68a;
+  font-weight:900;
+  font-size:1.35rem;
+  border:1px solid rgba(251,191,36,.24);
+}
+.shellOrbitals{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  align-items:stretch;
+}
+.subshell{
+  border:1px solid rgba(148,163,184,.20);
+  border-radius:16px;
+  background:rgba(15,23,42,.76);
+  padding:12px;
+  min-height:128px;
+  min-width:170px;
+}
+.subshell.problem{
+  border-color:rgba(239,68,68,.56);
+  box-shadow:0 0 0 1px rgba(239,68,68,.12) inset;
+}
+.subHead{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:10px;
+}
+.subLabel{
+  font-weight:850;
+  color:#e0f2fe;
+  font-size:1.25rem;
+}
+.subMeta{
+  color:var(--muted);
+  font-size:.82rem;
+  text-align:right;
+  line-height:1.25;
+}
+.orbitals{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  align-items:flex-start;
+}
+.orbitalWrap{
+  text-align:center;
+}
+.orbitalCell{
+  width:76px;
+  height:52px;
+  border:2px solid rgba(148,163,184,.42);
+  border-radius:11px;
+  background:rgba(2,6,23,.58);
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  overflow:hidden;
+  position:relative;
+}
+.orbitalCell::after{
+  content:"";
+  position:absolute;
+  top:7px;
+  bottom:7px;
+  left:50%;
+  border-left:1px dashed rgba(148,163,184,.30);
+  pointer-events:none;
+}
+.slot{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  font-size:1.35rem;
+  font-weight:900;
+  color:rgba(226,232,240,.36);
+  user-select:none;
+  min-width:36px;
+  min-height:48px;
+  transition:.12s ease;
+}
+.slot:hover{
+  background:rgba(96,165,250,.16);
+  color:#dbeafe;
+}
+.slot.up.filled{
+  color:var(--blue);
+  background:rgba(96,165,250,.22);
+}
+.slot.down.filled{
+  color:var(--rose);
+  background:rgba(251,113,133,.20);
+}
+.orbIndex{
+  font-size:.74rem;
+  color:rgba(203,213,225,.68);
+  margin-top:5px;
+}
+.box{
+  background:rgba(2,6,23,.48);
+  border:1px solid rgba(148,163,184,.16);
+  border-radius:14px;
+  padding:12px;
+  margin-top:12px;
+}
+.configText{
+  color:#fef3c7;
+  font-weight:800;
+  line-height:1.55;
+  word-break:break-word;
+}
+.msg{
+  margin-top:12px;
+  border-radius:14px;
+  padding:12px;
+  line-height:1.55;
+  color:#dbeafe;
+  background:rgba(30,41,59,.82);
+  border-left:5px solid var(--blue);
+}
+.msg.good{border-left-color:var(--green)}
+.msg.warn{border-left-color:var(--amber)}
+.msg.bad{border-left-color:var(--red)}
+.ruleList{
+  display:grid;
+  gap:9px;
+  margin-top:12px;
+}
+.rule{
+  padding:10px;
+  border-radius:12px;
+  background:rgba(2,6,23,.42);
+  border:1px solid rgba(148,163,184,.14);
+  color:#cbd5e1;
+  line-height:1.45;
+  font-size:.92rem;
+}
+.rule b{color:#e0f2fe}
+.small{
+  font-size:.88rem;
+  color:var(--muted);
+  line-height:1.55;
+}
+.legend{
+  display:grid;
+  gap:8px;
+  margin-top:15px;
+  padding-top:14px;
+  border-top:1px solid var(--line);
+  color:var(--muted);
+  font-size:.92rem;
+}
+.sw{
+  display:inline-block;
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  margin-right:8px;
+  vertical-align:middle;
+}
+@media(max-width:980px){
+  .grid{grid-template-columns:1fr}
+  .status{grid-template-columns:1fr 1fr}
+  .shellRow{grid-template-columns:1fr}
+  .shellLabel{min-height:44px}
+}
+</style>
 </head>
 
-<body data-page="simulations-atom-electron-configuration">
+<body>
 <div class="wrap">
-  <a class="back-link central-inline-1" href="../../index.html">&larr; Back to Interactive Learning Lab</a>
+  <a class="back-link" href="../../index.html" style="display:inline-block;margin-bottom:14px;color:#bfdbfe;text-decoration:none;font-weight:700">&larr; Back to Interactive Learning Lab</a>
   <section class="hero">
     <h1>Electronic Configuration Click Game</h1>
     <p class="subtitle">
@@ -58,9 +414,9 @@
       </div>
 
       <div class="legend">
-        <div><span class="sw central-inline-2"></span>↑ spin-up electron</div>
-        <div><span class="sw central-inline-3"></span>↓ spin-down electron</div>
-        <div><span class="sw central-inline-4"></span>red border: rule penalty</div>
+        <div><span class="sw" style="background:#60a5fa"></span>↑ spin-up electron</div>
+        <div><span class="sw" style="background:#fb7185"></span>↓ spin-down electron</div>
+        <div><span class="sw" style="background:#ef4444"></span>red border: rule penalty</div>
       </div>
 
       <p class="small">

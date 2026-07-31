@@ -6,13 +6,250 @@
 
   <title>2D Hydrogen Orbitals - Radial Nodes and Probability Dots</title>
 
-  
-  <link rel="stylesheet" href="../../css/mystyle.css">
+  <style>
+    :root{
+      --bg1:#07111f;
+      --bg2:#10213b;
+      --panel:rgba(15,23,42,.95);
+      --line:rgba(148,163,184,.22);
+      --text:#e5eefc;
+      --muted:#9fb3d9;
+      --blue:#60a5fa;
+      --green:#34d399;
+      --amber:#fbbf24;
+      --rose:#fb7185;
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:"Segoe UI",Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 18% 12%, rgba(96,165,250,.16), transparent 28rem),
+        radial-gradient(circle at 86% 82%, rgba(52,211,153,.10), transparent 28rem),
+        linear-gradient(135deg,var(--bg1),var(--bg2));
+    }
+
+    .wrap{
+      max-width:1320px;
+      margin:22px auto;
+      padding:0 16px 30px;
+    }
+
+    .hero,.card{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:20px;
+      box-shadow:0 14px 34px rgba(0,0,0,.28);
+    }
+
+    .hero{
+      padding:22px 24px;
+      margin-bottom:18px;
+    }
+
+    h1{
+      margin:0 0 10px;
+      color:#dbeafe;
+      font-size:clamp(1.9rem,3vw,2.7rem);
+      letter-spacing:-.03em;
+    }
+
+    .subtitle,.note{
+      margin:0;
+      color:var(--muted);
+      line-height:1.65;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:365px minmax(0,1fr);
+      gap:18px;
+      align-items:start;
+    }
+
+    .card{padding:18px}
+
+    h2{
+      margin:0 0 12px;
+      color:#bfdbfe;
+      font-size:1.18rem;
+    }
+
+    h3{
+      margin:16px 0 8px;
+      color:#dbeafe;
+      font-size:1rem;
+    }
+
+    .control{
+      margin:14px 0 16px;
+    }
+
+    label{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      font-weight:650;
+      margin-bottom:7px;
+      color:#dce8ff;
+      line-height:1.35;
+    }
+
+    .value{
+      color:#86efac;
+      font-variant-numeric:tabular-nums;
+      white-space:nowrap;
+    }
+
+    input[type=range], select{
+      width:100%;
+      accent-color:var(--blue);
+    }
+
+    select{
+      padding:9px 10px;
+      border-radius:10px;
+      border:1px solid rgba(148,163,184,.30);
+      background:#0f172a;
+      color:#e2e8f0;
+    }
+
+    .toggle{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin:10px 0;
+      color:#d7e7ff;
+      line-height:1.45;
+    }
+
+    .toggle input{transform:scale(1.1)}
+
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin:16px 0 4px;
+    }
+
+    button{
+      padding:10px 14px;
+      border:none;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:750;
+      background:var(--blue);
+      color:#06111f;
+    }
+
+    button.secondary{
+      background:#334155;
+      color:#e2e8f0;
+    }
+
+    #canvasWrap{
+      width:100%;
+      height:760px;
+      border-radius:16px;
+      overflow:hidden;
+      border:1px solid rgba(148,163,184,.18);
+      background:#000000;
+      position:relative;
+    }
+
+    canvas{
+      width:100%;
+      height:100%;
+      display:block;
+    }
+
+    .status{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:10px;
+      margin-top:14px;
+    }
+
+    .pill{
+      background:rgba(30,41,59,.88);
+      border:1px solid rgba(148,163,184,.16);
+      border-radius:13px;
+      padding:10px;
+      text-align:center;
+    }
+
+    .pill b{
+      display:block;
+      color:#f8fafc;
+      margin-bottom:4px;
+      font-size:.98rem;
+      font-variant-numeric:tabular-nums;
+    }
+
+    .pill span{
+      color:var(--muted);
+      font-size:.86rem;
+      line-height:1.25;
+    }
+
+    .formula{
+      color:#fef3c7;
+      font-weight:700;
+      line-height:1.65;
+      margin:0;
+    }
+
+    .warn{
+      padding:10px 12px;
+      border-radius:12px;
+      background:rgba(251,191,36,.10);
+      border-left:5px solid var(--amber);
+      color:#fde68a;
+      line-height:1.5;
+      margin-top:14px;
+      font-size:.92rem;
+    }
+
+    .legend{
+      display:grid;
+      gap:8px;
+      margin-top:15px;
+      padding-top:14px;
+      border-top:1px solid var(--line);
+      color:var(--muted);
+      font-size:.92rem;
+    }
+
+    .sw{
+      display:inline-block;
+      width:12px;
+      height:12px;
+      border-radius:50%;
+      margin-right:8px;
+      vertical-align:middle;
+    }
+
+    .small{
+      font-size:.88rem;
+      color:var(--muted);
+      line-height:1.55;
+    }
+
+    @media(max-width:980px){
+      .grid{grid-template-columns:1fr}
+      #canvasWrap{height:570px}
+      .status{grid-template-columns:1fr 1fr}
+    }
+  </style>
 </head>
 
-<body data-page="simulations-atom-twodhydrogen1">
+<body>
 <div class="wrap">
-  <a class="back-link central-inline-1" href="../../index.html">&larr; Back to Interactive Learning Lab</a>
+  <a class="back-link" href="../../index.html" style="display:inline-block;margin-bottom:14px;color:#bfdbfe;text-decoration:none;font-weight:700">&larr; Back to Interactive Learning Lab</a>
   <section class="hero">
     <h1>2D Hydrogen Orbitals: Probability Dots and Radial Nodes</h1>
     <p class="subtitle">
@@ -93,10 +330,10 @@
       </div>
 
       <div class="legend">
-        <div><span class="sw central-inline-2"></span>white dots: sampled probability points</div>
-        <div><span class="sw central-inline-3"></span>false-color heatmap: higher density = hotter colors</div>
-        <div><span class="sw central-inline-4"></span>yellow rings: radial nodes</div>
-        <div><span class="sw central-inline-5"></span>yellow/orange/magenta: heatmap contrast scale</div>
+        <div><span class="sw" style="background:#60a5fa"></span>white dots: sampled probability points</div>
+        <div><span class="sw" style="background:#fb7185"></span>false-color heatmap: higher density = hotter colors</div>
+        <div><span class="sw" style="background:#fbbf24"></span>yellow rings: radial nodes</div>
+        <div><span class="sw" style="background:#34d399"></span>yellow/orange/magenta: heatmap contrast scale</div>
       </div>
 
       <div class="warn">
@@ -120,7 +357,7 @@
         </div>
       </section>
 
-      <section class="card central-inline-6">
+      <section class="card" style="margin-top:18px;">
         <h2>Why the radial nodes are now visible</h2>
         <p class="formula">
           \(\psi(r,\theta)=R_{n,m}(r)\Phi_m(\theta)\), &nbsp;

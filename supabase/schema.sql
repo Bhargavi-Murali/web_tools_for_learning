@@ -34,6 +34,16 @@ create table if not exists public.activity_state (
   primary key (user_id, activity_id)
 );
 
+-- Server-side administrator allowlist. Change this address if the administrator
+-- signs in with a different email account.
+create table if not exists public.admin_allowlist (
+  email text primary key check (email = lower(btrim(email)))
+);
+
+insert into public.admin_allowlist (email)
+values ('muralipalla@gmail.com')
+on conflict (email) do nothing;
+
 create index if not exists quiz_attempts_user_quiz_date_idx
   on public.quiz_attempts (user_id, quiz_id, completed_at desc);
 
@@ -96,6 +106,52 @@ for each row execute function public.handle_new_user();
 alter table public.profiles enable row level security;
 alter table public.quiz_attempts enable row level security;
 alter table public.activity_state enable row level security;
+alter table public.admin_allowlist enable row level security;
+
+create or replace function public.is_site_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1
+    from public.admin_allowlist
+    where email = lower(coalesce((select auth.jwt() ->> 'email'), ''))
+  );
+$$;
+
+create or replace function public.admin_list_users()
+returns table (
+  user_id uuid,
+  email text,
+  display_name text,
+  created_at timestamptz,
+  last_sign_in_at timestamptz
+)
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+begin
+  if not public.is_site_admin() then
+    raise exception 'Administrator access required' using errcode = '42501';
+  end if;
+
+  return query
+  select
+    users.id,
+    users.email::text,
+    profiles.display_name,
+    users.created_at,
+    users.last_sign_in_at
+  from auth.users as users
+  left join public.profiles as profiles on profiles.user_id = users.id
+  order by users.last_sign_in_at desc nulls last, users.created_at desc;
+end;
+$$;
 
 drop policy if exists profiles_select_own on public.profiles;
 create policy profiles_select_own
@@ -147,10 +203,17 @@ using ((select auth.uid()) = user_id);
 revoke all on table
   public.profiles,
   public.quiz_attempts,
-  public.activity_state
+  public.activity_state,
+  public.admin_allowlist
 from anon;
+
+revoke all on table public.admin_allowlist from authenticated;
+revoke all on function public.is_site_admin() from public;
+revoke all on function public.admin_list_users() from public;
 
 grant usage on schema public to authenticated;
 grant select, update on table public.profiles to authenticated;
 grant select, insert, delete on table public.quiz_attempts to authenticated;
 grant select, insert, update, delete on table public.activity_state to authenticated;
+grant execute on function public.is_site_admin() to authenticated;
+grant execute on function public.admin_list_users() to authenticated;

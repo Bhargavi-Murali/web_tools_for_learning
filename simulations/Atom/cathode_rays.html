@@ -4,12 +4,47 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>J. J. Thomson Cathode Ray Experiment</title>
-
-  <link rel="stylesheet" href="../../css/mystyle.css">
+<style>
+:root{--bg:#07111f;--panel:#0f172a;--text:#e5eefc;--muted:#9fb3d9;--blue:#60a5fa;--green:#34d399;--amber:#fbbf24;--red:#fb7185}
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;color:var(--text);background:radial-gradient(circle at 20% 15%,rgba(96,165,250,.16),transparent 28rem),linear-gradient(135deg,#07111f,#10213b);min-height:100vh}
+.wrap{max-width:1240px;margin:24px auto;padding:0 16px 30px}
+.hero,.card{background:rgba(15,23,42,.94);border:1px solid rgba(148,163,184,.22);border-radius:20px;box-shadow:0 14px 34px rgba(0,0,0,.28)}
+.hero{padding:22px 24px;margin-bottom:18px}
+h1{margin:0 0 10px;color:#dbeafe;font-size:clamp(1.8rem,3vw,2.7rem)}
+.subtitle,.note{color:var(--muted);line-height:1.6;margin:0}
+.grid{display:grid;grid-template-columns:340px 1fr;gap:18px}
+.card{padding:18px}
+h2{margin:0 0 12px;color:#bfdbfe;font-size:1.18rem}
+h3{margin:16px 0 8px;color:#dbeafe;font-size:1rem}
+.control{margin:14px 0}
+label{display:flex;justify-content:space-between;gap:10px;font-weight:650;margin-bottom:7px;color:#dce8ff}
+.value{color:#86efac;font-variant-numeric:tabular-nums;white-space:nowrap}
+input[type=range]{width:100%;accent-color:var(--blue)}
+.toggle{display:flex;align-items:center;gap:10px;margin:10px 0;color:#d7e7ff;line-height:1.45}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+button{padding:10px 13px;border:0;border-radius:10px;font-weight:750;cursor:pointer;background:var(--blue);color:#06111f}
+button.secondary{background:#334155;color:#e2e8f0}
+button.tab{background:#1e293b;color:#dbeafe;border:1px solid rgba(148,163,184,.28)}
+button.tab.active{background:#2563eb;color:#fff}
+canvas{width:100%;height:auto;display:block;background:radial-gradient(circle at center,rgba(30,41,59,.55),rgba(2,6,23,.92)),#020617;border:1px solid rgba(148,163,184,.18);border-radius:16px}
+.status{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+.pill{background:rgba(30,41,59,.88);border:1px solid rgba(148,163,184,.16);border-radius:13px;padding:10px;text-align:center}
+.pill b{display:block;color:#f8fafc;font-variant-numeric:tabular-nums;margin-bottom:4px}
+.pill span{color:var(--muted);font-size:.86rem}
+.legend{display:grid;gap:8px;margin-top:15px;padding-top:14px;border-top:1px solid rgba(148,163,184,.22);color:var(--muted);font-size:.92rem}
+.sw{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:8px;vertical-align:middle}
+.warn{padding:10px 12px;border-radius:12px;background:rgba(251,191,36,.10);border-left:5px solid var(--amber);color:#fde68a;line-height:1.5;margin-top:14px;font-size:.92rem}
+.formula{color:#fef3c7;font-weight:700;line-height:1.6}
+table{width:100%;border-collapse:collapse;margin-top:12px;color:#e2e8f0;font-size:.9rem}
+td,th{border:1px solid rgba(148,163,184,.22);padding:8px 9px;text-align:left}
+th{background:rgba(96,165,250,.15);color:#bfdbfe}
+@media(max-width:920px){.grid{grid-template-columns:1fr}.status{grid-template-columns:1fr 1fr}}
+</style>
 </head>
-<body data-page="simulations-atom-cathode-rays">
+<body>
 <div class="wrap">
-<a class="back-link central-inline-1" href="../../index.html">&larr; Back to Interactive Learning Lab</a>
+<a class="back-link" href="../../index.html" style="display:inline-block;margin-bottom:14px;color:#bfdbfe;text-decoration:none;font-weight:700">&larr; Back to Interactive Learning Lab</a>
 <section class="hero">
 <h1>J. J. Thomson Cathode-Ray Experiment</h1>
 <p class="subtitle">A cathode-ray beam passes through electric and magnetic fields. The simulation integrates the electron path using the Lorentz force, \(F=q(E+v\times B)\), and shows how Thomson could balance the deflections and estimate the electron charge-to-mass ratio \(e/m\).</p>
@@ -40,10 +75,10 @@
 <div class="toggle"><input id="showFormula" type="checkbox" checked><span>Show formulas</span></div>
 
 <div class="legend">
-<div><span class="sw central-inline-2"></span>cyan beam: electron/cathode ray</div>
-<div><span class="sw central-inline-3"></span>red arrow: electric force</div>
-<div><span class="sw central-inline-4"></span>green arrow: magnetic force</div>
-<div><span class="sw central-inline-5"></span>yellow spot: screen impact</div>
+<div><span class="sw" style="background:#38bdf8"></span>cyan beam: electron/cathode ray</div>
+<div><span class="sw" style="background:#fb7185"></span>red arrow: electric force</div>
+<div><span class="sw" style="background:#34d399"></span>green arrow: magnetic force</div>
+<div><span class="sw" style="background:#fbbf24"></span>yellow spot: screen impact</div>
 </div>
 
 <div class="warn">The equations are physical, but the display is a simplified 2D vacuum tube for teaching.</div>
@@ -51,7 +86,7 @@
 
 <main>
 <section class="card">
-<div class="row central-inline-6"><button class="tab active" id="tabExperiment">Experiment view</button><button class="tab" id="tabMeasurement">Measurement view</button></div>
+<div class="row" style="margin-top:0"><button class="tab active" id="tabExperiment">Experiment view</button><button class="tab" id="tabMeasurement">Measurement view</button></div>
 <canvas id="sim" width="940" height="560"></canvas>
 <div class="status">
 <div class="pill"><b id="speedReadout"></b><span>electron speed</span></div>
@@ -61,7 +96,7 @@
 </div>
 </section>
 
-<section class="card central-inline-7">
+<section class="card" style="margin-top:18px">
 <h2>How the measurement works</h2>
 <p class="formula">Balance condition: \(eE=evB\Rightarrow v=E/B\). Magnetic curvature: \(evB=mv^2/r\Rightarrow e/m=v/(Br)\).</p>
 <p class="note">The button <b>Set B to balance E</b> chooses the magnetic field that nearly cancels electric deflection. In measurement view, the simulation fits a circular arc in the magnetic-field region and estimates \(e/m\).</p>

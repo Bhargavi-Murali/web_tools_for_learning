@@ -4,15 +4,556 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Virtual Acid–Base Titration Lab</title>
+<style>
+  :root {
+    --bg1: #07111f;
+    --bg2: #10213b;
+    --panel: rgba(15, 23, 42, 0.94);
+    --panel2: rgba(30, 41, 59, 0.88);
+    --ink: #e5eefc;
+    --muted: #9fb3d9;
+    --line: rgba(148, 163, 184, 0.20);
+    --accent: #60a5fa;
+    --accent-dark: #3b82f6;
+    --good: #34d399;
+    --warn: #fbbf24;
+    --bad: #fb7185;
+    --glass: rgba(15, 23, 42, 0.70);
+    --shadow: 0 14px 34px rgba(0, 0, 0, 0.32);
+  }
 
-  <link rel="stylesheet" href="../../css/mystyle.css">
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background:
+      radial-gradient(circle at 18% 12%, rgba(96, 165, 250, 0.16), transparent 28rem),
+      radial-gradient(circle at 86% 82%, rgba(52, 211, 153, 0.10), transparent 28rem),
+      linear-gradient(135deg, var(--bg1), var(--bg2));
+    color: var(--ink);
+  }
+
+  header {
+    padding: 28px 18px 16px;
+    text-align: center;
+  }
+
+  header h1 {
+    margin: 0;
+    font-size: clamp(1.85rem, 3.6vw, 3.05rem);
+    letter-spacing: -0.04em;
+    color: #dbeafe;
+  }
+
+  header p {
+    max-width: 900px;
+    margin: 10px auto 0;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .wrap {
+    width: min(1220px, calc(100% - 28px));
+    margin: 0 auto 40px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1.05fr 1.25fr;
+    gap: 18px;
+    align-items: start;
+  }
+
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    padding: 18px;
+  }
+
+  .card h2, .card h3 {
+    margin: 0 0 12px;
+    color: #bfdbfe;
+    letter-spacing: -0.025em;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  @media (max-width: 640px) {
+    .row { grid-template-columns: 1fr; }
+  }
+
+  label {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 750;
+    color: #dce8ff;
+    margin-bottom: 6px;
+  }
+
+  select, input[type="number"] {
+    width: 100%;
+    border: 1px solid rgba(148, 163, 184, 0.38);
+    background: #0f172a;
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-size: 1rem;
+    color: var(--ink);
+    outline: none;
+  }
+
+  select:focus, input[type="number"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.20);
+  }
+
+  .radio-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    background: rgba(30, 41, 59, 0.82);
+    color: #d7e7ff;
+    padding: 10px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .pill input { accent-color: var(--accent); }
+
+  button {
+    border: 0;
+    border-radius: 12px;
+    background: var(--accent);
+    color: #06111f;
+    padding: 10px 14px;
+    font-weight: 850;
+    font-size: 0.95rem;
+    cursor: pointer;
+    box-shadow: 0 7px 18px rgba(96, 165, 250, 0.20);
+  }
+
+  button:hover { background: var(--accent-dark); color: #eff6ff; }
+  button:disabled { background: #64748b; color: #cbd5e1; cursor: not-allowed; box-shadow: none; }
+
+  .ghost-btn {
+    background: #334155;
+    color: #e2e8f0;
+    box-shadow: none;
+  }
+
+  .ghost-btn:hover { background: #475569; color: #f8fafc; }
+
+  .danger-btn {
+    background: #fb7185;
+    color: #3f0712;
+  }
+
+  .danger-btn:hover {
+    background: #f43f5e;
+    color: white;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .stat {
+    background: rgba(30, 41, 59, 0.82);
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 16px;
+    padding: 12px;
+  }
+
+  .stat .k {
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .stat .v {
+    margin-top: 4px;
+    font-size: 1.12rem;
+    font-weight: 900;
+    color: #f8fafc;
+  }
+
+  .lab {
+    min-height: 800px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .bench {
+    position: relative;
+    min-height: 520px;
+    border-radius: 20px;
+    background:
+      radial-gradient(circle at 45% 34%, rgba(96, 165, 250, 0.13), transparent 17rem),
+      linear-gradient(180deg, rgba(15,23,42,0.88), rgba(2,6,23,0.96)),
+      repeating-linear-gradient(90deg, rgba(148,163,184,0.06) 0 14px, rgba(148,163,184,0.10) 14px 28px);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    padding: 18px;
+  }
+
+  .stand {
+    position: absolute;
+    left: 78px;
+    top: 42px;
+    width: 12px;
+    height: 315px;
+    background: #64748b;
+    border-radius: 999px;
+    box-shadow: 0 0 12px rgba(148,163,184,0.14);
+  }
+
+  .stand::before {
+    content: "";
+    position: absolute;
+    left: -42px;
+    bottom: -10px;
+    width: 98px;
+    height: 18px;
+    border-radius: 999px;
+    background: #64748b;
+  }
+
+  .clamp {
+    position: absolute;
+    left: 86px;
+    top: 92px;
+    width: 80px;
+    height: 12px;
+    border-radius: 999px;
+    background: #94a3b8;
+  }
+
+  .burette {
+    position: absolute;
+    left: 150px;
+    top: 38px;
+    width: 50px;
+    height: 285px;
+    border: 3px solid rgba(226, 232, 240, 0.70);
+    background: rgba(255,255,255,0.16);
+    border-radius: 17px 17px 8px 8px;
+    overflow: hidden;
+    box-shadow: inset 0 0 18px rgba(255,255,255,0.08);
+  }
+
+  .burette-liquid {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 92%;
+    background: linear-gradient(180deg, rgba(125, 211, 252, 0.45), rgba(59, 130, 246, 0.70));
+    transition: height 0.35s ease;
+  }
+
+  .ticks {
+    position: absolute;
+    inset: 8px 0 8px auto;
+    width: 18px;
+    background: repeating-linear-gradient(180deg, rgba(241,245,249,.65) 0 2px, transparent 2px 22px);
+    opacity: 0.72;
+  }
+
+  .stopcock {
+    position: absolute;
+    left: 140px;
+    top: 317px;
+    width: 70px;
+    height: 12px;
+    border-radius: 999px;
+    background: #cbd5e1;
+  }
+
+  .drop {
+    position: absolute;
+    left: 172px;
+    top: 334px;
+    width: 10px;
+    height: 18px;
+    background: rgba(96, 165, 250, 0.78);
+    border-radius: 50% 50% 65% 65%;
+    opacity: 0;
+  }
+
+  .drop.animate {
+    animation: fall 0.45s ease-out;
+  }
+
+  @keyframes fall {
+    0% { transform: translateY(0); opacity: 0.95; }
+    100% { transform: translateY(68px); opacity: 0; }
+  }
+
+  .flask {
+    position: absolute;
+    left: 105px;
+    top: 354px;
+    width: 154px;
+    height: 122px;
+    transform: translateX(-8px);
+  }
+
+  .flask-neck {
+    position: absolute;
+    left: 62px;
+    top: -52px;
+    width: 32px;
+    height: 75px;
+    border: 3px solid rgba(226, 232, 240, 0.55);
+    border-bottom: 0;
+    border-radius: 12px 12px 0 0;
+    background: rgba(255,255,255,0.18);
+  }
+
+  .flask-body {
+    position: absolute;
+    inset: 0;
+    clip-path: polygon(39% 0, 61% 0, 96% 90%, 88% 100%, 12% 100%, 4% 90%);
+    border-radius: 26px;
+    background: rgba(255,255,255,0.20);
+    border: 3px solid rgba(226, 232, 240, 0.55);
+    overflow: hidden;
+    box-shadow: inset 0 0 18px rgba(255,255,255,0.10);
+  }
+
+  .flask-liquid {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 8px;
+    height: 50px;
+    border-radius: 0 0 28px 28px;
+    background: rgba(255,255,255,0.75);
+    border-top: 2px solid rgba(255,255,255,0.78);
+    transition: background 0.3s ease, height 0.25s ease;
+  }
+
+  .swirl {
+    position: absolute;
+    left: 55px;
+    top: 70px;
+    width: 50px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.55);
+    opacity: 0.0;
+  }
+
+  .flask.swirling .swirl {
+    animation: swirl 0.7s ease-out;
+  }
+
+  @keyframes swirl {
+    0% { transform: rotate(0deg) scale(0.75); opacity: 0.8; }
+    100% { transform: rotate(420deg) scale(1.4); opacity: 0; }
+  }
+
+  .side-readout {
+    position: absolute;
+    right: 18px;
+    top: 18px;
+    width: min(330px, calc(100% - 300px));
+    min-width: 230px;
+    display: grid;
+    gap: 10px;
+  }
+
+  @media (max-width: 680px) {
+    .bench { min-height: 610px; }
+    .side-readout {
+      top: 470px;
+      left: 18px;
+      right: 18px;
+      width: auto;
+    }
+  }
+
+  .readout-box {
+    background: rgba(15, 23, 42, 0.82);
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 16px;
+    padding: 12px;
+  }
+
+  .readout-box strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #f8fafc;
+  }
+
+  .readout-box span {
+    color: var(--muted);
+    line-height: 1.45;
+  }
+
+  .controls {
+    margin-top: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .message {
+    margin-top: 12px;
+    border-radius: 16px;
+    padding: 12px 14px;
+    background: rgba(30, 64, 175, 0.22);
+    border: 1px solid rgba(96, 165, 250, 0.26);
+    color: #dbeafe;
+    line-height: 1.45;
+  }
+
+  .message.good {
+    background: rgba(20, 83, 45, 0.24);
+    border-color: rgba(52, 211, 153, 0.34);
+    color: #bbf7d0;
+  }
+
+  .message.warn {
+    background: rgba(120, 53, 15, 0.25);
+    border-color: rgba(251, 191, 36, 0.36);
+    color: #fde68a;
+  }
+
+  .message.bad {
+    background: rgba(127, 29, 29, 0.28);
+    border-color: rgba(251, 113, 133, 0.38);
+    color: #fecdd3;
+  }
+
+  .challenge {
+    margin-top: 18px;
+  }
+
+  .challenge-grid {
+    display: grid;
+    grid-template-columns: 1fr 170px 120px;
+    gap: 10px;
+    align-items: end;
+  }
+
+  @media (max-width: 720px) {
+    .challenge-grid { grid-template-columns: 1fr; }
+  }
+
+  details {
+    margin-top: 12px;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  summary {
+    cursor: pointer;
+    font-weight: 850;
+    color: #bfdbfe;
+  }
+
+  .reward {
+    min-height: 44px;
+    margin-top: 12px;
+    font-weight: 900;
+    font-size: 1.12rem;
+    color: var(--good);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, rgba(251,191,36,0.95), rgba(52,211,153,0.88));
+    border: 1px solid #facc15;
+    color: #1f2933;
+    padding: 9px 14px;
+    border-radius: 999px;
+    box-shadow: 0 8px 18px rgba(234, 179, 8, 0.22);
+  }
+
+  .confetti-piece {
+    position: fixed;
+    top: -20px;
+    width: 10px;
+    height: 16px;
+    border-radius: 3px;
+    z-index: 9999;
+    animation: confettiFall 1.8s linear forwards;
+  }
+
+  @keyframes confettiFall {
+    to {
+      transform: translateY(110vh) rotate(760deg);
+      opacity: 0.2;
+    }
+  }
+
+  .mini-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 0.92rem;
+    overflow: hidden;
+    border-radius: 14px;
+  }
+
+  .mini-table th, .mini-table td {
+    border: 1px solid rgba(148, 163, 184, 0.20);
+    padding: 8px;
+    text-align: left;
+  }
+
+  .mini-table th {
+    background: rgba(30, 41, 59, 0.95);
+    color: #dbeafe;
+  }
+
+  .mini-table td {
+    background: rgba(15, 23, 42, 0.62);
+    color: #cbd5e1;
+  }
+
+  .small {
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.5;
+	
+	
+	
+  }
+</style>
 </head>
-<body data-page="simulations-chemistrylab-chemlab">
+<body>
 
 <header>
 
 
-  <a class="back-link central-inline-1" href="../../index.html">&larr; Back to Interactive Learning Lab</a>
+  <a class="back-link" href="../../index.html" style="display:inline-block;margin-bottom:14px;color:#bfdbfe;text-decoration:none;font-weight:700">&larr; Back to Interactive Learning Lab</a>
   <h1>Virtual Acid–Base Titration Lab</h1>
   <p>
     Choose an unknown acid or base, select a suitable standard titrant and indicator, perform a virtual titration, record the endpoint, and calculate the concentration of the unknown solution.
@@ -32,7 +573,7 @@
         </div>
       </div>
 
-      <div class="row central-inline-2">
+      <div class="row" style="margin-top:14px;">
         <div>
           <label for="titrantSelect">Standard titrant</label>
           <select id="titrantSelect"></select>
@@ -48,7 +589,7 @@
         </div>
       </div>
 
-      <div class="row central-inline-3">
+      <div class="row" style="margin-top:14px;">
         <div>
           <label for="indicatorSelect">Indicator</label>
           <select id="indicatorSelect">
@@ -61,7 +602,7 @@
         </div>
         <div>
           <label>Fresh trial</label>
-          <button id="newUnknownBtn" class="ghost-btn central-inline-4">Generate new unknown</button>
+          <button id="newUnknownBtn" class="ghost-btn" style="width:100%;">Generate new unknown</button>
         </div>
       </div>
 
@@ -160,11 +701,11 @@
       </div>
       <div>
         <label>&nbsp;</label>
-        <button id="checkAnswerBtn" class="central-inline-5">Check answer</button>
+        <button id="checkAnswerBtn" style="width:100%;">Check answer</button>
       </div>
       <div>
         <label>&nbsp;</label>
-        <button id="showHintBtn" class="ghost-btn central-inline-6">Small hint</button>
+        <button id="showHintBtn" class="ghost-btn" style="width:100%;">Small hint</button>
       </div>
     </div>
 

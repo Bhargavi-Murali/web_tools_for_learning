@@ -4,11 +4,10 @@
   <meta charset="UTF-8">
   <title>Interactive Learning Lab</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <link rel="stylesheet" href="css/mystyle.css">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body data-page="index">
+<body>
   <header class="site-header">
     <nav class="top-nav">
       <div class="brand">
@@ -21,7 +20,12 @@
         <a href="#chemistry">Chemistry</a>
         <a href="#mathematics">Mathematics</a>
         <a href="#english">English</a>
-        <a href="account.html">Account</a>
+        <span id="authNav" class="auth-nav" aria-live="polite">
+          <span id="signedInIndicator" class="signed-in-indicator" hidden></span>
+          <a id="scoresLink" href="scores.html" hidden>My scores</a>
+          <a id="adminLink" href="admin.html" hidden>Users</a>
+          <a id="accountLink" href="account.html">Account</a>
+        </span>
       </div>
     </nav>
 
@@ -273,5 +277,8 @@
     For suggestions and feedback: <a href="mailto:muralipalla@gmail.com">muralipalla@gmail.com</a>·
   </p>
 </footer>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.2/dist/umd/supabase.min.js"></script>
+  <script defer src="js/supabase-client.js"></script>
+  <script defer src="js/home-auth.js"></script>
 </body>
 </html>
